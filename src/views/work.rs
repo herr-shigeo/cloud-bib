@@ -1,0 +1,232 @@
+use crate::db_client::*;
+use crate::error::*;
+use crate::item::atoi;
+use crate::item::RentalSetting;
+use crate::item::{search_items, update_item};
+use crate::item::{Book, BorrowedBook, User};
+use crate::views::reply::Reply;
+use crate::views::session::*;
+use crate::views::transaction::*;
+use actix_session::Session;
+use actix_web::{web, HttpResponse, Result};
+use log::{debug, error};
+use serde::Deserialize;
+use std::sync::Mutex;
+
+#[derive(Deserialize, Debug)]
+pub struct FormData {
+    pub user_id: String,
+    pub borrowed_book_id: String,
+    pub returned_book_id: String,
+}
+
+pub async fn process(
+    session: Session,
+    form: web::Form<FormData>,
+    data: web::Data<Mutex<DbClient>>,
+    transaction: web::Data<Transaction>,
+) -> Result<HttpResponse, BibErrorResponse> {
+    debug!("{:?}", form);
+
+    check_session(&session)?;
+    let db = get_db(&data).await?;
+
+    let mut user = User::default();
+    if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {
+        let book_title =
+            unborrow_book(&db, &transaction, &mut user, &form.returned_book_id).await?;
+        let mut reply = Reply::default();
+        reply.returned_book_title = book_title;
+        reply.user = user;
+        return Ok(HttpResponse::Ok().json(reply));
+    }
+
+    user.id = atoi(&form.user_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+    let mut user = match select_user(&db, &user).await {
+        Some(user) => user,
+        None => {
+            disconnect_db(&data);
+            return Err(BibErrorResponse::DataNotFound(String::new()));
+        }
+    };
+
+    let mut setting = RentalSetting::default();
+    setting.id = 1;
+    let mut setting = match search_items(&db, &setting).await {
+        Ok(setting) => setting,
+        Err(e) => {
+            disconnect_db(&data);
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    };
+
+    if setting.len() != 1 {
+        return Err(BibErrorResponse::DataDuplicated);
+    }
+    let setting = setting.pop().unwrap();
+
+    if form.borrowed_book_id != "" {
+        borrow_book(
+            &db,
+            &transaction,
+            &mut user,
+            &form.borrowed_book_id,
+            setting.num_books,
+            setting.num_days.into(),
+        )
+        .await?;
+    }
+
+    if form.returned_book_id != "" {
+        unborrow_book(&db, &transaction, &mut user, &form.returned_book_id).await?;
+    }
+
+    let mut reply = Reply::default();
+    reply.user = user.clone();
+    for book in user.borrowed_books {
+        // Insert the new item at the front to sort in the order of the date
+        reply.borrowed_books.insert(0, book.clone());
+    }
+
+    Ok(HttpResponse::Ok().json(reply))
+}
+
+async fn select_user(db: &DbInstance, user: &User) -> Option<User> {
+    let mut users = match search_items(db, user).await {
+        Ok(users) => users,
+        Err(_) => {
+            return None;
+        }
+    };
+
+    if users.len() == 1 {
+        users.pop()
+    } else {
+        error!("multiple users are found");
+        None
+    }
+}
+
+async fn borrow_book(
+    db: &DbInstance,
+    transaction: &web::Data<Transaction>,
+    user: &mut User,
+    book_id: &str,
+    max_borrowing_books: u32,
+    max_borrowing_days: i64,
+) -> Result<(), BibErrorResponse> {
+    let num_borrowed_books: u32 = user.borrowed_books.len().try_into().unwrap();
+    if num_borrowed_books >= max_borrowing_books {
+        return Err(BibErrorResponse::OverBorrowingLimit);
+    }
+
+    let mut book = Book::default();
+    let book_id = atoi(book_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+
+    book.id = book_id;
+    let mut books = match search_items(db, &book).await {
+        Ok(books) => books,
+        Err(e) => {
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    };
+    if books.len() != 1 {
+        return Err(BibErrorResponse::DataDuplicated);
+    }
+    let mut book = books.pop().unwrap();
+    if book.owner_id.is_some() {
+        return Err(BibErrorResponse::BookNotReturned);
+    }
+
+    let mut counter = transaction.counter.lock().unwrap();
+    *counter += 1;
+    let transaction_id = *counter % transaction.max_counter;
+    drop(counter);
+
+    let borrowed_book = BorrowedBook::new(book_id, &book.title, max_borrowing_days, transaction_id);
+
+    book.return_deadline = Some(borrowed_book.return_deadline.clone());
+    user.borrowed_books.push(borrowed_book);
+    book.owner_id = Some(user.id.clone());
+
+    user.borrowed_count += 1;
+    update_item(db, user)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    book.borrowed_count += 1;
+    update_item(db, &book)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    debug!("transaction_id = {}", transaction_id);
+    Transaction::borrow(db, transaction_id, user, &book)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))
+}
+
+async fn unborrow_book(
+    db: &DbInstance,
+    _transaction: &web::Data<Transaction>,
+    user: &mut User,
+    book_id: &str,
+) -> Result<String, BibErrorResponse> {
+    debug!("unborrow_book,id = {}", book_id);
+
+    let mut book = Book::default();
+    let book_id = atoi(book_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+
+    book.id = book_id;
+    let mut books = match search_items(db, &book).await {
+        Ok(books) => books,
+        Err(e) => {
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    };
+    if books.len() != 1 {
+        return Err(BibErrorResponse::DataDuplicated);
+    }
+    book = books.pop().unwrap();
+
+    if user.id == 0 {
+        if book.owner_id.is_none() {
+            return Err(BibErrorResponse::BookNotBorrowed);
+        }
+        user.id = book.owner_id.unwrap();
+        *user = match select_user(db, user).await {
+            Some(user) => user,
+            None => {
+                return Err(BibErrorResponse::DataNotFound(String::new()));
+            }
+        };
+    }
+    book.owner_id = None;
+    book.return_deadline = None;
+
+    let mut transaction_id: u32 = 0;
+    let mut done: bool = false;
+    let mut borrowed_date: String = String::new();
+    for (pos, borrowed_book) in user.borrowed_books.iter().enumerate() {
+        if borrowed_book.book_id == book_id {
+            transaction_id = borrowed_book.transaction_id;
+            borrowed_date = borrowed_book.borrowed_date.clone();
+            user.borrowed_books.remove(pos);
+            done = true;
+            break;
+        }
+    }
+    if done == false {
+        return Err(BibErrorResponse::BookNotBorrowed);
+    }
+
+    update_item(db, user)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+    update_item(db, &book)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    debug!("transaction_id = {}", transaction_id);
+    Transaction::unborrow(db, transaction_id, user, &book, borrowed_date).await;
+    Ok(book.title)
+}

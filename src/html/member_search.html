@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charSet="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cloud-bib.herokuapp.com/css/default.css">
+<script src="https://cloud-bib.herokuapp.com/js/util.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js" integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+
+<script>
+function get_link(data){
+    $('#form').submit();
+};
+
+$(document).ready(function() { 
+  var options = {
+    dataType: 'json',
+    success:  processJson
+  };
+  $('#form').ajaxForm(options);
+
+  var options3 = {
+    dataType: 'json',
+    success:  processBookList
+  };
+  $('#form_book').ajaxForm(options3);
+
+  $('#book_list_table').DataTable({
+    "columns": [
+      { "data": "title" },
+      { "data": "series" },
+      { "data": "author" },
+      { "data": "owner_id" },
+      { "data": "char" },
+      { "data": "borrowed_count" }
+    ],
+    "columnDefs": [
+      {
+        "targets": 5,
+        "className": 'dt-body-center'
+      }
+    ]
+  });
+});
+
+function processJson(data) {
+  document.getElementById("form").reset();
+  if (handleAuthError(data, '/member')) {
+    return;
+  }
+}
+
+function processBookList(data) {
+  document.getElementById("form_book").reset();
+
+  if (handleAuthError(data, '/member')) {
+    return;
+  }
+  if (handleError(data)) {
+    return;
+  }
+
+  var dataSet = data['book_list'];
+  $.each(dataSet, function(i, d) {
+    if (d.owner_id == null) {
+      d.owner_id = '貸出可能';
+    }
+    else {
+      d.owner_id = '貸出中 (〜' + d.return_deadline + ')';
+    }
+  });
+
+  var datatable = $('#book_list_table').DataTable();
+  datatable.clear();
+  datatable.destroy();
+  $('#book_list_table').DataTable({
+    "scrollX": false,
+    "autoWidth": false,
+    "data": dataSet,
+    "columns": [
+      { "data": "title" },
+      { "data": "series" },
+      { "data": "author" },
+      { "data": "owner_id" },
+      { "data": "char" },
+      { "data": "borrowed_count" }
+    ]
+  });
+}
+</script>
+</head>
+
+<body>
+
+<form id="form" name="form" action="/auth/logout" method="post">
+<input type="submit" id="invisible_logout" style="display: none;">
+</form>
+
+<div class="topnav">
+  <a class="active" href="/member/home">ホーム</a>
+  <a href="/member/search/main">図書検索</a>
+  <div class="topnav-right">
+    <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+  </div>
+</div>
+
+<div class="full-container">
+<h3>図書検索</h3>
+<p>キーワードを入力後にEnterを押して検索</p>
+<form id="form_book" name="form_book" action="/search/book" method="get" enctype="application/x-www-form-urlencoded">
+  <input type="hidden" placeholder="" name="id" value="">
+  <label for="value"><b>タイトル</b></label>
+  <input type="text" placeholder="" name="title">
+  <input type="hidden" placeholder="" name="char" value="">
+  <input type="submit" value="Submit Comment" style="display: none;">
+</form>
+
+<div style="overflow-x: auto;">
+<table id="book_list_table" class="display compact nowrap">
+  <thead>
+    <tr>
+      <th>タイトル</th>
+      <th>シリーズ</th>
+      <th>著者</th>
+      <th>貸出状況</th>
+      <th>キャラ</th>
+      <th>貸出数</th>
+    </tr>
+  </thead>
+</table>
+</div>
+
+</div>
+
+</body>
+</html>
+
