@@ -217,35 +217,37 @@ pub async fn import_book_list(
     for i in 0..records.len() {
         let record = &records[i];
         let num_field = record.len();
-        if num_field != 11 {
+        if num_field != 12 {
             return Err(BibErrorResponse::InvalidArgument(num_field.to_string()));
         }
         debug!(
-            "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
+            "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
             &record[0],  // id
             &record[1],  // title
-            &record[2],  // char
-            &record[3],  // register_type
-            &record[4],  // remark
+            &record[2],  // kana
+            &record[3],  // char
+            &record[4],  // recommendation
             &record[5],  // status
-            &record[6],  // author
-            &record[7],  // publisher
-            &record[8],  // series
-            &record[9],  // kana
-            &record[10], // register_date
+            &record[6],  // register_type
+            &record[7],  // author
+            &record[8],  // publisher
+            &record[9],  // series
+            &record[10], // remark
+            &record[11], // register_date
         );
         let book = match Book::new(
-            &record[0],
-            &record[1],
-            &record[9],
-            &record[8],
-            &record[6],
-            &record[7],
-            &record[2],
-            &record[4],
-            &record[10],
-            &record[3],
-            &record[5],
+            &record[0],	// id
+            &record[1],	// title
+            &record[2],	// kana
+            &record[9],	// series
+            &record[7],	// author
+            &record[8],	// publisher
+            &record[3],	// char
+            &record[10],	// remark
+            &record[4],	// recommendation
+            &record[11],	// register_date
+            &record[6],	// register_type
+            &record[5],	// status
         ) {
             Ok(book) => book,
             Err(e) => {

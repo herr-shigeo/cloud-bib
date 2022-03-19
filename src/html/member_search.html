@@ -30,12 +30,13 @@ $(document).ready(function() {
 
   $('#book_list_table').DataTable({
     "columns": [
+      { "data": "id" },
       { "data": "title" },
       { "data": "series" },
       { "data": "author" },
       { "data": "owner_id" },
       { "data": "char" },
-      { "data": "borrowed_count" }
+      { "data": "recommendation" }
     ],
     "columnDefs": [
       {
@@ -81,12 +82,13 @@ function processBookList(data) {
     "autoWidth": false,
     "data": dataSet,
     "columns": [
+      { "data": "id" },
       { "data": "title" },
       { "data": "series" },
       { "data": "author" },
       { "data": "owner_id" },
       { "data": "char" },
-      { "data": "borrowed_count" }
+      { "data": "recommendation" }
     ]
   });
 }
@@ -122,12 +124,13 @@ function processBookList(data) {
 <table id="book_list_table" class="display compact nowrap">
   <thead>
     <tr>
+      <th>図書ID</th>
       <th>タイトル</th>
       <th>シリーズ</th>
       <th>著者</th>
       <th>貸出状況</th>
       <th>キャラ</th>
-      <th>貸出数</th>
+      <th>推薦</th>
     </tr>
   </thead>
 </table>

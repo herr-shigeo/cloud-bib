@@ -106,6 +106,8 @@ function processBookList(data) {
   document.getElementById("book_publisher").value = book.publisher;
   document.getElementById("book_char").value = book.char;
   document.getElementById("book_remark").value = book.remark;
+  document.getElementById("book_status").value = book.status;
+  document.getElementById("book_recommendation").value = book.recommendation;
   if (book.register_type == "購入")
     document.getElementById("book_bought").checked = true;
   else if (book.register_type == "寄贈")
@@ -317,28 +319,32 @@ function move() {
     <label for="book_kana"><b>タイトルヨミ*</b></label>
     <input type="text" name="book_kana" id="book_kana" placeholder="" required>
     </td>
-    </tr>
-    <tr>
     <td>
     <label for="book_author"><b>著者</b></label>
     <input type="text" name="book_author" id="book_author">
     </td>
+    </tr>
+    <tr>
     <td>
     <label for="book_publisher"><b>出版社</b></label>
     <input type="text" name="book_publisher" id="book_publisher">
+    </td>
+    <td>
+    <label for="book_recommendation"><b>推薦</b></label>
+    <input type="text" name="book_recommendation" id="book_recommendation" placeholder="【〇〇推薦】を記入する">
     </td>
     </tr>
     <tr>
     <td>
     <label for="book_remark"><b>注記</b></label>
-    <input type="text" name="book_remark" id="book_remark" placeholder="【〇〇推薦】を記入する">
+    <input type="text" name="book_remark" id="book_remark" placeholder="">
     </td>
     <td>
     <label for="book_status"><b>破損状況</b></label>
     <input type="text" name="book_status" id="book_status" placeholder="【破損状況】を記入する">
     </td>
-    </tr>
     <tr>
+    </tr>
     <td>
     <label for="book_register_date"><b>登録日</b></label>
     <input type="text" name="book_register_date" id="book_register_date">
