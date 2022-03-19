@@ -111,10 +111,10 @@ function processBookList(data) {
 <h3>図書検索</h3>
 <p>キーワードを入力後にEnterを押して検索</p>
 <form id="form_book" name="form_book" action="/search/book" method="get" enctype="application/x-www-form-urlencoded">
-  <input type="hidden" placeholder="" name="id" value="">
   <label for="value"><b>タイトル</b></label>
   <input type="text" placeholder="" name="title">
-  <input type="hidden" placeholder="" name="char" value="">
+  <input type="hidden" placeholder="" name="id" value="">
+  <input type="hidden" placeholder="" name="kana" value="">
   <input type="submit" value="Submit Comment" style="display: none;">
 </form>
 
