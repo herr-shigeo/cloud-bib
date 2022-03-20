@@ -224,30 +224,30 @@ pub async fn import_book_list(
             "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
             &record[0],  // id
             &record[1],  // title
-            &record[2],  // kana
-            &record[3],  // char
+            &record[2],  // char
+            &record[3],  // register_type
             &record[4],  // recommendation
-            &record[5],  // status
-            &record[6],  // register_type
+            &record[5],  // remark
+            &record[6],  // status
             &record[7],  // author
             &record[8],  // publisher
             &record[9],  // series
-            &record[10], // remark
+            &record[10], // kana
             &record[11], // register_date
         );
         let book = match Book::new(
             &record[0],	// id
             &record[1],	// title
-            &record[2],	// kana
+            &record[10],	// kana
             &record[9],	// series
             &record[7],	// author
             &record[8],	// publisher
-            &record[3],	// char
-            &record[10],	// remark
+            &record[2],	// char
+            &record[5],	// remark
             &record[4],	// recommendation
             &record[11],	// register_date
-            &record[6],	// register_type
-            &record[5],	// status
+            &record[3],	// register_type
+            &record[6],	// status
         ) {
             Ok(book) => book,
             Err(e) => {
