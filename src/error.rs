@@ -19,6 +19,8 @@ pub enum BibErrorResponse {
     DbConnectionError(String),
     InvalidArgument(String),
     DataNotFound(String),
+    UserNotFound(u32),
+    BookNotFound(u32),
     DataDuplicated,
     OverBorrowingLimit,
     BookNotReturned,
@@ -84,10 +86,26 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     reason: reason.to_string(),
                 })
             }
-            BibErrorResponse::DataDuplicated => {
+            BibErrorResponse::UserNotFound(id) => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,
                     errcode: 106,
+                    message: format!("ID({})が見つかりません", id),
+                    reason: String::new(),
+                })
+            }
+            BibErrorResponse::BookNotFound(id) => {
+                HttpResponse::build(self.status_code()).json(BibResponseBody {
+                    success: false,
+                    errcode: 107,
+                    message: format!("ID({})が見つかりません", id),
+                    reason: String::new(),
+                })
+            }
+            BibErrorResponse::DataDuplicated => {
+                HttpResponse::build(self.status_code()).json(BibResponseBody {
+                    success: false,
+                    errcode: 108,
                     message: String::from("該当するデータが複数存在しています"),
                     reason: String::new(),
                 })
@@ -95,7 +113,7 @@ impl actix_web::error::ResponseError for BibErrorResponse {
             BibErrorResponse::OverBorrowingLimit => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,
-                    errcode: 107,
+                    errcode: 109,
                     message: String::from("貸出できる上限を超えています"),
                     reason: String::new(),
                 })
@@ -103,7 +121,7 @@ impl actix_web::error::ResponseError for BibErrorResponse {
             BibErrorResponse::BookNotReturned => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,
-                    errcode: 108,
+                    errcode: 110,
                     message: String::from("この本は返却されていません"),
                     reason: String::new(),
                 })
@@ -111,7 +129,7 @@ impl actix_web::error::ResponseError for BibErrorResponse {
             BibErrorResponse::BookNotBorrowed => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,
-                    errcode: 109,
+                    errcode: 111,
                     message: String::from("この本は貸出されていません"),
                     reason: String::new(),
                 })
@@ -119,7 +137,7 @@ impl actix_web::error::ResponseError for BibErrorResponse {
             BibErrorResponse::SystemError(reason) => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,
-                    errcode: 110,
+                    errcode: 112,
                     message: String::from("システムエラーが発生しました"),
                     reason: reason.to_string(),
                 })

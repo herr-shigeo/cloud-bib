@@ -44,7 +44,7 @@ pub async fn login(
         Ok(users) => users,
         Err(e) => {
             disconnect_db(&data);
-            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+            return Err(BibErrorResponse::UserNotFound(user.id));
         }
     };
     if users.len() != 1 {
@@ -112,7 +112,7 @@ pub async fn borrowed_books(
         Ok(users) => users,
         Err(e) => {
             disconnect_db(&data);
-            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+            return Err(BibErrorResponse::UserNotFound(user.id));
         }
     };
 

@@ -46,7 +46,7 @@ pub async fn process(
         Some(user) => user,
         None => {
             disconnect_db(&data);
-            return Err(BibErrorResponse::DataNotFound(String::new()));
+            return Err(BibErrorResponse::UserNotFound(user.id));
         }
     };
 
@@ -127,7 +127,7 @@ async fn borrow_book(
     let mut books = match search_items(db, &book).await {
         Ok(books) => books,
         Err(e) => {
-            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+            return Err(BibErrorResponse::BookNotFound(book.id));
         }
     };
     if books.len() != 1 {
@@ -180,7 +180,7 @@ async fn unborrow_book(
     let mut books = match search_items(db, &book).await {
         Ok(books) => books,
         Err(e) => {
-            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+            return Err(BibErrorResponse::BookNotFound(book.id));
         }
     };
     if books.len() != 1 {
@@ -196,7 +196,7 @@ async fn unborrow_book(
         *user = match select_user(db, user).await {
             Some(user) => user,
             None => {
-                return Err(BibErrorResponse::DataNotFound(String::new()));
+                return Err(BibErrorResponse::UserNotFound(user.id));
             }
         };
     }

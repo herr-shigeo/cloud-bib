@@ -31,6 +31,9 @@ function processJson(data) {
     return;
   }
   if (handleError(data)) {
+    if (data.errcode == 106) {
+      window.location.href = '/home';
+    }
     return;
   }
 

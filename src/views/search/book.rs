@@ -57,7 +57,7 @@ async fn get_book_list(
     let mut books = match search_items(&db, book).await {
         Ok(books) => books,
         Err(e) => {
-            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+            return Err(BibErrorResponse::BookNotFound(book.id));
         }
     };
 
