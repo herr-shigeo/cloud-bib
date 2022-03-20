@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use chrono::{Duration, TimeZone, Utc};
 use chrono_tz::Europe::Berlin;
 use mongodb::bson::doc;
-use mongodb::options::{DropCollectionOptions, IndexOptions};
+use mongodb::options::IndexOptions;
 use mongodb::{Collection, IndexModel};
 use serde::{Deserialize, Serialize};
 use std::error;
@@ -363,7 +363,7 @@ impl Database for User {
         collection.delete(query).await
     }
 
-    async fn delete_all(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete_all(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
@@ -411,7 +411,7 @@ impl Database for Book {
         collection.delete(query).await
     }
 
-    async fn delete_all(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete_all(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
@@ -453,7 +453,7 @@ impl Database for RentalSetting {
         panic!("Not implemented")
     }
 
-    async fn delete_all(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete_all(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
@@ -476,7 +476,7 @@ impl Database for SystemSetting {
 
     async fn update(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
         let query = doc! { "id": self.id };
-        let mut update = doc![];
+        let update;
         if self.password != "" && self.member_password != "" {
             update = doc! { "password" : self.password.clone(), "member_password": self.member_password.clone() };
         } else if self.password != "" {
@@ -494,7 +494,7 @@ impl Database for SystemSetting {
         panic!("Not implemented")
     }
 
-    async fn delete_all(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete_all(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 

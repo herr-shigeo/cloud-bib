@@ -42,7 +42,7 @@ pub async fn login(
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
     let mut users = match search_items(&db, &user).await {
         Ok(users) => users,
-        Err(e) => {
+        Err(_) => {
             disconnect_db(&data);
             return Err(BibErrorResponse::UserNotFound(user.id));
         }
@@ -110,7 +110,7 @@ pub async fn borrowed_books(
     user.id = user_id;
     let mut users = match search_items(&db, &user).await {
         Ok(users) => users,
-        Err(e) => {
+        Err(_) => {
             disconnect_db(&data);
             return Err(BibErrorResponse::UserNotFound(user.id));
         }

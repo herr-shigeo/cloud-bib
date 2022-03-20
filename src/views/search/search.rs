@@ -38,7 +38,7 @@ pub async fn search_delayed_list(
     let user = User::default();
     let users = match search_items(&db, &user).await {
         Ok(users) => users,
-        Err(e) => {
+        Err(_) => {
             return Err(BibErrorResponse::UserNotFound(user.id));
         }
     };

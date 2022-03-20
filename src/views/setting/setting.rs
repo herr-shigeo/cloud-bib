@@ -236,18 +236,18 @@ pub async fn import_book_list(
             &record[11], // register_date
         );
         let book = match Book::new(
-            &record[0],	// id
-            &record[1],	// title
-            &record[10],	// kana
-            &record[9],	// series
-            &record[7],	// author
-            &record[8],	// publisher
-            &record[2],	// char
-            &record[5],	// remark
-            &record[4],	// recommendation
-            &record[11],	// register_date
-            &record[3],	// register_type
-            &record[6],	// status
+            &record[0],  // id
+            &record[1],  // title
+            &record[10], // kana
+            &record[9],  // series
+            &record[7],  // author
+            &record[8],  // publisher
+            &record[2],  // char
+            &record[5],  // remark
+            &record[4],  // recommendation
+            &record[11], // register_date
+            &record[3],  // register_type
+            &record[6],  // status
         ) {
             Ok(book) => book,
             Err(e) => {
@@ -261,22 +261,6 @@ pub async fn import_book_list(
         }
     }
 
-    let reply = Reply::default();
-    Ok(HttpResponse::Ok().json(reply))
-}
-
-pub async fn clear_status(
-    session: Session,
-    data: web::Data<Mutex<DbClient>>,
-) -> Result<HttpResponse, BibErrorResponse> {
-    let reply = Reply::default();
-    Ok(HttpResponse::Ok().json(reply))
-}
-
-pub async fn clear_history(
-    session: Session,
-    data: web::Data<Mutex<DbClient>>,
-) -> Result<HttpResponse, BibErrorResponse> {
     let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
 }

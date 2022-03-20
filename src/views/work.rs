@@ -126,7 +126,7 @@ async fn borrow_book(
     book.id = book_id;
     let mut books = match search_items(db, &book).await {
         Ok(books) => books,
-        Err(e) => {
+        Err(_) => {
             return Err(BibErrorResponse::BookNotFound(book.id));
         }
     };
@@ -179,7 +179,7 @@ async fn unborrow_book(
     book.id = book_id;
     let mut books = match search_items(db, &book).await {
         Ok(books) => books,
-        Err(e) => {
+        Err(_) => {
             return Err(BibErrorResponse::BookNotFound(book.id));
         }
     };
@@ -227,6 +227,8 @@ async fn unborrow_book(
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
 
     debug!("transaction_id = {}", transaction_id);
-    Transaction::unborrow(db, transaction_id, user, &book, borrowed_date).await;
+    Transaction::unborrow(db, transaction_id, user, &book, borrowed_date)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
     Ok(book.title)
 }

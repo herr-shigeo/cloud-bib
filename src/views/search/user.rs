@@ -47,7 +47,7 @@ async fn get_user_list(
 
     let mut users = match search_items(&db, user).await {
         Ok(users) => users,
-        Err(e) => {
+        Err(_) => {
             return Err(BibErrorResponse::UserNotFound(user.id));
         }
     };
