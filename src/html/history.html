@@ -48,7 +48,17 @@ function processJson(data) {
   }
 
   var dataSet = data['transaction_list'];
+
   var datatable = $('#transaction_list_table').DataTable();
+  $.each(dataSet, function(i, d){
+    var dt = d['borrowed_date'].split(" ")
+    d['borrowed_date'] = dt[0] + ' <b style="color:#aaaaaa"><font size="-2">&nbsp;&nbsp&nbsp;&nbsp;&nbsp;' + dt[1] + '</font></b>'
+    var dt = d['returned_date'].split(" ")
+	if (dt[1]) {
+      d['returned_date'] = dt[0] + ' <b style="color:#aaaaaa"><font size="-2">&nbsp;&nbsp&nbsp;&nbsp;&nbsp;' + dt[1] + '</font></b>'
+    }
+  });
+
   datatable.clear();
   datatable.destroy();
   $('#transaction_list_table').DataTable({
@@ -96,21 +106,21 @@ function processJson(data) {
   <tr>
   <td>
   <label for="value"><b>図書ID</b></label>
-  <input type="text" placeholder="" name="book_id" id="book_id">
+  <input type="text" placeholder="半角数字" name="book_id" id="book_id">
   </td>
   <td>
   <label for="value"><b>図書タイトル</b></label>
-  <input type="text" placeholder="" name="book_title">
+  <input type="text" placeholder="全角" name="book_title">
   </td>
   </tr>
   <tr>
   <td>
   <label for="value"><b>利用者ID</b></label>
-  <input type="text" placeholder="" name="user_id" id="user_id">
+  <input type="text" placeholder="半角数字" name="user_id" id="user_id">
   </td>
   <td>
   <label for="value"><b>利用者氏名</b></label>
-  <input type="text" placeholder="" name="user_name" id="user_name">
+  <input type="text" placeholder="全角" name="user_name" id="user_name">
   </td>
   </tr>
   </table>

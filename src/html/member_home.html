@@ -67,15 +67,15 @@ function processBorrowList(data) {
     var tr = $('<tr></tr>');
     var book_id = $('<td></td>').text(d.book_id);
     var book_title = $('<td></td>').text(d.book_title);
-    var borrowed_date = $('<td></td>').text(d.borrowed_date);
+    var borrowed_date = $('<td></td>').text(d.borrowed_date.split(" ")[0]);
     var deadline;
     var deadline_date = new Date(d.return_deadline);
     var today = new Date();
     if (today > deadline_date) {
-      deadline = $('<td style="color:red"></td>').text(d.return_deadline);
+      deadline = $('<td style="color:red"></td>').text(d.return_deadline.split(" ")[0]);
     }
     else {
-      deadline = $('<td></td>').text(d.return_deadline);
+      deadline = $('<td></td>').text(d.return_deadline.split(" ")[0]);
     }
     tr.append(book_id);
     tr.append(book_title);
@@ -94,6 +94,11 @@ function processTransactionList(data) {
   }
 
   var dataSet = data['transaction_list'];
+  $.each(dataSet, function(i, d){
+		d['borrowed_date'] = d['borrowed_date'].split(" ")[0];
+		d['returned_date'] = d['returned_date'].split(" ")[0];
+  });
+
   var datatable = $('#transaction_list_table').DataTable();
   datatable.clear();
   datatable.destroy();

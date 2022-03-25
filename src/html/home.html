@@ -116,7 +116,7 @@ function setStatus(msg) {
 <p>貸出処理をするには利用者IDを入力して下さい</p>
 <form name="user_select" action="/user" method="get" enctype="application/x-www-form-urlencoded">
   <label for="user_id"><b><font size="+1">利用者ID</font></b></label>
-  <input type="text" id="user_id" name="user_id" style="ime-mode: disabled">
+  <input type="text" id="user_id" name="user_id" style="ime-mode: disabled" placeholder="">
 </form>
 
 <button class="accordion">利用者検索</button>
@@ -127,21 +127,21 @@ function setStatus(msg) {
   <tr>
   <td>
   <label for="value"><b>氏名</b></label>
-  <input type="text" placeholder="" name="name" id="name">
+  <input type="text" placeholder="全角" name="name" id="name">
   </td>
   <td>
-  <label for="value"><b>半角カナ</b></label>
+  <label for="value"><b>半角ｶﾅ</b></label>
   <input type="text" placeholder="" name="kana" id="kana">
   </td>
   </tr>
   <tr>
   <td>
   <label for="value"><b>利用者ID</b></label>
-  <input type="text" placeholder="" name="id" id="user_id">
+  <input type="text" placeholder="半角数字" name="id" id="user_id">
   </td>
   <td>
   <label for="value"><b>利用者区分</b></label>
-  <input type="text" placeholder="" name="category">
+  <input type="text" placeholder="生徒/講師/後援会員/その他" name="category">
   </td>
   </tr>
   </table>

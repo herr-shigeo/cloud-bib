@@ -85,6 +85,8 @@ function processUserList(data) {
     document.getElementById("user_koushi").checked = true;
   else if (user.category == "後援会員")
     document.getElementById("user_kouenkai").checked = true;
+  else if (user.category == "その他")
+    document.getElementById("user_other").checked = true;
 }
 
 function processBookList(data) {
@@ -224,9 +226,9 @@ function move() {
 <p>既存データを修正する場合は、利用者IDを入力後にEnterを押してデータを読み出す</p>
 <form id="form_user_list" name="form_user_list" action="/search/user" method="get" enctype="application/x-www-form-urlencoded">
   <label for="value"><b>利用者ID</b></label>
-  <input type="text" name="id" id="user_id_search">
-  <input type="hidden" name="name" value="">
-  <input type="hidden" name="kana" value="">
+  <input type="text" name="id" placeholder="半角数字" id="user_id_search">
+  <input type="hidden" name="name" placeholder="" value="">
+  <input type="hidden" name="kana" placeholder="" value="">
   <input type="hidden" name="category" value="">
 </form>
 <form id="form_user_update" name="form_user_update" action="/edit/user" method="post">
@@ -236,7 +238,7 @@ function move() {
     <tr>
     <td>
     <label for="user_id"><b>利用者ID*</b></label>
-    <input type="text" name="user_id" id="user_id" required>
+    <input type="text" name="user_id" id="user_id" placeholder="半角数字" required>
     </td>
     <td>
     <b>利用者区分</b>
@@ -246,24 +248,26 @@ function move() {
     <label for="user_koushi">講師</label>
     <input type="radio" name="user_category" id="user_kouenkai" value="後援会員">
     <label for="user_kouenkai">後援会員</label>
+    <input type="radio" name="user_category" id="user_other" value="他">
+    <label for="user_other">その他</label>
     </td>
     <td>
     <label for="user_remark"><b>備考</b></label>
-    <input type="text" name="user_remark" id="user_remark">
+    <input type="text" name="user_remark" placeholder="" id="user_remark">
     </td>
     </tr>
     <tr>
     <td>
     <label for="user_name"><b>氏名*</b></label>
-    <input type="text" name="user_name" id="user_name" required>
+    <input type="text" name="user_name" id="user_name" placeholder="全角" required>
     </td>
     <td>
-    <label for="user_kana"><b>半角カナ*</b></label>
+    <label for="user_kana"><b>半角ｶﾅ*</b></label>
     <input type="text" name="user_kana" id="user_kana" required>
     </td>
     <td>
     <label for="user_register_date"><b>登録日</b></label>
-    <input type="text" name="user_register_date" id="user_register_date">
+    <input type="text" name="user_register_date" id="user_register_date" placeholder="半角 yyyy/mm/dd">
     </td>
     </tr>
     </table>
@@ -286,7 +290,7 @@ function move() {
 <p>既存データを修正する場合は、図書IDを入力後にEnterを押してデータを読み出す</p>
 <form id="form_book_list" name="form_book_list" action="/search/book" method="get" enctype="application/x-www-form-urlencoded">
   <label for="value"><b>図書ID</b></label>
-  <input type="text" name="id" id="book_id_search">
+  <input type="text" name="id" id="book_id_search" placeholder="半角数字">
   <input type="hidden" name="title" value="">
   <input type="hidden" name="kana" value="">
 </form>
@@ -297,37 +301,37 @@ function move() {
     <tr>
     <td>
     <label for="book_id"><b>図書ID*</b></label>
-    <input type="text" name="book_id" id="book_id" required>
+    <input type="text" name="book_id" id="book_id" placeholder="半角数字" required>
     </td>
     <td>
     <label for="book_char"><b>分類マーク</b></label>
-    <input type="text" name="book_char" id="book_char">
+    <input type="text" name="book_char" id="book_char" placeholder="">
     </td>
     </tr>
     <tr>
     <td>
     <label for="book_title"><b>タイトル*</b></label>
-    <input type="text" name="book_title" id="book_title" placeholder="DVD　タイトル前に入れる" required>
+    <input type="text" name="book_title" id="book_title" placeholder="すべて全角 / ＤＶＤはタイトル前に入れる" required>
     </td>
     <td>
     <label for="book_series"><b>シリーズ</b></label>
-    <input type="text" name="book_series" id="book_series">
+    <input type="text" name="book_series" id="book_series" placeholder="">
     </td>
     </tr>
     <tr>
     <td>
     <label for="book_kana"><b>タイトルヨミ*</b></label>
-    <input type="text" name="book_kana" id="book_kana" placeholder="" required>
+    <input type="text" name="book_kana" id="book_kana" placeholder="全角カナ" required>
     </td>
     <td>
     <label for="book_author"><b>著者</b></label>
-    <input type="text" name="book_author" id="book_author">
+    <input type="text" name="book_author" id="book_author" placeholder="">
     </td>
     </tr>
     <tr>
     <td>
     <label for="book_publisher"><b>出版社</b></label>
-    <input type="text" name="book_publisher" id="book_publisher">
+    <input type="text" name="book_publisher" id="book_publisher" placeholder="">
     </td>
     <td>
     <label for="book_recommendation"><b>推薦</b></label>
@@ -341,13 +345,13 @@ function move() {
     </td>
     <td>
     <label for="book_status"><b>破損状況</b></label>
-    <input type="text" name="book_status" id="book_status" placeholder="【破損状況】を記入する">
+    <input type="text" name="book_status" id="book_status" placeholder="">
     </td>
     <tr>
     </tr>
     <td>
     <label for="book_register_date"><b>登録日</b></label>
-    <input type="text" name="book_register_date" id="book_register_date">
+    <input type="text" name="book_register_date" id="book_register_date" placeholder="半角 yyyy/mm/dd">
     </td>
     <td>
     <b>登録区分</b>
