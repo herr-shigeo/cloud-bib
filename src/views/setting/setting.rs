@@ -10,7 +10,7 @@ use actix_multipart::Multipart;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use futures::{StreamExt, TryStreamExt};
-use log::{debug, info};
+use log::{debug, error, info};
 use serde::Deserialize;
 use std::io::Write;
 use std::sync::Mutex;
@@ -203,6 +203,7 @@ pub async fn import_book_list(
     let file_path = match save_file(payload).await {
         Ok(file_path) => file_path,
         Err(e) => {
+            error!("{:?}", e);
             return Err(BibErrorResponse::SystemError(e.to_string()));
         }
     };
@@ -210,6 +211,7 @@ pub async fn import_book_list(
     let records = match read_csv(&file_path) {
         Ok(records) => records,
         Err(e) => {
+            error!("{:?}", e);
             return Err(BibErrorResponse::SystemError(e.to_string()));
         }
     };
@@ -218,6 +220,7 @@ pub async fn import_book_list(
         let record = &records[i];
         let num_field = record.len();
         if num_field != 12 {
+            error!("Invalid field num = {}", num_field);
             return Err(BibErrorResponse::InvalidArgument(num_field.to_string()));
         }
         debug!(
@@ -251,16 +254,19 @@ pub async fn import_book_list(
         ) {
             Ok(book) => book,
             Err(e) => {
+                error!("{:?}", e);
                 disconnect_db(&data);
                 return Err(BibErrorResponse::InvalidArgument(e.to_string()));
             }
         };
         if let Err(e) = insert_item(&db, &book).await {
+            error!("{:?}", e);
             disconnect_db(&data);
             return Err(BibErrorResponse::SystemError(e.to_string()));
         }
     }
 
+    debug!("Done");
     let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
 }
