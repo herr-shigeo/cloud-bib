@@ -47,7 +47,8 @@ $(document).ready(function() {
 
   var options5 = {
     dataType: 'json',
-    success:  processRegister
+    success:  processRegister,
+    timeout: 0
   };
   $('#form_user_register').ajaxForm(options5);
   $('#form_book_register').ajaxForm(options5);
@@ -186,7 +187,7 @@ function move() {
   var elem = document.getElementById("myBar");
   elem.style.display = "block";
   var width = 1;
-  var id = setInterval(frame, 1000);
+  var id = setInterval(frame, 2000);
   function frame() {
     if (width >= 100) {
       clearInterval(id);
