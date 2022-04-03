@@ -424,6 +424,8 @@ impl Database for Book {
             query = doc! { "title": {"$regex": &self.title} };
         } else if self.kana != "" {
             query = doc! { "kana": {"$regex": &self.kana} };
+        } else if self.author != "" {
+            query = doc! { "author": {"$regex": &self.author} };
         }
 
         let collection = self.get_collection(db);

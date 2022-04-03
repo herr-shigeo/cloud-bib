@@ -16,6 +16,7 @@ pub struct FormData {
     pub id: String,
     pub title: String,
     pub kana: String,
+    pub author: String,
 }
 
 #[derive(Serialize, Debug)]
@@ -45,6 +46,7 @@ pub async fn search_book(
     }
     book.title = form.title.clone();
     book.kana = form.kana.clone();
+    book.author = form.author.clone();
     get_book_list(data, &book).await
 }
 

@@ -15,6 +15,10 @@ pub fn member_factory(app: &mut web::ServiceConfig) {
         web::post().to(member::login),
     )
     .route(
+        &base_path.define(String::from("/news")),
+        web::get().to(member::load_news),
+    )
+    .route(
         &base_path.define(String::from("/borrowed_books")),
         web::get().to(member::borrowed_books),
     )

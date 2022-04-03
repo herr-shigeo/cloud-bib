@@ -104,6 +104,7 @@ function processBookList(data) {
 <div class="topnav">
   <a class="active" href="/member/home">ホーム</a>
   <a href="/member/search/main">図書検索</a>
+  <a href="/member/news">案内</a>
   <div class="topnav-right">
     <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
   </div>
@@ -111,15 +112,26 @@ function processBookList(data) {
 
 <div class="full-container">
 <h3>図書検索</h3>
-<p>キーワードを入力後にEnterを押して検索</p>
 <form id="form_book" name="form_book" action="/search/book" method="get" enctype="application/x-www-form-urlencoded">
+  <table>
+  <tr>
+  <td>
   <label for="value"><b>タイトル（全角）</b></label>
-  <input type="text" placeholder="例）かいけつゾロリ、歴史、コナン、ＤＶＤ" name="title">
-  <input type="hidden" placeholder="" name="id" value="">
-  <input type="hidden" placeholder="" name="kana" value="">
-  <input type="submit" value="Submit Comment" style="display: none;">
+  <input type="text" placeholder="例）かいけつゾロリ、歴史、コナン、ＤＶＤ" name="title" id="book_title">
+  </td>
+  <td>
+  <input type="hidden" placeholder="" name="id" id="book_id">
+  <input type="hidden" placeholder="" name="kana" id="book_kana">
+  </td>
+  <td>
+  <label for="value"><b>著者</b></label>
+  <input type="text" placeholder="全角" name="author" id="book_author">
+  </td>
+  </tr>
+  </table>
+  <button type="submit">検索</button>
 </form>
-
+<h3>検索結果</h3>
 <div style="overflow-x: auto;">
 <table id="book_list_table" class="display compact nowrap">
   <thead>

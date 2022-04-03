@@ -12,7 +12,7 @@ function handleError(data) {
   if (data['success'] == true) {
     return false;
   }
-  const msg = data['message'] + '(E' + data['errcode'] + ')';
+  const msg = data['message'];
   alert(msg);
   return true;
 }

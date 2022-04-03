@@ -98,7 +98,7 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,
                     errcode: 107,
-                    message: format!("ID({})が見つかりません", id),
+                    message: format!("該当図書が見つかりません(ID = {})", id),
                     reason: String::new(),
                 })
             }

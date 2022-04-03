@@ -62,7 +62,6 @@ function processJson(data) {
   datatable.clear();
   datatable.destroy();
   $('#transaction_list_table').DataTable({
-    "pageLength": 25,
     "autoWidth": false,
     "scrollX": false,
     "order": [[ 4, "desc" ]],
@@ -109,23 +108,22 @@ function processJson(data) {
   <input type="text" placeholder="半角数字" name="book_id" id="book_id">
   </td>
   <td>
-  <label for="value"><b>図書タイトル</b></label>
+  <label for="value"><b>タイトル</b></label>
   <input type="text" placeholder="全角" name="book_title">
   </td>
-  </tr>
-  <tr>
   <td>
   <label for="value"><b>利用者ID</b></label>
   <input type="text" placeholder="半角数字" name="user_id" id="user_id">
   </td>
   <td>
-  <label for="value"><b>利用者氏名</b></label>
+  <label for="value"><b>氏名</b></label>
   <input type="text" placeholder="全角" name="user_name" id="user_name">
   </td>
   </tr>
   </table>
   <button type="submit">検索</button>
 </form>
+<h3>検索結果</h3>
 <table id="transaction_list_table" class="display compact nowrap">
   <thead>
     <tr>
