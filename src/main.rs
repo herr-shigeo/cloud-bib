@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
     let transaction_counter: u32 = transaction_items.await.len().try_into().unwrap();
     let transaction_counter: u32 = (transaction_counter % max_transaction_num)
         .try_into()
-        .unwrap() + 1;
+        .unwrap();
     let transaction = web::Data::new(Transaction::new(max_transaction_num, transaction_counter));
 
     let mut csp_rng = ChaCha20Rng::from_entropy();
