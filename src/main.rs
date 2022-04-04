@@ -3,6 +3,7 @@ use crate::item::TransactionItem;
 use crate::views::transaction::*;
 use actix_session::CookieSession;
 use actix_web::{web, App, HttpServer};
+use log::info;
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
 use std::env;
@@ -24,12 +25,15 @@ async fn main() -> std::io::Result<()> {
     let db = get_db(&db_client.clone()).await.unwrap();
 
     let item = TransactionItem::default();
-    let transaction_items = Transaction::search(&db, &item);
-    let transaction_counter: u32 = transaction_items.await.len().try_into().unwrap();
-    let transaction_counter: u32 = (transaction_counter % max_transaction_num)
-        .try_into()
-        .unwrap();
-    let transaction = web::Data::new(Transaction::new(max_transaction_num, transaction_counter));
+    let mut transaction_items = Transaction::search(&db, &item).await;
+    let last_transaction = transaction_items.pop();
+    let last_counter = last_transaction.unwrap().id;
+    let new_counter = last_counter + 1;
+    info!(
+        "last_counter = {}, new_counter = {}",
+        last_counter, new_counter
+    );
+    let transaction = web::Data::new(Transaction::new(max_transaction_num, new_counter));
 
     let mut csp_rng = ChaCha20Rng::from_entropy();
     let mut data = [0u8; 32];
