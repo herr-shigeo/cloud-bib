@@ -111,8 +111,18 @@ where
     ) -> Result<(), Box<dyn error::Error>> {
         debug!("update: {:?}", query);
         let options = UpdateOptions::builder().upsert(upsert).build();
-        self.update_one(query, update, options).await?;
-        Ok(())
+        let result = self.update_one(query, update, options).await?;
+        debug!("{:?}", result);
+        if result.matched_count == 1 && result.modified_count == 1 && result.upserted_id == None {
+            return Ok(());
+        }
+        if result.matched_count == 0 && result.modified_count == 0 && result.upserted_id != None {
+            return Ok(());
+        }
+        Err(Box::new(Error::new(
+            ErrorKind::Other,
+            "Update failed for unknwon reason".to_string(),
+        )))
     }
 
     async fn delete(&self, query: Document) -> Result<(), Box<dyn error::Error>> {
@@ -142,7 +152,7 @@ where
         if items.len() == 0 {
             Err(Box::new(Error::new(
                 ErrorKind::Other,
-                "Playload not found".to_string(),
+                "Item not found".to_string(),
             )))
         } else {
             debug!("Ok: num = {}", items.len());

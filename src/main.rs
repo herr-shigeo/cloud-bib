@@ -29,11 +29,8 @@ async fn main() -> std::io::Result<()> {
     let last_transaction = transaction_items.pop();
     let last_counter = last_transaction.unwrap().id;
     let new_counter = last_counter + 1;
-    info!(
-        "last_counter = {}, new_counter = {}",
-        last_counter, new_counter
-    );
-    let transaction = web::Data::new(Transaction::new(max_transaction_num, new_counter));
+    info!("last_counter = {}", last_counter);
+    let transaction = web::Data::new(Transaction::new(max_transaction_num, last_counter));
 
     let mut csp_rng = ChaCha20Rng::from_entropy();
     let mut data = [0u8; 32];
