@@ -1,5 +1,6 @@
 use actix_web::web;
 mod auth;
+pub mod cache;
 mod content_loader;
 mod edit;
 mod export;

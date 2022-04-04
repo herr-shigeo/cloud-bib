@@ -3,6 +3,7 @@ use crate::error::BibErrorResponse;
 use crate::item::atoi;
 use crate::item::search_items;
 use crate::item::Book;
+use crate::views::cache::*;
 use crate::views::reply::Reply;
 use crate::views::session::check_any_session;
 use actix_session::Session;
@@ -28,6 +29,7 @@ pub async fn search_book(
     session: Session,
     form: web::Query<FormData>,
     data: web::Data<Mutex<DbClient>>,
+    cache: web::Data<Cache>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
@@ -47,11 +49,12 @@ pub async fn search_book(
     book.title = form.title.clone();
     book.kana = form.kana.clone();
     book.author = form.author.clone();
-    get_book_list(data, &book).await
+    get_book_list(data, &cache, &book).await
 }
 
 async fn get_book_list(
     data: web::Data<Mutex<DbClient>>,
+    cache: &web::Data<Cache>,
     book: &Book,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db(&data).await?;
@@ -62,6 +65,13 @@ async fn get_book_list(
             return Err(BibErrorResponse::BookNotFound(book.id));
         }
     };
+
+    for mut book in &mut books {
+        if let Some(info) = cache.get(book.id) {
+            book.owner_id = Some(info.owner_id);
+            book.return_deadline = Some(info.return_deadline.clone());
+        }
+    }
 
     let mut reply = Reply::default();
     reply.book_list.append(&mut books);

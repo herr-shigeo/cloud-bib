@@ -4,6 +4,7 @@ use crate::item::atoi;
 use crate::item::RentalSetting;
 use crate::item::{search_items, update_item};
 use crate::item::{Book, BorrowedBook, User};
+use crate::views::cache::*;
 use crate::views::reply::Reply;
 use crate::views::session::*;
 use crate::views::transaction::*;
@@ -24,6 +25,7 @@ pub async fn process(
     session: Session,
     form: web::Form<FormData>,
     data: web::Data<Mutex<DbClient>>,
+    cache: web::Data<Cache>,
     transaction: web::Data<Transaction>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
@@ -34,7 +36,7 @@ pub async fn process(
     let mut user = User::default();
     if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {
         let book_title =
-            unborrow_book(&db, &transaction, &mut user, &form.returned_book_id).await?;
+            unborrow_book(&db, &cache, &transaction, &mut user, &form.returned_book_id).await?;
         let mut reply = Reply::default();
         reply.returned_book_title = book_title;
         reply.user = user;
@@ -68,6 +70,7 @@ pub async fn process(
     if form.borrowed_book_id != "" {
         borrow_book(
             &db,
+            &cache,
             &transaction,
             &mut user,
             &form.borrowed_book_id,
@@ -78,7 +81,7 @@ pub async fn process(
     }
 
     if form.returned_book_id != "" {
-        unborrow_book(&db, &transaction, &mut user, &form.returned_book_id).await?;
+        unborrow_book(&db, &cache, &transaction, &mut user, &form.returned_book_id).await?;
     }
 
     let mut reply = Reply::default();
@@ -109,6 +112,7 @@ async fn select_user(db: &DbInstance, user: &User) -> Option<User> {
 
 async fn borrow_book(
     db: &DbInstance,
+    cache: &web::Data<Cache>,
     transaction: &web::Data<Transaction>,
     user: &mut User,
     book_id: &str,
@@ -133,7 +137,7 @@ async fn borrow_book(
     if books.len() != 1 {
         return Err(BibErrorResponse::DataDuplicated);
     }
-    let mut book = books.pop().unwrap();
+    let book = books.pop().unwrap();
     if book.owner_id.is_some() {
         return Err(BibErrorResponse::BookNotReturned);
     }
@@ -145,19 +149,15 @@ async fn borrow_book(
 
     let borrowed_book = BorrowedBook::new(book_id, &book.title, max_borrowing_days, transaction_id);
 
-    book.return_deadline = Some(borrowed_book.return_deadline.clone());
+    let return_deadline = borrowed_book.return_deadline.clone();
     user.borrowed_books.push(borrowed_book);
-    book.owner_id = Some(user.id.clone());
 
     user.borrowed_count += 1;
     update_item(db, user)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
 
-    book.borrowed_count += 1;
-    update_item(db, &book)
-        .await
-        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+    cache.borrow(book.id, user.id, return_deadline);
 
     debug!("transaction_id = {}", transaction_id);
     Transaction::borrow(db, transaction_id, user, &book)
@@ -167,6 +167,7 @@ async fn borrow_book(
 
 async fn unborrow_book(
     db: &DbInstance,
+    cache: &web::Data<Cache>,
     _transaction: &web::Data<Transaction>,
     user: &mut User,
     book_id: &str,
@@ -189,10 +190,11 @@ async fn unborrow_book(
     book = books.pop().unwrap();
 
     if user.id == 0 {
-        if book.owner_id.is_none() {
+        let borrow_info = cache.unborrow(book.id);
+        if borrow_info.is_none() {
             return Err(BibErrorResponse::BookNotBorrowed);
         }
-        user.id = book.owner_id.unwrap();
+        user.id = borrow_info.unwrap().owner_id;
         *user = match select_user(db, user).await {
             Some(user) => user,
             None => {
@@ -200,9 +202,6 @@ async fn unborrow_book(
             }
         };
     }
-    book.owner_id = None;
-    book.return_deadline = None;
-
     let mut transaction_id: u32 = 0;
     let mut done: bool = false;
     let mut borrowed_date: String = String::new();
@@ -222,9 +221,8 @@ async fn unborrow_book(
     update_item(db, user)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
-    update_item(db, &book)
-        .await
-        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    cache.unborrow(book.id);
 
     debug!("transaction_id = {}", transaction_id);
     Transaction::unborrow(db, transaction_id, user, &book, borrowed_date)

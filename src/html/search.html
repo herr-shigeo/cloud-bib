@@ -59,7 +59,6 @@ $(document).ready(function() {
       { "data": "series" },
       { "data": "remark" },
       { "data": "register_date" },
-      { "data": "borrowed_count" }
     ]
   });
 });
@@ -141,11 +140,10 @@ function processBookList(data) {
       { "data": "series" },
       { "data": "remark" },
       { "data": "register_date" },
-      { "data": "borrowed_count" }
     ],
     "columnDefs": [
       {
-        "targets": 12,
+        "targets": 11,
         "className": 'dt-body-center'
       }
     ]
@@ -218,7 +216,6 @@ function processBookList(data) {
       <th>シリーズ</th>
       <th>注記</th>
       <th>登録日</th>
-      <th>貸出数</th>
     </tr>
   </thead>
 </table>
