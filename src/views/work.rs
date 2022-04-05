@@ -137,7 +137,7 @@ async fn borrow_book(
     if books.len() != 1 {
         return Err(BibErrorResponse::DataDuplicated);
     }
-    let book = books.pop().unwrap();
+    let mut book = books.pop().unwrap();
     if book.owner_id.is_some() {
         return Err(BibErrorResponse::BookNotReturned);
     }
@@ -158,6 +158,12 @@ async fn borrow_book(
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
 
     cache.borrow(book.id, user.id, return_deadline);
+
+    // Don't propagate error
+    book.borrowed_count += 1;
+    if let Err(e) = update_item(db, &book).await {
+        error!("{:?}", e);
+    }
 
     debug!("transaction_id = {}", transaction_id);
     Transaction::borrow(db, transaction_id, user, &book)
@@ -190,7 +196,7 @@ async fn unborrow_book(
     book = books.pop().unwrap();
 
     if user.id == 0 {
-        let borrow_info = cache.unborrow(book.id);
+        let borrow_info = cache.get(book.id);
         if borrow_info.is_none() {
             return Err(BibErrorResponse::BookNotBorrowed);
         }
