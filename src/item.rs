@@ -129,6 +129,7 @@ pub struct Book {
     pub kana: String,
     pub register_date: String,
 
+    pub borrowed_count: u32,
     pub reserved: String,
     pub owner_id: Option<u32>,
     pub return_deadline: Option<String>,
@@ -232,6 +233,7 @@ impl Book {
             register_date: format!("{}", dt.format("%Y/%m/%d")),
             register_type: String::new(),
             status: String::new(),
+            borrowed_count: 0,
             reserved: String::new(),
             owner_id: None,
             return_deadline: None,
@@ -265,6 +267,7 @@ impl Book {
             register_date: register_date.to_string(),
             register_type: register_type.to_string(),
             status: status.to_string(),
+            borrowed_count: 0,
             reserved: String::new(),
             owner_id: None,
             return_deadline: None,
