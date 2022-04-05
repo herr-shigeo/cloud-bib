@@ -95,7 +95,6 @@ fn write_book_list(books: Vec<Book>) -> Result<String, Box<dyn error::Error>> {
             series: book.series.clone(),
             remark: book.remark.clone(),
             register_date: book.register_date.clone(),
-            borrowed_count: book.borrowed_count.clone(),
             reserved: book.reserved.clone(),
             owner_id: None,
             return_deadline: None,
