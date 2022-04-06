@@ -25,10 +25,13 @@ async fn main() -> std::io::Result<()> {
     let db_client = web::Data::new(Mutex::new(DbClient::new()));
     let db = get_db(&db_client.clone()).await.unwrap();
 
+    let mut last_counter = 0;
     let item = TransactionItem::default();
     let mut transaction_items = Transaction::search(&db, &item).await;
-    let last_transaction = transaction_items.pop();
-    let last_counter = last_transaction.unwrap().id;
+    if transaction_items.len() > 0 {
+        let last_transaction = transaction_items.pop();
+        last_counter = last_transaction.unwrap().id;
+    }
     info!("last_counter = {}", last_counter);
     let transaction = web::Data::new(Transaction::new(max_transaction_num, last_counter));
 
