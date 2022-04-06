@@ -113,16 +113,10 @@ where
         let options = UpdateOptions::builder().upsert(upsert).build();
         let result = self.update_one(query, update, options).await?;
         debug!("{:?}", result);
-        if result.matched_count == 1 && result.modified_count == 1 && result.upserted_id == None {
-            return Ok(());
+        if result.matched_count != result.modified_count {
+            info!("The data seems to be not updated. {:?}", result);
         }
-        if result.matched_count == 0 && result.modified_count == 0 && result.upserted_id != None {
-            return Ok(());
-        }
-        Err(Box::new(Error::new(
-            ErrorKind::Other,
-            "Update failed for unknwon reason".to_string(),
-        )))
+        Ok(())
     }
 
     async fn delete(&self, query: Document) -> Result<(), Box<dyn error::Error>> {
