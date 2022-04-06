@@ -182,7 +182,7 @@ pub async fn import_user_list(
         )
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
 
-        if let Err(e) = update_item(&db, &user).await {
+        if let Err(e) = insert_item(&db, &user).await {
             disconnect_db(&data);
             return Err(BibErrorResponse::SystemError(e.to_string()));
         }
