@@ -117,7 +117,8 @@ function processBookList(data) {
       d.owner_id = '貸出可能';
     }
     else {
-      d.owner_id = '貸出中 (' + d.owner_id + ', 〜' + d.return_deadline + ')';
+      var dt = d.return_deadline.split(" ")
+      d.owner_id = '貸出中 (' + d.owner_id + ', 〜' + dt[0] + ')';
     }
   });
 
