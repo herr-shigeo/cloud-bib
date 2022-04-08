@@ -69,6 +69,7 @@ function setUserInfo(user, num_books) {
   if (user['category'] != "") {
     document.getElementById("user_category").innerHTML = user['category'];
   }
+  document.getElementById("user_id2").innerHTML = user['id'];
   document.getElementById("user_kana").innerHTML = user['kana'];
   document.getElementById("user_register_date").innerHTML = '登録日: ' +  user['register_date'];
   document.getElementById("user_remark").innerHTML = '備考: ' + user['remark'];
@@ -144,6 +145,7 @@ var returned_count = 0;
 <table class="user-info">
 <tr>
 <td><div id="user_name">利用者未選択</div></td>
+<td><div id="user_id2">利用者ID未選択</div></td>
 <td><div id="user_kana"></div></td>
 <td><div id="user_category">利用者区分無し</div></td>
 <td><div id="user_register_date"></div></td>
