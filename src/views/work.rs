@@ -138,7 +138,8 @@ async fn borrow_book(
         return Err(BibErrorResponse::DataDuplicated);
     }
     let mut book = books.pop().unwrap();
-    if book.owner_id.is_some() {
+    let borrow_info = cache.get(book.id);
+    if borrow_info.is_some() {
         return Err(BibErrorResponse::BookNotReturned);
     }
 
