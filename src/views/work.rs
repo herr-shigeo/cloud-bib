@@ -149,10 +149,8 @@ async fn borrow_book(
     drop(counter);
 
     let borrowed_book = BorrowedBook::new(book_id, &book.title, max_borrowing_days, transaction_id);
-
     let return_deadline = borrowed_book.return_deadline.clone();
     user.borrowed_books.push(borrowed_book);
-
     user.borrowed_count += 1;
     update_item(db, user)
         .await
