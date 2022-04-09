@@ -46,8 +46,9 @@ function processReturn(data) {
   else {
     var user = data['user'];
     var name = user['name'];
+    var id = user['id'];
     var book_title = data['returned_book_title'];
-    msg = '<font size="+2">' + name + '</font> さんが <font size="+2" style="color:navy">' + book_title + '</font>' + ' を返却しました'
+    msg = '<font size="+2">' + name + '</font> (' + id +') さんが <font size="+2" style="color:navy">' + book_title + '</font>' + ' を返却しました'
   }
   setStatus(msg);
   document.getElementById("form_unborrow").reset();
