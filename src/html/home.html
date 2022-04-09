@@ -48,7 +48,8 @@ function processReturn(data) {
     var name = user['name'];
     var id = user['id'];
     var book_title = data['returned_book_title'];
-    msg = '<font size="+2">' + name + '</font> (' + id +') さんが <font size="+2" style="color:navy">' + book_title + '</font>' + ' を返却しました'
+    var book_id = data['returned_book_id'];
+    msg = '<font size="+2">' + name + '</font> (' + id +') さんが <font size="+2" style="color:navy">' + book_title + '</font> (' + book_id  + ') を返却しました'
   }
   setStatus(msg);
   document.getElementById("form_unborrow").reset();

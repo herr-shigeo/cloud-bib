@@ -35,10 +35,11 @@ pub async fn process(
 
     let mut user = User::default();
     if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {
-        let book_title =
+        let (book_title, book_id) =
             unborrow_book(&db, &cache, &transaction, &mut user, &form.returned_book_id).await?;
         let mut reply = Reply::default();
         reply.returned_book_title = book_title;
+        reply.returned_book_id = book_id;
         reply.user = user;
         return Ok(HttpResponse::Ok().json(reply));
     }
@@ -176,7 +177,7 @@ async fn unborrow_book(
     _transaction: &web::Data<Transaction>,
     user: &mut User,
     book_id: &str,
-) -> Result<String, BibErrorResponse> {
+) -> Result<(String, u32), BibErrorResponse> {
     debug!("unborrow_book,id = {}", book_id);
 
     let mut book = Book::default();
@@ -233,5 +234,5 @@ async fn unborrow_book(
     Transaction::unborrow(db, transaction_id, user, &book, borrowed_date)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
-    Ok(book.title)
+    Ok((book.title, book.id))
 }
