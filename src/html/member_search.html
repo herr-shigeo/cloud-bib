@@ -71,7 +71,7 @@ function processBookList(data) {
     }
     else {
       var dt = d.return_deadline.split(" ")
-      d.owner_id = '貸出中 (' + d.owner_id + ', 〜' + dt[0] + ')';
+      d.owner_id = '貸出中 (〜' + dt[0] + ')';
     }
   });
 
