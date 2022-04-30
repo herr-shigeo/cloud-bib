@@ -157,6 +157,19 @@ async fn borrow_book(
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
 
+    // Check the returned data
+    let mut done: bool = false;
+    for book in &user.borrowed_books {
+        if book_id == book.book_id {
+            debug!("Check passed, book_id = {}", book_id);
+            done = true;
+            break;
+        }
+    }
+    if !done {
+        return Err(BibErrorResponse::SystemError("Check failed".to_string()));
+    }
+
     cache.borrow(book.id, user.id, return_deadline);
 
     // Don't propagate error
@@ -227,6 +240,20 @@ async fn unborrow_book(
     update_item(db, user)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    // Check the returned data
+    let mut done: bool = true;
+    for book in &user.borrowed_books {
+        if book_id == book.book_id {
+            error!("Check failed, book_id = {}", book_id);
+            done = false;
+            break;
+        }
+    }
+    if !done {
+        return Err(BibErrorResponse::SystemError("Check failed".to_string()));
+    }
+    debug!("Check passed, book_id = {}", book_id);
 
     cache.unborrow(book.id);
 

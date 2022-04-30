@@ -4,9 +4,9 @@ use actix_web::web;
 use async_trait::async_trait;
 use bson::Document;
 use futures::stream::TryStreamExt;
-use log::{debug, info};
+use log::{debug, error, info};
 use mongodb::bson::doc;
-use mongodb::options::{FindOptions, UpdateOptions};
+use mongodb::options::{FindOneAndUpdateOptions, FindOptions};
 use mongodb::{options::*, Client, Collection, Database};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -31,7 +31,7 @@ pub async fn get_db(data: &web::Data<Mutex<DbClient>>) -> Result<DbInstance, Bib
     {
         let db_client = data.lock().unwrap();
         if db_client.connected {
-            info!("already connected to the db");
+            debug!("already connected to the db");
             let db = db_client.client.as_ref().unwrap().database(&db_name);
             return Ok(DbInstance { instance: db });
         }
@@ -101,7 +101,7 @@ pub trait HelperCollection<T> {
 #[async_trait]
 impl<T> HelperCollection<T> for Collection<T>
 where
-    T: DeserializeOwned + Unpin + Send + Sync + Serialize,
+    T: DeserializeOwned + Unpin + Send + Sync + Serialize + std::fmt::Debug,
 {
     async fn update(
         &self,
@@ -109,13 +109,13 @@ where
         update: Document,
         upsert: bool,
     ) -> Result<(), Box<dyn error::Error>> {
-        debug!("update: {:?}", query);
-        let options = UpdateOptions::builder().upsert(upsert).build();
-        let result = self.update_one(query, update, options).await?;
-        debug!("{:?}", result);
-        if result.matched_count != result.modified_count {
-            info!("The data seems to be not updated. {:?}", result);
-        }
+        debug!("update: {:?}", update);
+        let options = FindOneAndUpdateOptions::builder()
+            .upsert(upsert)
+            .return_document(ReturnDocument::After)
+            .build();
+        let result = self.find_one_and_update(query, update, options).await?;
+        debug!("returned  = {:?}", result);
         Ok(())
     }
 
