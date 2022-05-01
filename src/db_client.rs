@@ -109,7 +109,7 @@ where
         update: Document,
         upsert: bool,
     ) -> Result<(), Box<dyn error::Error>> {
-        debug!("update: {:?}", update);
+        debug!("query: {:?}", query);
         let options = FindOneAndUpdateOptions::builder()
             .upsert(upsert)
             .return_document(ReturnDocument::After)

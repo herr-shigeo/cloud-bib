@@ -7,6 +7,7 @@ use mongodb::options::IndexOptions;
 use mongodb::{Collection, IndexModel};
 use serde::{Deserialize, Serialize};
 use std::error;
+use std::io::{Error, ErrorKind};
 
 #[async_trait]
 pub trait Database {
@@ -77,6 +78,21 @@ pub async fn search_items<T: Database>(
     item: &T,
 ) -> Result<Vec<T>, Box<dyn error::Error>> {
     item.search(db).await
+}
+
+pub async fn search_item<T: Database>(
+    db: &DbInstance,
+    item: &T,
+) -> Result<T, Box<dyn error::Error>> {
+    let mut items = item.search(db).await?;
+    if items.len() == 1 {
+        Ok(items.pop().unwrap())
+    } else {
+        Err(Box::new(Error::new(
+            ErrorKind::Other,
+            "Multiple items are found".to_string(),
+        )))
+    }
 }
 
 pub async fn create_unique_index(db: &DbInstance) -> Result<(), Box<dyn error::Error>> {

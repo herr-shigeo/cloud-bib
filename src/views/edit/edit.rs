@@ -1,6 +1,7 @@
 use crate::db_client::*;
 use crate::error::BibErrorResponse;
-use crate::item::{delete_item, update_item};
+use crate::item::atoi;
+use crate::item::{delete_item, search_item, update_item};
 use crate::item::{Book, User};
 use crate::views::content_loader::read_file;
 use crate::views::reply::Reply;
@@ -39,15 +40,17 @@ pub async fn user(
     check_session(&session)?;
     let db = get_db(&data).await?;
 
-    let user = User::new(
-        &form.user_id,
-        &form.user_name,
-        &form.user_kana,
-        &form.user_category,
-        &form.user_remark,
-        &form.user_register_date,
-    )
-    .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+    // Read the User from DB first
+    let mut user = User::default();
+    user.id = atoi(&form.user_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+    user = search_item(&db, &user)
+        .await
+        .map_err(|_| BibErrorResponse::UserNotFound(user.id))?;
+    user.name = form.user_name.clone();
+    user.kana = form.user_kana.clone();
+    user.category = form.user_category.clone();
+    user.remark = form.user_remark.clone();
+    user.register_date = form.user_register_date.clone();
 
     let operation: &str = &form.operation;
     match operation {
@@ -97,25 +100,23 @@ pub async fn book(
     check_session(&session)?;
     let db = get_db(&data).await?;
 
-    let book = match Book::new(
-        &form.book_id,
-        &form.book_title,
-        &form.book_kana,
-        &form.book_series,
-        &form.book_author,
-        &form.book_publisher,
-        &form.book_char,
-        &form.book_remark,
-        &form.book_recommendation,
-        &form.book_register_date,
-        &form.book_register_type,
-        &form.book_status,
-    ) {
-        Ok(book) => book,
-        Err(e) => {
-            return Err(BibErrorResponse::InvalidArgument(e.to_string()));
-        }
-    };
+    // Read the Book from DB first
+    let mut book = Book::default();
+    book.id = atoi(&form.book_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+    book = search_item(&db, &book)
+        .await
+        .map_err(|_| BibErrorResponse::BookNotFound(book.id))?;
+    book.title = form.book_title.clone();
+    book.kana = form.book_kana.clone();
+    book.series = form.book_series.clone();
+    book.author = form.book_author.clone();
+    book.publisher = form.book_publisher.clone();
+    book.char = form.book_char.clone();
+    book.remark = form.book_remark.clone();
+    book.recommendation = form.book_recommendation.clone();
+    book.register_date = form.book_register_date.clone();
+    book.register_type = form.book_register_type.clone();
+    book.status = form.book_status.clone();
 
     let operation: &str = &form.operation;
     match operation {

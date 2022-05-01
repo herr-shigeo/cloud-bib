@@ -2,7 +2,7 @@ use crate::db_client::*;
 use crate::error::*;
 use crate::item::atoi;
 use crate::item::RentalSetting;
-use crate::item::{search_items, update_item};
+use crate::item::{search_item, search_items, update_item};
 use crate::item::{Book, BorrowedBook, User};
 use crate::views::cache::*;
 use crate::views::reply::Reply;
@@ -45,9 +45,9 @@ pub async fn process(
     }
 
     user.id = atoi(&form.user_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
-    let mut user = match select_user(&db, &user).await {
-        Some(user) => user,
-        None => {
+    let mut user = match search_item(&db, &user).await {
+        Ok(user) => user,
+        Err(_) => {
             disconnect_db(&data);
             return Err(BibErrorResponse::UserNotFound(user.id));
         }
@@ -93,22 +93,6 @@ pub async fn process(
     }
 
     Ok(HttpResponse::Ok().json(reply))
-}
-
-async fn select_user(db: &DbInstance, user: &User) -> Option<User> {
-    let mut users = match search_items(db, user).await {
-        Ok(users) => users,
-        Err(_) => {
-            return None;
-        }
-    };
-
-    if users.len() == 1 {
-        users.pop()
-    } else {
-        error!("multiple users are found");
-        None
-    }
 }
 
 async fn borrow_book(
@@ -214,9 +198,9 @@ async fn unborrow_book(
             return Err(BibErrorResponse::BookNotBorrowed);
         }
         user.id = borrow_info.unwrap().owner_id;
-        *user = match select_user(db, user).await {
-            Some(user) => user,
-            None => {
+        *user = match search_item(db, user).await {
+            Ok(user) => user,
+            Err(_) => {
                 return Err(BibErrorResponse::UserNotFound(user.id));
             }
         };
