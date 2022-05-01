@@ -70,6 +70,10 @@ function processBorrowList(data) {
     var borrowed_date = $('<td></td>').text(d.borrowed_date.split(" ")[0]);
     var deadline;
     var deadline_date = new Date(d.return_deadline);
+	deadline_date.setHours(0);
+	deadline_date.setMinutes(0);
+	deadline_date.setSeconds(0);
+	deadline_date.setMilliseconds(0);
     var today = new Date();
     if (today > deadline_date) {
       deadline = $('<td style="color:red"></td>').text(d.return_deadline.split(" ")[0]);
