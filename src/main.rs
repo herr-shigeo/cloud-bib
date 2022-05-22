@@ -19,7 +19,7 @@ mod views;
 async fn main() -> std::io::Result<()> {
     env_logger::init();
     let port = env::var("PORT").unwrap_or("5000".to_string());
-    let max_transaction_num = env::var("MAX_TRANSACTION_NUM").unwrap_or("2000000".to_string());
+    let max_transaction_num = env::var("MAX_TRANSACTION_NUM").unwrap_or("100000".to_string());
     let max_transaction_num = max_transaction_num.parse::<u32>().unwrap();
 
     let db_client = web::Data::new(Mutex::new(DbClient::new()));
