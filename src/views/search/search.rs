@@ -1,9 +1,9 @@
-use crate::db_client::*;
 use crate::error::*;
 use crate::item::search_items;
 use crate::item::BorrowedBook;
 use crate::item::User;
 use crate::views::content_loader::read_file;
+use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::check_session;
 use actix_session::Session;
@@ -12,6 +12,7 @@ use chrono::{NaiveDateTime, TimeZone, Utc};
 use chrono_tz::Europe::Berlin;
 use log::debug;
 use serde::Serialize;
+use shared_mongodb::ClientHolder;
 use std::sync::Mutex;
 
 pub async fn load(_session: Session) -> HttpResponse {
@@ -30,7 +31,7 @@ pub struct DelayedBook {
 
 pub async fn search_delayed_list(
     session: Session,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data).await?;

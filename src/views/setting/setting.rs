@@ -1,4 +1,3 @@
-use crate::db_client::*;
 use crate::error::*;
 use crate::item::{insert_item, search_items, update_item, Book, User};
 use crate::item::{RentalSetting, SystemSetting};
@@ -12,9 +11,11 @@ use actix_web::{web, HttpResponse, Result};
 use futures::{StreamExt, TryStreamExt};
 use log::{debug, error, info};
 use serde::Deserialize;
+use shared_mongodb::{database, ClientHolder};
 use std::io::Write;
 use std::sync::Mutex;
 extern crate sanitize_filename;
+use crate::views::db_helper::get_db;
 use std::error;
 use std::io::{Error, ErrorKind};
 
@@ -40,7 +41,7 @@ pub struct Form2Data {
 pub async fn update_rental_setting(
     session: Session,
     form: web::Form<Form1Data>,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
@@ -58,7 +59,7 @@ pub async fn update_rental_setting(
     match update_item(&db, &setting).await {
         Ok(setting) => setting,
         Err(e) => {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     }
@@ -69,7 +70,7 @@ pub async fn update_rental_setting(
 
 pub async fn get_rental_setting(
     session: Session,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data).await?;
@@ -79,7 +80,7 @@ pub async fn get_rental_setting(
     let mut setting = match search_items(&db, &setting).await {
         Ok(setting) => setting,
         Err(e) => {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     };
@@ -99,7 +100,7 @@ pub async fn get_rental_setting(
 pub async fn update_system_setting(
     session: Session,
     form: web::Form<Form2Data>,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
@@ -117,7 +118,7 @@ pub async fn update_system_setting(
     match update_item(&db, &setting).await {
         Ok(setting) => setting,
         Err(e) => {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     }
@@ -148,7 +149,7 @@ async fn save_file(mut payload: Multipart) -> Result<String, Box<dyn error::Erro
 pub async fn import_user_list(
     session: Session,
     payload: Multipart,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data).await?;
@@ -183,7 +184,7 @@ pub async fn import_user_list(
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
 
         if let Err(e) = insert_item(&db, &user).await {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::SystemError(e.to_string()));
         }
     }
@@ -195,7 +196,7 @@ pub async fn import_user_list(
 pub async fn import_book_list(
     session: Session,
     payload: Multipart,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data).await?;
@@ -255,13 +256,13 @@ pub async fn import_book_list(
             Ok(book) => book,
             Err(e) => {
                 error!("{:?}", e);
-                disconnect_db(&data);
+                database::disconnect(&data);
                 return Err(BibErrorResponse::InvalidArgument(e.to_string()));
             }
         };
         if let Err(e) = insert_item(&db, &book).await {
             error!("{:?}", e);
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::SystemError(e.to_string()));
         }
     }

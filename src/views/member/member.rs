@@ -1,14 +1,15 @@
-use crate::db_client::*;
 use crate::error::BibErrorResponse;
 use crate::item::search_items;
 use crate::item::SystemSetting;
 use crate::item::User;
 use crate::views::content_loader::read_file;
+use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::*;
 use actix_session::*;
 use actix_web::{web, HttpResponse, Result};
 use serde::Deserialize;
+use shared_mongodb::{database, ClientHolder};
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
@@ -34,7 +35,7 @@ pub async fn load() -> HttpResponse {
 pub async fn login(
     session: Session,
     form: web::Form<FormData1>,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db(&data).await?;
 
@@ -43,7 +44,7 @@ pub async fn login(
     let mut users = match search_items(&db, &user).await {
         Ok(users) => users,
         Err(_) => {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::UserNotFound(user.id));
         }
     };
@@ -57,7 +58,7 @@ pub async fn login(
     let mut setting = match search_items(&db, &setting).await {
         Ok(setting) => setting,
         Err(e) => {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     };
@@ -106,7 +107,7 @@ pub async fn load_search(_session: Session) -> HttpResponse {
 
 pub async fn borrowed_books(
     session: Session,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let user_id = check_member_session(&session)?;
     let mut reply = Reply::default();
@@ -118,7 +119,7 @@ pub async fn borrowed_books(
     let mut users = match search_items(&db, &user).await {
         Ok(users) => users,
         Err(_) => {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::UserNotFound(user.id));
         }
     };

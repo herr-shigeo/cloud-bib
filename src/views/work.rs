@@ -1,17 +1,19 @@
-use crate::db_client::*;
 use crate::error::*;
 use crate::item::atoi;
 use crate::item::RentalSetting;
 use crate::item::{search_item, search_items, update_item};
 use crate::item::{Book, BorrowedBook, User};
 use crate::views::cache::*;
+use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::*;
 use crate::views::transaction::*;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::{debug, error};
+use mongodb::Database;
 use serde::Deserialize;
+use shared_mongodb::{database, ClientHolder};
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
@@ -24,7 +26,7 @@ pub struct FormData {
 pub async fn process(
     session: Session,
     form: web::Form<FormData>,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
     cache: web::Data<Cache>,
     transaction: web::Data<Transaction>,
 ) -> Result<HttpResponse, BibErrorResponse> {
@@ -48,7 +50,7 @@ pub async fn process(
     let mut user = match search_item(&db, &user).await {
         Ok(user) => user,
         Err(_) => {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::UserNotFound(user.id));
         }
     };
@@ -58,7 +60,7 @@ pub async fn process(
     let mut setting = match search_items(&db, &setting).await {
         Ok(setting) => setting,
         Err(e) => {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     };
@@ -96,7 +98,7 @@ pub async fn process(
 }
 
 async fn borrow_book(
-    db: &DbInstance,
+    db: &Database,
     cache: &web::Data<Cache>,
     transaction: &web::Data<Transaction>,
     user: &mut User,
@@ -169,7 +171,7 @@ async fn borrow_book(
 }
 
 async fn unborrow_book(
-    db: &DbInstance,
+    db: &Database,
     cache: &web::Data<Cache>,
     _transaction: &web::Data<Transaction>,
     user: &mut User,

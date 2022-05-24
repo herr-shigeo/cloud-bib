@@ -1,8 +1,8 @@
-use crate::db_client::*;
 use crate::error::BibErrorResponse;
 use crate::item::TransactionItem;
 use crate::item::{search_items, Book, User};
 use crate::views::content_loader::read_file;
+use crate::views::db_helper::get_db;
 use crate::views::session::check_session;
 use crate::Transaction;
 use actix_files::NamedFile;
@@ -12,6 +12,7 @@ use chrono::{TimeZone, Utc};
 use chrono_tz::Europe::Berlin;
 use csv::WriterBuilder;
 use log::error;
+use shared_mongodb::{database, ClientHolder};
 use std::error;
 use std::fs::File;
 use std::io::Write;
@@ -52,7 +53,7 @@ fn write_user_list(users: Vec<User>) -> Result<String, Box<dyn error::Error>> {
 
 pub async fn export_user_list(
     session: Session,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<NamedFile, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data).await?;
@@ -61,7 +62,7 @@ pub async fn export_user_list(
     let users = match search_items(&db, &user).await {
         Ok(users) => users,
         Err(e) => {
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     };
@@ -113,7 +114,7 @@ fn write_book_list(books: Vec<Book>) -> Result<String, Box<dyn error::Error>> {
 
 pub async fn export_book_list(
     session: Session,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<NamedFile, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data).await?;
@@ -123,7 +124,7 @@ pub async fn export_book_list(
         Ok(books) => books,
         Err(e) => {
             error!("{:?}", e);
-            disconnect_db(&data);
+            database::disconnect(&data);
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     };
@@ -166,7 +167,7 @@ fn write_transaction_list(items: Vec<TransactionItem>) -> Result<String, Box<dyn
 
 pub async fn export_history_list(
     session: Session,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<NamedFile, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data).await?;

@@ -1,9 +1,7 @@
-use crate::item::Book;
 use crate::item::*;
-use crate::DbInstance;
-use log::{debug, info};
+use log::debug;
+use mongodb::Database;
 use std::collections::HashMap;
-use std::error;
 use std::sync::Mutex;
 
 #[derive(Clone, Debug)]
@@ -32,7 +30,7 @@ impl Cache {
         }
     }
 
-    pub async fn construct(&self, db: &DbInstance) {
+    pub async fn construct(&self, db: &Database) {
         let mut user = User::default();
         user.id = 0;
         let users = match search_items(db, &user).await {

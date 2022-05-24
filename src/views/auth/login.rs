@@ -1,12 +1,12 @@
-use crate::db_client::*;
 use crate::error::BibErrorResponse;
 use crate::item::{search_items, SystemSetting};
+use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::*;
-use crate::DbClient;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use serde::Deserialize;
+use shared_mongodb::ClientHolder;
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
@@ -18,7 +18,7 @@ pub struct FormData {
 pub async fn login(
     session: Session,
     form: web::Form<FormData>,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db(&data).await?;
 

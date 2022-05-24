@@ -1,14 +1,15 @@
-use crate::db_client::*;
 use crate::error::BibErrorResponse;
 use crate::item::atoi;
 use crate::item::search_items;
 use crate::item::User;
+use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::check_session;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::debug;
 use serde::Deserialize;
+use shared_mongodb::ClientHolder;
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
@@ -22,7 +23,7 @@ pub struct FormData {
 pub async fn search_user(
     session: Session,
     form: web::Query<FormData>,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
     check_session(&session)?;
@@ -40,7 +41,7 @@ pub async fn search_user(
 }
 
 async fn get_user_list(
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
     user: &User,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db(&data).await?;

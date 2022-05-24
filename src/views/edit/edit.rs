@@ -1,15 +1,16 @@
-use crate::db_client::*;
 use crate::error::BibErrorResponse;
 use crate::item::atoi;
 use crate::item::{delete_item, search_item, update_item};
 use crate::item::{Book, User};
 use crate::views::content_loader::read_file;
+use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::check_session;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::debug;
 use serde::Deserialize;
+use shared_mongodb::ClientHolder;
 use std::sync::Mutex;
 
 pub async fn load(_session: Session) -> HttpResponse {
@@ -33,7 +34,7 @@ pub struct Form1Data {
 pub async fn user(
     session: Session,
     form: web::Form<Form1Data>,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
@@ -104,7 +105,7 @@ pub struct Form2Data {
 pub async fn book(
     session: Session,
     form: web::Form<Form2Data>,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 

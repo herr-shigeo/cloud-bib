@@ -1,9 +1,9 @@
 use crate::item::*;
 use crate::item::{Book, User};
-use crate::DbInstance;
 use chrono::{TimeZone, Utc};
 use chrono_tz::Europe::Berlin;
 use log::{debug, info};
+use mongodb::Database;
 use std::error;
 use std::sync::Mutex;
 
@@ -20,7 +20,7 @@ impl Transaction {
         }
     }
 
-    pub async fn search(db: &DbInstance, item: &TransactionItem) -> Vec<TransactionItem> {
+    pub async fn search(db: &Database, item: &TransactionItem) -> Vec<TransactionItem> {
         debug!("{:?}", item);
         let items = match search_items(db, item).await {
             Ok(items) => items,
@@ -33,7 +33,7 @@ impl Transaction {
     }
 
     pub async fn borrow(
-        db: &DbInstance,
+        db: &Database,
         counter: u32,
         user: &User,
         book: &Book,
@@ -54,7 +54,7 @@ impl Transaction {
     }
 
     pub async fn unborrow(
-        db: &DbInstance,
+        db: &Database,
         counter: u32,
         user: &User,
         book: &Book,

@@ -1,11 +1,12 @@
-use crate::db_client::*;
 use crate::error::*;
 use crate::item::{delete_item_all, TransactionItem};
 use crate::views::content_loader::read_file;
+use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::check_session;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
+use shared_mongodb::ClientHolder;
 use std::sync::Mutex;
 
 pub async fn load() -> HttpResponse {
@@ -17,7 +18,7 @@ pub async fn load() -> HttpResponse {
 
 pub async fn clear_status(
     session: Session,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data).await?;
@@ -33,7 +34,7 @@ pub async fn clear_status(
 
 pub async fn clear_history(
     session: Session,
-    _data: web::Data<Mutex<DbClient>>,
+    _data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     //let db = get_db(&data).await?;

@@ -1,15 +1,16 @@
-use crate::db_client::*;
 use crate::error::BibErrorResponse;
 use crate::item::atoi;
 use crate::item::search_items;
 use crate::item::Book;
 use crate::views::cache::*;
+use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::check_any_session;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::debug;
 use serde::{Deserialize, Serialize};
+use shared_mongodb::ClientHolder;
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
@@ -28,7 +29,7 @@ pub struct BookList {
 pub async fn search_book(
     session: Session,
     form: web::Query<FormData>,
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
     cache: web::Data<Cache>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
@@ -53,7 +54,7 @@ pub async fn search_book(
 }
 
 async fn get_book_list(
-    data: web::Data<Mutex<DbClient>>,
+    data: web::Data<Mutex<ClientHolder>>,
     cache: &web::Data<Cache>,
     book: &Book,
 ) -> Result<HttpResponse, BibErrorResponse> {

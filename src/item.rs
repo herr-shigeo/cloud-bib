@@ -1,35 +1,38 @@
-use crate::db_client::*;
 use async_trait::async_trait;
+use bson::Document;
 use chrono::{Duration, TimeZone, Utc};
 use chrono_tz::Europe::Berlin;
+use futures::stream::TryStreamExt;
 use mongodb::bson::doc;
-use mongodb::options::IndexOptions;
+use mongodb::options::*;
+use mongodb::Database;
 use mongodb::{Collection, IndexModel};
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::error;
 use std::io::{Error, ErrorKind};
 
 #[async_trait]
-pub trait Database {
-    async fn insert(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>>;
-    async fn update(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>>;
-    async fn delete(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>>;
-    async fn delete_all(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>>;
+pub trait Entity {
+    async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>>;
+    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>>;
+    async fn delete(&self, db: &Database) -> Result<(), Box<dyn error::Error>>;
+    async fn delete_all(&self, db: &Database) -> Result<(), Box<dyn error::Error>>;
 
-    async fn search(&self, db: &DbInstance) -> Result<Vec<Self>, Box<dyn error::Error>>
+    async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>>
     where
         Self: std::marker::Sized;
 
     fn get_collection_name(&self) -> &str;
 
-    fn get_collection(&self, db: &DbInstance) -> Collection<Self>
+    fn get_collection(&self, db: &Database) -> Collection<Self>
     where
         Self: std::marker::Sized,
     {
-        db.instance.collection::<Self>(self.get_collection_name())
+        db.collection::<Self>(self.get_collection_name())
     }
 
-    async fn create_unique_index(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>>
+    async fn create_unique_index(&self, db: &Database) -> Result<(), Box<dyn error::Error>>
     where
         Self: std::marker::Sized,
         Self: std::marker::Send,
@@ -45,45 +48,33 @@ pub trait Database {
     }
 }
 
-pub async fn insert_item<T: Database>(
-    db: &DbInstance,
-    item: &T,
-) -> Result<(), Box<dyn error::Error>> {
+pub async fn insert_item<T: Entity>(db: &Database, item: &T) -> Result<(), Box<dyn error::Error>> {
     item.insert(db).await
 }
 
-pub async fn update_item<T: Database>(
-    db: &DbInstance,
-    item: &T,
-) -> Result<(), Box<dyn error::Error>> {
+pub async fn update_item<T: Entity>(db: &Database, item: &T) -> Result<(), Box<dyn error::Error>> {
     item.update(db).await
 }
 
-pub async fn delete_item<T: Database>(
-    db: &DbInstance,
-    item: &T,
-) -> Result<(), Box<dyn error::Error>> {
+pub async fn delete_item<T: Entity>(db: &Database, item: &T) -> Result<(), Box<dyn error::Error>> {
     item.delete(db).await
 }
 
-pub async fn delete_item_all<T: Database>(
-    db: &DbInstance,
+pub async fn delete_item_all<T: Entity>(
+    db: &Database,
     item: &T,
 ) -> Result<(), Box<dyn error::Error>> {
     item.delete_all(db).await
 }
 
-pub async fn search_items<T: Database>(
-    db: &DbInstance,
+pub async fn search_items<T: Entity>(
+    db: &Database,
     item: &T,
 ) -> Result<Vec<T>, Box<dyn error::Error>> {
     item.search(db).await
 }
 
-pub async fn search_item<T: Database>(
-    db: &DbInstance,
-    item: &T,
-) -> Result<T, Box<dyn error::Error>> {
+pub async fn search_item<T: Entity>(db: &Database, item: &T) -> Result<T, Box<dyn error::Error>> {
     let mut items = item.search(db).await?;
     if items.len() == 1 {
         Ok(items.pop().unwrap())
@@ -95,7 +86,7 @@ pub async fn search_item<T: Database>(
     }
 }
 
-pub async fn create_unique_index(db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+pub async fn create_unique_index(db: &Database) -> Result<(), Box<dyn error::Error>> {
     let item = User::default();
     item.create_unique_index(db).await?;
     let item = Book::default();
@@ -358,14 +349,14 @@ impl TransactionItem {
 }
 
 #[async_trait]
-impl Database for User {
-    async fn insert(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+impl Entity for User {
+    async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let collection = self.get_collection(db);
         collection.insert_one(self, None).await?;
         Ok(())
     }
 
-    async fn update(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let query = doc! { "id" : self.id };
         let update = bson::to_bson(self).unwrap();
         let update = doc! { "$set" : update };
@@ -373,17 +364,17 @@ impl Database for User {
         collection.update(query, update, true).await
     }
 
-    async fn delete(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let query = doc! { "id" : self.id };
         let collection = self.get_collection(db);
         collection.delete(query).await
     }
 
-    async fn delete_all(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn search(&self, db: &DbInstance) -> Result<Vec<Self>, Box<dyn error::Error>> {
+    async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
         let mut query = doc! { "id": { "$gt": 0 }};
 
         if self.id != 0 {
@@ -406,14 +397,14 @@ impl Database for User {
 }
 
 #[async_trait]
-impl Database for Book {
-    async fn insert(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+impl Entity for Book {
+    async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let collection = self.get_collection(db);
         collection.insert_one(self, None).await?;
         Ok(())
     }
 
-    async fn update(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let query = doc! { "id" : self.id };
         let update = bson::to_bson(self).unwrap();
         let update = doc! { "$set" : update };
@@ -421,17 +412,17 @@ impl Database for Book {
         collection.update(query, update, true).await
     }
 
-    async fn delete(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let query = doc! { "id" : self.id };
         let collection = self.get_collection(db);
         collection.delete(query).await
     }
 
-    async fn delete_all(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn search(&self, db: &DbInstance) -> Result<Vec<Self>, Box<dyn error::Error>> {
+    async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
         let mut query = doc! { "id": { "$gt": 0 }};
 
         if self.id != 0 {
@@ -454,12 +445,12 @@ impl Database for Book {
 }
 
 #[async_trait]
-impl Database for RentalSetting {
-    async fn insert(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+impl Entity for RentalSetting {
+    async fn insert(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn update(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let query = doc! { "id": self.id };
         let update = bson::to_bson(self).unwrap();
         let update = doc! { "$set" : update };
@@ -467,15 +458,15 @@ impl Database for RentalSetting {
         collection.update(query, update, false).await
     }
 
-    async fn delete(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn delete_all(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn search(&self, db: &DbInstance) -> Result<Vec<Self>, Box<dyn error::Error>> {
+    async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
         let query = doc! { "$or" : [{"id": self.id}] };
         let collection = self.get_collection(db);
         collection.search(query).await
@@ -487,12 +478,12 @@ impl Database for RentalSetting {
 }
 
 #[async_trait]
-impl Database for SystemSetting {
-    async fn insert(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+impl Entity for SystemSetting {
+    async fn insert(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn update(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let query = doc! { "id": self.id };
         let update;
         if self.password != "" && self.member_password != "" {
@@ -508,15 +499,15 @@ impl Database for SystemSetting {
         collection.update(query, update, false).await
     }
 
-    async fn delete(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn delete_all(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn search(&self, db: &DbInstance) -> Result<Vec<Self>, Box<dyn error::Error>> {
+    async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
         let query = doc! { "$or" : [{"id": self.id}] };
         let collection = self.get_collection(db);
         collection.search(query).await
@@ -528,12 +519,12 @@ impl Database for SystemSetting {
 }
 
 #[async_trait]
-impl Database for TransactionItem {
-    async fn insert(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+impl Entity for TransactionItem {
+    async fn insert(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn update(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let query = doc! { "id": self.id };
         let update = bson::to_bson(self).unwrap();
         let update = doc! { "$set" : update };
@@ -541,16 +532,16 @@ impl Database for TransactionItem {
         collection.update(query, update, true).await
     }
 
-    async fn delete(&self, _db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
         panic!("Not implemented")
     }
 
-    async fn delete_all(&self, db: &DbInstance) -> Result<(), Box<dyn error::Error>> {
+    async fn delete_all(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let collection = self.get_collection(db);
         collection.delete_all().await
     }
 
-    async fn search(&self, db: &DbInstance) -> Result<Vec<Self>, Box<dyn error::Error>> {
+    async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
         let mut query = doc! { "id": { "$gt": 0 }};
         if self.user_name != "" && self.book_title != "" {
             query = doc! { "$or" : [{"user_id": self.user_id}, {"user_name": {"$regex": &self.user_name}}, {"book_id": &self.book_id}, {"book_title": {"$regex": &self.book_title}}] };
@@ -568,5 +559,70 @@ impl Database for TransactionItem {
 
     fn get_collection_name(&self) -> &str {
         "transactions"
+    }
+}
+
+#[async_trait]
+pub trait HelperCollection<T> {
+    async fn update(
+        &self,
+        query: Document,
+        update: Document,
+        upsert: bool,
+    ) -> Result<(), Box<dyn error::Error>>;
+    async fn delete(&self, query: Document) -> Result<(), Box<dyn error::Error>>;
+    async fn delete_all(&self) -> Result<(), Box<dyn error::Error>>;
+    async fn search(&self, query: Document) -> Result<Vec<T>, Box<dyn error::Error>>;
+}
+
+#[async_trait]
+impl<T> HelperCollection<T> for Collection<T>
+where
+    T: DeserializeOwned + Unpin + Send + Sync + Serialize + std::fmt::Debug,
+{
+    async fn update(
+        &self,
+        query: Document,
+        update: Document,
+        upsert: bool,
+    ) -> Result<(), Box<dyn error::Error>> {
+        let options = FindOneAndUpdateOptions::builder()
+            .upsert(upsert)
+            .return_document(ReturnDocument::After)
+            .build();
+        let result = self.find_one_and_update(query, update, options).await?;
+        Ok(())
+    }
+
+    async fn delete(&self, query: Document) -> Result<(), Box<dyn error::Error>> {
+        let result = self.delete_one(query, None).await?;
+        if result.deleted_count == 1 {
+            return Ok(());
+        } else {
+            panic!("Not implemented")
+        }
+    }
+
+    async fn delete_all(&self) -> Result<(), Box<dyn error::Error>> {
+        let options = DropCollectionOptions::builder().build();
+        self.drop(options).await?;
+        Ok(())
+    }
+
+    async fn search(&self, query: Document) -> Result<Vec<T>, Box<dyn error::Error>> {
+        let find_options = FindOptions::builder().sort(doc! { "id": 1 }).build();
+        let mut items: Vec<T> = vec![];
+        let mut cursor = self.find(query, find_options).await?;
+        while let Some(item) = cursor.try_next().await? {
+            items.push(item);
+        }
+        if items.len() == 0 {
+            Err(Box::new(Error::new(
+                ErrorKind::Other,
+                "Item not found".to_string(),
+            )))
+        } else {
+            Ok(items)
+        }
     }
 }
