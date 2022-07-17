@@ -40,6 +40,7 @@ $(document).ready(function() {
       { "data": "user_name" },
       { "data": "book.book_id" },
       { "data": "book.book_title" },
+      { "data": "book.char" },
       { "data": "book.borrowed_date" },
       { "data": "book.return_deadline" }
     ]
@@ -94,6 +95,7 @@ function processDelayedList(data) {
       { "data": "user_name" },
       { "data": "book.book_id" },
       { "data": "book.book_title" },
+      { "data": "book.char" },
       { "data": "book.borrowed_date" },
       { "data": "book.return_deadline" }
     ]
@@ -241,6 +243,7 @@ function processBookList(data) {
       <th>利用者氏名</th>
       <th>図書ID</th>
       <th>図書タイトル</th>
+      <th>分類マーク</th>
       <th>貸出日</th>
       <th>返却期限</th>
     </tr>
