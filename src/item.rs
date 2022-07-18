@@ -113,29 +113,7 @@ pub struct User {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct UserV2 {
-    pub id: u32,
-    pub name: String,
-    pub kana: String,
-    pub category: String,
-    pub remark: String,
-    pub register_date: String,
-    pub borrowed_count: u32,
-    pub reserved: String,
-    pub borrowed_books: Vec<BorrowedBookV2>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct BorrowedBook {
-    pub book_id: u32,
-    pub book_title: String,
-    pub borrowed_date: String,
-    pub return_deadline: String,
-    pub transaction_id: u32,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct BorrowedBookV2 {
     pub book_id: u32,
     pub book_title: String,
     pub borrowed_date: String,
@@ -231,62 +209,7 @@ impl User {
     }
 }
 
-impl UserV2 {
-    pub fn default() -> Self {
-        let utc = Utc::now().naive_utc();
-        let dt = Berlin.from_utc_datetime(&utc);
-        Self {
-            id: 0,
-            name: String::new(),
-            kana: String::new(),
-            category: String::new(),
-            remark: String::new(),
-            register_date: format!("{}", dt.format("%Y/%m/%d")),
-            borrowed_count: 0,
-            reserved: String::new(),
-            borrowed_books: vec![],
-        }
-    }
-
-    pub fn new(
-        id: &str,
-        name: &str,
-        kana: &str,
-        category: &str,
-        remark: &str,
-        register_date: &str,
-    ) -> Result<Self, Box<dyn error::Error>> {
-        let r = Self {
-            id: atoi(id)?,
-            name: name.to_string(),
-            kana: kana.to_string(),
-            category: category.to_string(),
-            remark: remark.to_string(),
-            register_date: register_date.to_string(),
-            borrowed_count: 0,
-            reserved: String::new(),
-            borrowed_books: vec![],
-        };
-        Ok(r)
-    }
-}
-
 impl BorrowedBook {
-    pub fn new(id: u32, title: &str, borrowing_days: i64, transaction_id: u32) -> Self {
-        let utc = Utc::now().naive_utc();
-        let dt = Berlin.from_utc_datetime(&utc);
-        let deadline = dt + Duration::days(borrowing_days);
-        Self {
-            book_id: id,
-            book_title: title.to_string(),
-            borrowed_date: format!("{}", dt.format("%Y/%m/%d %H:%M")),
-            return_deadline: format!("{}", deadline.format("%Y/%m/%d %H:%M")),
-            transaction_id: transaction_id,
-        }
-    }
-}
-
-impl BorrowedBookV2 {
     pub fn default() -> Self {
         Self {
             book_id: 0,
@@ -446,54 +369,6 @@ impl TransactionItem {
 
 #[async_trait]
 impl Entity for User {
-    async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
-        let collection = self.get_collection(db);
-        collection.insert_one(self, None).await?;
-        Ok(())
-    }
-
-    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
-        let query = doc! { "id" : self.id };
-        let update = bson::to_bson(self).unwrap();
-        let update = doc! { "$set" : update };
-        let collection = self.get_collection(db);
-        collection.update(query, update, true).await
-    }
-
-    async fn delete(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
-        let query = doc! { "id" : self.id };
-        let collection = self.get_collection(db);
-        collection.delete(query).await
-    }
-
-    async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
-        panic!("Not implemented")
-    }
-
-    async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
-        let mut query = doc! { "id": { "$gt": 0 }};
-
-        if self.id != 0 {
-            query = doc! { "id": self.id };
-        } else if self.name != "" {
-            query = doc! { "name": {"$regex": &self.name} };
-        } else if self.kana != "" {
-            query = doc! { "kana": {"$regex": &self.kana} };
-        } else if self.category != "" {
-            query = doc! { "category": {"$regex": &self.category} };
-        }
-
-        let collection = self.get_collection(db);
-        collection.search(query).await
-    }
-
-    fn get_collection_name(&self) -> &str {
-        "users"
-    }
-}
-
-#[async_trait]
-impl Entity for UserV2 {
     async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let collection = self.get_collection(db);
         collection.insert_one(self, None).await?;
