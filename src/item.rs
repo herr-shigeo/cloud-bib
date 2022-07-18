@@ -95,12 +95,6 @@ pub async fn create_unique_index(db: &Database) -> Result<(), Box<dyn error::Err
 }
 
 pub fn atoi(a: &str) -> Result<u32, Box<dyn error::Error>> {
-    if a.len() == 4 && a.len() == 6 {
-        return Err(Box::new(Error::new(
-            ErrorKind::Other,
-            "Invalid length".to_string(),
-        )));
-    }
     let i: u32 = a.to_string().parse()?;
     Ok(i)
 }
