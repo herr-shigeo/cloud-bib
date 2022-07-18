@@ -168,6 +168,7 @@ pub async fn import_user_list(
         }
     };
 
+    let mut users = vec![];
     for i in 0..records.len() {
         let record = &records[i];
         let num_field = record.len();
@@ -182,7 +183,9 @@ pub async fn import_user_list(
             &record[0], &record[1], &record[2], &record[3], &record[4], &record[5],
         )
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
-
+        users.push(user);
+    }
+    for user in users {
         if let Err(e) = insert_item(&db, &user).await {
             database::disconnect(&data);
             return Err(BibErrorResponse::SystemError(e.to_string()));
@@ -217,6 +220,7 @@ pub async fn import_book_list(
         }
     };
 
+    let mut books = vec![];
     for i in 0..records.len() {
         let record = &records[i];
         let num_field = record.len();
@@ -239,7 +243,7 @@ pub async fn import_book_list(
             &record[10], // kana
             &record[11], // register_date
         );
-        let book = match Book::new(
+        let book = Book::new(
             &record[0],  // id
             &record[1],  // title
             &record[10], // kana
@@ -252,14 +256,11 @@ pub async fn import_book_list(
             &record[11], // register_date
             &record[3],  // register_type
             &record[6],  // status
-        ) {
-            Ok(book) => book,
-            Err(e) => {
-                error!("{:?}", e);
-                database::disconnect(&data);
-                return Err(BibErrorResponse::InvalidArgument(e.to_string()));
-            }
-        };
+        )
+        .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+        books.push(book);
+    }
+    for book in books {
         if let Err(e) = insert_item(&db, &book).await {
             error!("{:?}", e);
             database::disconnect(&data);
