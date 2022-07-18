@@ -209,6 +209,7 @@ impl User {
     }
 }
 
+#[allow(dead_code)]
 impl BorrowedBook {
     pub fn default() -> Self {
         Self {
@@ -609,7 +610,7 @@ where
             .upsert(upsert)
             .return_document(ReturnDocument::After)
             .build();
-        let result = self.find_one_and_update(query, update, options).await?;
+        let _ = self.find_one_and_update(query, update, options).await?;
         Ok(())
     }
 

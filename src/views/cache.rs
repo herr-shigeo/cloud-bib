@@ -49,7 +49,7 @@ impl Cache {
     }
 
     pub fn get(&self, book_id: u32) -> Option<BorrowCache> {
-        let mut borrowed_books = self.borrowed_books.lock().unwrap();
+        let borrowed_books = self.borrowed_books.lock().unwrap();
         let ret = borrowed_books.get(&book_id);
         if ret.is_none() {
             return None;

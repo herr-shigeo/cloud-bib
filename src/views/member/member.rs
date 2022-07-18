@@ -91,7 +91,7 @@ pub async fn load_home(session: Session) -> HttpResponse {
         .body(html_data)
 }
 
-pub async fn load_news(session: Session) -> HttpResponse {
+pub async fn load_news(_: Session) -> HttpResponse {
     let html_data = read_file("src/html/member_news.html").unwrap();
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
