@@ -123,6 +123,7 @@ function processBookList(data) {
 
 function processUserUpdate(data) {
   document.getElementById("form_user_update").reset();
+  document.getElementById("user_id_search").focus();
 
   if (handleAuthError(data, '/')) {
     return;
@@ -137,6 +138,7 @@ function processUserUpdate(data) {
 
 function processBookUpdate(data) {
   document.getElementById("form_book_update").reset();
+  document.getElementById("book_id_search").focus();
 
   if (handleAuthError(data, '/')) {
     return;
