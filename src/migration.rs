@@ -63,6 +63,7 @@ async fn main() {
             }
         };
         user2.id = user.id;
+        user2.borrowed_count = user.borrowed_count;
         for book in user.borrowed_books {
             let mut book2 = BorrowedBookV2::default();
             book2.book_id = book.book_id;
