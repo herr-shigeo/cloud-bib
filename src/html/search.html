@@ -84,6 +84,15 @@ function processDelayedList(data) {
 
   var dataSet = data['delayed_list'];
   var datatable = $('#delayed_list_table').DataTable();
+  $.each(dataSet, function(i, d){
+    var dt = d['book'].borrowed_date.split(" ")
+    d['book'].borrowed_date = dt[0] + ' <b style="color:#aaaaaa"><font size="-2">&nbsp;&nbsp&nbsp;&nbsp;&nbsp;' + dt[1] + '</font></b>'
+    var dt = d['book'].return_deadline.split(" ")
+	if (dt[1]) {
+      d['book'].return_deadline = dt[0] + ' <b style="color:#aaaaaa"><font size="-2">&nbsp;&nbsp&nbsp;&nbsp;&nbsp;' + dt[1] + '</font></b>'
+    }
+  });
+
   datatable.clear();
   datatable.destroy();
   $('#delayed_list_table').DataTable({
