@@ -7,6 +7,7 @@ mod edit;
 mod export;
 mod history;
 mod home;
+mod about;
 mod index;
 mod maintain;
 mod member;
@@ -36,6 +37,10 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     .route(
         &base_path.define(String::from("/js/{filename:.*}")),
         web::get().to(index::js_files),
+    )
+    .route(
+        &base_path.define(String::from("/about")),
+        web::get().to(about::load),
     )
     .route(
         &base_path.define(String::from("/home")),
