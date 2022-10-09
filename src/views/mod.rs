@@ -1,4 +1,5 @@
 use actix_web::web;
+mod about;
 mod auth;
 pub mod cache;
 mod content_loader;
@@ -7,7 +8,6 @@ mod edit;
 mod export;
 mod history;
 mod home;
-mod about;
 mod index;
 mod maintain;
 mod member;

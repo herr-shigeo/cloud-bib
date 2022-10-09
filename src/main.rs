@@ -20,11 +20,11 @@ mod views;
 async fn main() -> std::io::Result<()> {
     env_logger::init();
     let port = env::var("PORT").unwrap_or("5000".to_string());
-    let max_transaction_num = env::var("MAX_TRANSACTION_NUM").unwrap_or("100000".to_string());
+    let max_transaction_num = env::var("BIB_MAX_TRANSACTION_NUM").unwrap_or("100000".to_string());
     let max_transaction_num = max_transaction_num.parse::<u32>().unwrap();
 
     let client_uri =
-        env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+        env::var("BIB_MONGODB_URI").expect("You must set the BIB_MONGODB_URI environment var!");
     let mut client_options = match ClientOptions::parse(client_uri).await {
         Ok(client_options) => client_options,
         Err(e) => {
@@ -36,7 +36,7 @@ async fn main() -> std::io::Result<()> {
 
     let client_holder = web::Data::new(Mutex::new(ClientHolder::new(client_options)));
     let db_name =
-        env::var("DATABASE_NAME").expect("You must set the DATABSE_NAME environment var!");
+        env::var("BIB_DATABASE_NAME").expect("You must set the BIB_DATABSE_NAME environment var!");
     let db = database::get(&client_holder.clone(), &db_name)
         .await
         .unwrap();

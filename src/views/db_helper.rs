@@ -9,7 +9,7 @@ use lazy_static::lazy_static;
 
 lazy_static! {
     static ref DB_NAME: String =
-        env::var("DATABASE_NAME").expect("You must set the DATABSE_NAME environment var!");
+        env::var("BIB_DATABASE_NAME").expect("You must set the BIB_DATABSE_NAME environment var!");
 }
 
 pub async fn get_db(data: &web::Data<Mutex<ClientHolder>>) -> Result<Database, BibErrorResponse> {
