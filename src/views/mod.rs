@@ -35,6 +35,10 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
         web::get().to(index::css_files),
     )
     .route(
+        &base_path.define(String::from("/image/{filename:.*}")),
+        web::get().to(index::image_files),
+    )
+    .route(
         &base_path.define(String::from("/js/{filename:.*}")),
         web::get().to(index::js_files),
     )

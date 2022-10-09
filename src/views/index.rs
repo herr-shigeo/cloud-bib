@@ -20,6 +20,15 @@ pub async fn css_files(req: HttpRequest) -> Result<NamedFile> {
     Ok(NamedFile::open(path)?)
 }
 
+pub async fn image_files(req: HttpRequest) -> Result<NamedFile> {
+    let file_name: String = req.match_info().query("filename").parse()?;
+    let mut path = PathBuf::from("src/html/image");
+    path.push(file_name);
+
+    debug!("{:?}", path);
+    Ok(NamedFile::open(path)?)
+}
+
 pub async fn js_files(req: HttpRequest) -> Result<NamedFile> {
     let file_name: String = req.match_info().query("filename").parse()?;
     let mut path = PathBuf::from("src/html/js");
