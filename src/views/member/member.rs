@@ -11,7 +11,15 @@ use actix_session::*;
 use actix_web::{web, HttpResponse, Result};
 use serde::Deserialize;
 use shared_mongodb::{database, ClientHolder};
+use std::env;
 use std::sync::Mutex;
+
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref DB_COMMON_NAME: String =
+        env::var("BIB_DB_MEMBER_NAME").unwrap_or("unknown".to_string());
+}
 
 #[derive(Deserialize, Debug)]
 pub struct FormData1 {
@@ -38,7 +46,7 @@ pub async fn login(
     form: web::Form<FormData1>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db_with_name(&data, &"tosho-system".to_string()).await?;
+    let db = get_db_with_name(&data, &DB_COMMON_NAME).await?;
 
     let user = User::new(&form.user_id, "", "", "", "", "")
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
