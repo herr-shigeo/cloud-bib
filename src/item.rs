@@ -156,6 +156,7 @@ pub struct SystemSetting {
     pub uname: String,
     pub password: String,
     pub member_password: String,
+    pub dbname: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -329,6 +330,7 @@ impl SystemSetting {
             uname: String::new(),
             password: String::new(),
             member_password: String::new(),
+            dbname: String::new(),
         }
     }
 
@@ -338,6 +340,7 @@ impl SystemSetting {
             uname: String::new(),
             password: password.to_string(),
             member_password: member_password.to_string(),
+            dbname: String::new(),
         };
         Ok(r)
     }
