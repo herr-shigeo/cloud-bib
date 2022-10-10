@@ -168,6 +168,8 @@ pub async fn import_user_list(
         }
     };
 
+    // Check the number of items(TODO)
+
     let mut users = vec![];
     for i in 0..records.len() {
         let record = &records[i];
@@ -219,6 +221,8 @@ pub async fn import_book_list(
             return Err(BibErrorResponse::SystemError(e.to_string()));
         }
     };
+
+    // Check the number of items(TODO)
 
     let mut books = vec![];
     for i in 0..records.len() {

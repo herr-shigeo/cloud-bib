@@ -53,15 +53,18 @@ pub async fn user(
             user.register_date = form.user_register_date.clone();
             user
         }
-        Err(_) => User::new(
-            &form.user_id,
-            &form.user_name,
-            &form.user_kana,
-            &form.user_category,
-            &form.user_remark,
-            &form.user_register_date,
-        )
-        .unwrap(),
+        Err(_) => {
+            // Check the number of items(TODO)
+            User::new(
+                &form.user_id,
+                &form.user_name,
+                &form.user_kana,
+                &form.user_category,
+                &form.user_remark,
+                &form.user_register_date,
+            )
+            .unwrap()
+        }
     };
 
     let operation: &str = &form.operation;
@@ -130,21 +133,24 @@ pub async fn book(
             book.status = form.book_status.clone();
             book
         }
-        Err(_) => Book::new(
-            &form.book_id,
-            &form.book_title,
-            &form.book_kana,
-            &form.book_series,
-            &form.book_author,
-            &form.book_publisher,
-            &form.book_char,
-            &form.book_remark,
-            &form.book_recommendation,
-            &form.book_register_date,
-            &form.book_register_type,
-            &form.book_status,
-        )
-        .unwrap(),
+        Err(_) => {
+            // Check the number of items(TODO)
+            Book::new(
+                &form.book_id,
+                &form.book_title,
+                &form.book_kana,
+                &form.book_series,
+                &form.book_author,
+                &form.book_publisher,
+                &form.book_char,
+                &form.book_remark,
+                &form.book_recommendation,
+                &form.book_register_date,
+                &form.book_register_type,
+                &form.book_status,
+            )
+            .unwrap()
+        }
     };
 
     let operation: &str = &form.operation;
