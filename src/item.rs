@@ -114,7 +114,7 @@ pub struct User {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SystemUser {
-    pub name: String,
+    pub uname: String,
     pub password: String,
     pub dbname: String,
 }
@@ -220,7 +220,7 @@ impl User {
 impl SystemUser {
     pub fn default() -> Self {
         Self {
-            name: String::new(),
+            uname: String::new(),
             password: String::new(),
             dbname: String::new(),
         }
@@ -443,7 +443,7 @@ impl Entity for SystemUser {
     }
 
     async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
-        let query = doc! { "name" : &self.name };
+        let query = doc! { "uname" : &self.uname };
         let update = bson::to_bson(self).unwrap();
         let update = doc! { "$set" : update };
         let collection = self.get_collection(db);
@@ -459,7 +459,7 @@ impl Entity for SystemUser {
     }
 
     async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
-        let query = doc! { "name": &self.name};
+        let query = doc! { "uname": &self.uname};
         let collection = self.get_collection(db);
         collection.search(query).await
     }

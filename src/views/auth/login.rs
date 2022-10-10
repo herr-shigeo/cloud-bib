@@ -1,5 +1,5 @@
 use crate::error::BibErrorResponse;
-use crate::item::{search_items, SystemSetting};
+use crate::item::{search_items, SystemUser};
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::*;
@@ -22,19 +22,19 @@ pub async fn login(
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db(&data, None).await?;
 
-    let mut setting = SystemSetting::default();
-    setting.id = 1;
-    let mut setting = match search_items(&db, &setting).await {
-        Ok(setting) => setting,
+    let mut system_user = SystemUser::default();
+    system_user.uname = form.uname.clone();
+    let mut system_user = match search_items(&db, &system_user).await {
+        Ok(system_user) => system_user,
         Err(e) => {
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     };
 
     let mut passed = false;
-    if setting.len() == 1 {
-        let setting = setting.pop().unwrap();
-        if setting.uname == form.uname && setting.password == form.password {
+    if system_user.len() == 1 {
+        let system_user = system_user.pop().unwrap();
+        if system_user.password == form.password {
             passed = true;
         }
     }
