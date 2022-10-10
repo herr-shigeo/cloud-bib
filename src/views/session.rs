@@ -16,11 +16,15 @@ pub fn check_or_create_session(session: &Session, dbname: &String) -> Result<(),
 pub fn check_or_create_member_session(
     session: &Session,
     user_id: u32,
+    dbname: &String
 ) -> Result<(), BibErrorResponse> {
     if check_member_session(session).is_err() {
         info!("New member session");
         session
             .set("user_id", user_id)
+            .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+        session
+            .set("dbname", dbname)
             .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
     }
     Ok(())
@@ -39,6 +43,7 @@ pub fn check_session(session: &Session) -> Result<(), BibErrorResponse> {
 }
 
 pub fn check_member_session(session: &Session) -> Result<u32, BibErrorResponse> {
+    check_session(session)?;
     if let Some(user_id) = session
         .get::<u32>("user_id")
         .map_err(|_| BibErrorResponse::NotAuthorized)?

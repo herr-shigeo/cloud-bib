@@ -68,13 +68,12 @@ pub async fn login(
         let setting = setting.pop().unwrap();
         if setting.member_password == form.member_password {
             passed = true;
+            check_or_create_member_session(&session, user.id, &setting.dbname)?;
         }
     }
     if passed == false {
         return Err(BibErrorResponse::LoginFailed);
     }
-
-    check_or_create_member_session(&session, user.id)?;
 
     let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
