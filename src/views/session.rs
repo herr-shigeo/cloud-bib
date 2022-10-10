@@ -16,7 +16,7 @@ pub fn check_or_create_session(session: &Session, dbname: &String) -> Result<(),
 pub fn check_or_create_member_session(
     session: &Session,
     user_id: u32,
-    dbname: &String
+    dbname: &String,
 ) -> Result<(), BibErrorResponse> {
     if check_member_session(session).is_err() {
         info!("New member session");

@@ -56,7 +56,7 @@ pub async fn export_user_list(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<NamedFile, BibErrorResponse> {
     check_session(&session)?;
-    let db = get_db(&data, Some(&session)).await?;
+    let db = get_db(&data, &session).await?;
 
     let user = User::default();
     let users = match search_items(&db, &user).await {
@@ -117,7 +117,7 @@ pub async fn export_book_list(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<NamedFile, BibErrorResponse> {
     check_session(&session)?;
-    let db = get_db(&data, Some(&session)).await?;
+    let db = get_db(&data, &session).await?;
 
     let book = Book::default();
     let books = match search_items(&db, &book).await {
@@ -170,7 +170,7 @@ pub async fn export_history_list(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<NamedFile, BibErrorResponse> {
     check_session(&session)?;
-    let db = get_db(&data, Some(&session)).await?;
+    let db = get_db(&data, &session).await?;
 
     let item = TransactionItem::default();
     let transaction_items = Transaction::search(&db, &item).await;

@@ -4,6 +4,7 @@ use crate::item::SystemSetting;
 use crate::item::User;
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db;
+use crate::views::db_helper::get_db_with_name;
 use crate::views::reply::Reply;
 use crate::views::session::*;
 use actix_session::*;
@@ -37,7 +38,7 @@ pub async fn login(
     form: web::Form<FormData1>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db(&data, Some(&session)).await?;
+    let db = get_db_with_name(&data, &"tosho-system".to_string()).await?;
 
     let user = User::new(&form.user_id, "", "", "", "", "")
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
@@ -111,7 +112,7 @@ pub async fn borrowed_books(
     let user_id = check_member_session(&session)?;
     let mut reply = Reply::default();
 
-    let db = get_db(&data, Some(&session)).await?;
+    let db = get_db(&data, &session).await?;
 
     let mut user = User::default();
     user.id = user_id;

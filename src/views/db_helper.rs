@@ -13,25 +13,26 @@ lazy_static! {
 
 pub async fn get_db(
     data: &web::Data<Mutex<ClientHolder>>,
-    session: Option<&Session>,
+    session: &Session,
 ) -> Result<Database, BibErrorResponse> {
-    let database_name: String = match session {
-        Some(session) => {
-            if let Some(dbname) = session
-            .get::<String>("dbname")
-            .map_err(|_| BibErrorResponse::NotAuthorized)?
-            {
-                dbname.clone()
-            } else {
-                return Err(BibErrorResponse::NotAuthorized);
-            }
-        }
-        None => DB_SYSTEM_USERS.to_string(),
-    };
-    let db = database::get(data, &database_name)
+    if let Some(dbname) = session
+        .get::<String>("dbname")
+        .map_err(|_| BibErrorResponse::NotAuthorized)?
+    {
+        let db = database::get(data, &dbname)
+            .await
+            .map_err(|e| BibErrorResponse::DbConnectionError(e.to_string()))?;
+        return Ok(db);
+    }
+    return Err(BibErrorResponse::NotAuthorized);
+}
+
+pub async fn get_db_with_name(
+    data: &web::Data<Mutex<ClientHolder>>,
+    dbname: &String,
+) -> Result<Database, BibErrorResponse> {
+    let db = database::get(data, dbname)
         .await
         .map_err(|e| BibErrorResponse::DbConnectionError(e.to_string()))?;
     Ok(db)
 }
-
-

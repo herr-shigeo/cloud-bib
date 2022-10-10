@@ -59,7 +59,7 @@ async fn get_book_list(
     cache: &web::Data<Cache>,
     book: &Book,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db(&data, Some(session)).await?;
+    let db = get_db(&data, session).await?;
 
     let mut books = match search_items(&db, book).await {
         Ok(books) => books,

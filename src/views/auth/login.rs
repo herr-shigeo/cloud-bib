@@ -1,6 +1,6 @@
 use crate::error::BibErrorResponse;
 use crate::item::{search_items, SystemUser};
-use crate::views::db_helper::get_db;
+use crate::views::db_helper::{get_db, get_db_with_name};
 use crate::views::reply::Reply;
 use crate::views::session::*;
 use actix_session::Session;
@@ -20,7 +20,7 @@ pub async fn login(
     form: web::Form<FormData>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db(&data, None).await?;
+    let db = get_db_with_name(&data, &"common".to_string()).await?;
 
     let mut system_user = SystemUser::default();
     system_user.uname = form.uname.clone();

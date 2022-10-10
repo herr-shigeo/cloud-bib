@@ -45,7 +45,7 @@ async fn get_user_list(
     user: &User,
     session: &Session,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db(&data, Some(session)).await?;
+    let db = get_db(&data, session).await?;
 
     let mut users = match search_items(&db, user).await {
         Ok(users) => users,

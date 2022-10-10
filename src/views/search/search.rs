@@ -34,7 +34,7 @@ pub async fn search_delayed_list(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
-    let db = get_db(&data, Some(&session)).await?;
+    let db = get_db(&data, &session).await?;
 
     let user = User::default();
     let users = match search_items(&db, &user).await {

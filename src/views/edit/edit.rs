@@ -39,7 +39,7 @@ pub async fn user(
     debug!("{:?}", form);
 
     check_session(&session)?;
-    let db = get_db(&data, Some(&session)).await?;
+    let db = get_db(&data, &session).await?;
 
     // Read the User from DB first
     let mut user = User::default();
@@ -113,7 +113,7 @@ pub async fn book(
     debug!("{:?}", form);
 
     check_session(&session)?;
-    let db = get_db(&data, Some(&session)).await?;
+    let db = get_db(&data, &session).await?;
 
     // Read the Book from DB first
     let mut book = Book::default();
