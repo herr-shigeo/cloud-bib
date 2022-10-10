@@ -36,13 +36,12 @@ pub async fn login(
         let system_user = system_user.pop().unwrap();
         if system_user.password == form.password {
             passed = true;
+            check_or_create_session(&session, &system_user.dbname)?;
         }
     }
     if passed == false {
         return Err(BibErrorResponse::LoginFailed);
     }
-
-    check_or_create_session(&session)?;
 
     let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))

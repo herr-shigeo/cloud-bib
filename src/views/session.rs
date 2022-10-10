@@ -3,11 +3,11 @@ use actix_session::Session;
 use actix_web::Result;
 use log::{debug, info};
 
-pub fn check_or_create_session(session: &Session) -> Result<(), BibErrorResponse> {
+pub fn check_or_create_session(session: &Session, dbname: &String) -> Result<(), BibErrorResponse> {
     if check_session(session).is_err() {
         info!("New session");
         session
-            .set("counter", 1)
+            .set("dbname", dbname)
             .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
     }
     Ok(())
@@ -27,14 +27,11 @@ pub fn check_or_create_member_session(
 }
 
 pub fn check_session(session: &Session) -> Result<(), BibErrorResponse> {
-    if let Some(count) = session
-        .get::<i32>("counter")
+    if let Some(dbname) = session
+        .get::<String>("dbname")
         .map_err(|_| BibErrorResponse::NotAuthorized)?
     {
-        session
-            .set("counter", count + 1)
-            .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
-        debug!("SESSION count: {}", count + 1);
+        debug!("SESSION: dbname = {}", dbname);
         Ok(())
     } else {
         Err(BibErrorResponse::NotAuthorized)
