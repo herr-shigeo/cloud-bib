@@ -113,6 +113,13 @@ pub struct User {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct SystemUser {
+    pub name: String,
+    pub password: String,
+    pub dbname: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct BorrowedBook {
     pub book_id: u32,
     pub book_title: String,
@@ -207,6 +214,16 @@ impl User {
             borrowed_books: vec![],
         };
         Ok(r)
+    }
+}
+
+impl SystemUser {
+    pub fn default() -> Self {
+        Self {
+            name: String::new(),
+            password: String::new(),
+            dbname: String::new(),
+        }
     }
 }
 
@@ -416,6 +433,39 @@ impl Entity for User {
 
     fn get_collection_name(&self) -> &str {
         "users2"
+    }
+}
+
+#[async_trait]
+impl Entity for SystemUser {
+    async fn insert(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
+        panic!("Not implemented")
+    }
+
+    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let query = doc! { "name" : &self.name };
+        let update = bson::to_bson(self).unwrap();
+        let update = doc! { "$set" : update };
+        let collection = self.get_collection(db);
+        collection.update(query, update, false).await
+    }
+
+    async fn delete(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
+        panic!("Not implemented")
+    }
+
+    async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
+        panic!("Not implemented")
+    }
+
+    async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
+        let query = doc! { "name": &self.name};
+        let collection = self.get_collection(db);
+        collection.search(query).await
+    }
+
+    fn get_collection_name(&self) -> &str {
+        "system-users"
     }
 }
 
