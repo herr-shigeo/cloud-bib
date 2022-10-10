@@ -36,7 +36,8 @@ impl Cache {
         let users = match search_items(db, &user).await {
             Ok(users) => users,
             Err(_) => {
-                panic!("failed to search users");
+                debug!("No users created yet");
+                return;
             }
         };
 
