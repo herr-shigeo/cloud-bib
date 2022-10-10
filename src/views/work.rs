@@ -33,7 +33,7 @@ pub async fn process(
     debug!("{:?}", form);
 
     check_session(&session)?;
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let mut user = User::default();
     if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {

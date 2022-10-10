@@ -50,15 +50,16 @@ pub async fn search_book(
     book.title = form.title.clone();
     book.kana = form.kana.clone();
     book.author = form.author.clone();
-    get_book_list(data, &cache, &book).await
+    get_book_list(&session, data, &cache, &book).await
 }
 
 async fn get_book_list(
+    session: &Session,
     data: web::Data<Mutex<ClientHolder>>,
     cache: &web::Data<Cache>,
     book: &Book,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(session)).await?;
 
     let mut books = match search_items(&db, book).await {
         Ok(books) => books,

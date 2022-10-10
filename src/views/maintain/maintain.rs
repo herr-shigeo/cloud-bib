@@ -21,7 +21,7 @@ pub async fn clear_status(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let item = TransactionItem::default();
     delete_item_all(&db, &item)

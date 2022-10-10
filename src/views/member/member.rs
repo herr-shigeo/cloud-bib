@@ -37,7 +37,7 @@ pub async fn login(
     form: web::Form<FormData1>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let user = User::new(&form.user_id, "", "", "", "", "")
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
@@ -112,7 +112,7 @@ pub async fn borrowed_books(
     let user_id = check_member_session(&session)?;
     let mut reply = Reply::default();
 
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let mut user = User::default();
     user.id = user_id;

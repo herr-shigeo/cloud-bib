@@ -20,7 +20,7 @@ pub async fn login(
     form: web::Form<FormData>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db(&data).await?;
+    let db = get_db(&data, None).await?;
 
     let mut setting = SystemSetting::default();
     setting.id = 1;

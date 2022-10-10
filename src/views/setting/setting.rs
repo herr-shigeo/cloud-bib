@@ -46,7 +46,7 @@ pub async fn update_rental_setting(
     debug!("{:?}", form);
 
     check_session(&session)?;
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let mut setting = match RentalSetting::new(&form.num_books, &form.num_days) {
         Ok(setting) => setting,
@@ -73,7 +73,7 @@ pub async fn get_rental_setting(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let mut setting = RentalSetting::default();
     setting.id = 1;
@@ -105,7 +105,7 @@ pub async fn update_system_setting(
     debug!("{:?}", form);
 
     check_session(&session)?;
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let mut setting = match SystemSetting::new(&form.password, &form.member_password) {
         Ok(setting) => setting,
@@ -152,7 +152,7 @@ pub async fn import_user_list(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let file_path = match save_file(payload).await {
         Ok(file_path) => file_path,
@@ -204,7 +204,7 @@ pub async fn import_book_list(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let file_path = match save_file(payload).await {
         Ok(file_path) => file_path,

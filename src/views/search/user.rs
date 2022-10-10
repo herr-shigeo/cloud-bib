@@ -37,14 +37,15 @@ pub async fn search_user(
     user.name = form.name.clone();
     user.kana = form.kana.clone();
     user.category = form.category.clone();
-    get_user_list(data, &user).await
+    get_user_list(data, &user, &session).await
 }
 
 async fn get_user_list(
     data: web::Data<Mutex<ClientHolder>>,
     user: &User,
+    session: &Session,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(session)).await?;
 
     let mut users = match search_items(&db, user).await {
         Ok(users) => users,

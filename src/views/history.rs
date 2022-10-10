@@ -36,7 +36,7 @@ pub async fn search(
     debug!("{:?}", form);
 
     check_session(&session)?;
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let mut user_id = 0;
     if form.user_id != "" {
@@ -63,7 +63,7 @@ pub async fn show_member(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let user_id = check_member_session(&session)?;
-    let db = get_db(&data).await?;
+    let db = get_db(&data, Some(&session)).await?;
 
     let mut item = TransactionItem::default();
     item.user_id = user_id;
