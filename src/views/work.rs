@@ -1,5 +1,6 @@
 use crate::error::*;
 use crate::item::atoi;
+use crate::item::RentalSetting;
 use crate::item::{search_item, search_items, update_item};
 use crate::item::{Book, BorrowedBook, User};
 use crate::views::cache::*;
@@ -7,7 +8,6 @@ use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::*;
 use crate::views::transaction::*;
-use crate::views::utils::get_rental_setting;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::{debug, error};
@@ -70,12 +70,20 @@ pub async fn process(
         }
     };
 
-    let setting = get_rental_setting(&db).await;
-    if setting.is_err() {
-        database::disconnect(&data);
-        return Err(BibErrorResponse::DataNotFound("RentalSetting".to_string()));
+    let mut setting = RentalSetting::default();
+    setting.id = 1;
+    let mut setting = match search_items(&db, &setting).await {
+        Ok(setting) => setting,
+        Err(e) => {
+            database::disconnect(&data);
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    };
+
+    if setting.len() != 1 {
+        return Err(BibErrorResponse::DataDuplicated);
     }
-    let setting = setting.unwrap();
+    let setting = setting.pop().unwrap();
 
     if form.borrowed_book_id != "" {
         borrow_book(

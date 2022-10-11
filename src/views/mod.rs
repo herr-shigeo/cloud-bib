@@ -18,7 +18,6 @@ mod session;
 mod setting;
 pub mod transaction;
 mod user;
-mod utils;
 mod work;
 
 use crate::views::path::Path;
