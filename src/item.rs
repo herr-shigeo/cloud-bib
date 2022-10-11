@@ -155,6 +155,9 @@ pub struct RentalSetting {
     pub id: u32,
     pub num_books: u32,
     pub num_days: u32,
+    pub max_num_transactions: u32,
+    pub max_registered_users: u32,
+    pub max_registered_books: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -327,6 +330,9 @@ impl RentalSetting {
             id: 0,
             num_books: 0,
             num_days: 0,
+            max_num_transactions: 0,
+            max_registered_users: 0,
+            max_registered_books: 0,
         }
     }
 
@@ -335,6 +341,9 @@ impl RentalSetting {
             id: 0,
             num_books: atoi(num_books)?,
             num_days: atoi(num_days)?,
+            max_num_transactions: 0,
+            max_registered_users: 0,
+            max_registered_books: 0,
         };
         Ok(r)
     }
@@ -525,7 +534,7 @@ impl Entity for RentalSetting {
 
     async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
         let query = doc! { "id": self.id };
-        let update = bson::to_bson(self).unwrap();
+        let update = doc! { "num_books" : self.num_books, "num_days": self.num_days };
         let update = doc! { "$set" : update };
         let collection = self.get_collection(db);
         collection.update(query, update, false).await

@@ -35,8 +35,8 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    let db_names =
-        env::var("BIB_DB_SYSTEM_NAME").expect("You must set the BIB_DB_SYSTEM_NAME environment var!");
+    let db_names = env::var("BIB_DB_SYSTEM_NAME")
+        .expect("You must set the BIB_DB_SYSTEM_NAME environment var!");
     let db_names_vec = db_names.split(" ").collect::<Vec<&str>>();
 
     // Set up the DB client holder

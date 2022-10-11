@@ -13,8 +13,8 @@ use std::sync::Mutex;
 use lazy_static::lazy_static;
 
 lazy_static! {
-    static ref DB_COMMON_NAME: String = env::var("BIB_DB_NAME")
-        .expect("You must set the BIB_DB_NAME environment var!");
+    static ref DB_COMMON_NAME: String =
+        env::var("BIB_DB_NAME").expect("You must set the BIB_DB_NAME environment var!");
 }
 
 #[derive(Deserialize, Debug)]
