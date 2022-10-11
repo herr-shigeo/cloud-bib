@@ -52,6 +52,8 @@ async fn main() -> std::io::Result<()> {
     // Configure each DB
     let mut transaction_map: HashMap<String, Transaction> = HashMap::new();
     let mut cache_map: HashMap<String, Cache> = HashMap::new();
+    let mut setting_map: HashMap<String, SystemSetting> = HashMap::new();
+
     for db_name in db_names_vec {
         let db = database::get(&client_holder.clone(), db_name)
             .await
@@ -66,6 +68,8 @@ async fn main() -> std::io::Result<()> {
         setting.id = 1;
         let setting = search_items(&db, &setting).await;
         let setting = setting.unwrap().pop().unwrap();
+        let max_num_transactions = setting.max_num_transactions;
+        setting_map.insert(db_name.to_string(), setting);
 
         // Create a Transaction
         let mut last_counter = 0;
@@ -77,9 +81,9 @@ async fn main() -> std::io::Result<()> {
         }
         info!(
             "last_counter/max_num_transactions = {}/{}",
-            last_counter, setting.max_num_transactions
+            last_counter, max_num_transactions
         );
-        let transaction = Transaction::new(setting.max_num_transactions, last_counter);
+        let transaction = Transaction::new(max_num_transactions, last_counter);
         transaction_map.insert(db_name.to_string(), transaction);
 
         // Create a Cache
@@ -89,6 +93,7 @@ async fn main() -> std::io::Result<()> {
     }
     let transaction_map = web::Data::new(transaction_map);
     let cache_map = web::Data::new(cache_map);
+    let setting_map = web::Data::new(setting_map);
 
     HttpServer::new(move || {
         let app = App::new()
@@ -96,6 +101,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(CookieSession::signed(&data).secure(true))
             .app_data(transaction_map.clone())
             .app_data(cache_map.clone())
+            .app_data(setting_map.clone())
             .app_data(client_holder.clone());
         return app;
     })

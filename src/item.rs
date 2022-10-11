@@ -157,7 +157,7 @@ pub struct RentalSetting {
     pub num_days: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SystemSetting {
     pub id: u32,
     pub member_password: String,
@@ -328,7 +328,6 @@ impl RentalSetting {
             id: 0,
             num_books: 0,
             num_days: 0,
-
         }
     }
 

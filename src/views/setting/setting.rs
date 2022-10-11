@@ -1,5 +1,5 @@
 use crate::error::*;
-use crate::item::{insert_item, search_items, update_item, Book, User};
+use crate::item::{insert_item, search_items, update_item, Book, SystemSetting, User};
 use crate::item::{RentalSetting, SystemUser};
 use crate::views::content_loader::read_csv;
 use crate::views::content_loader::read_file;
@@ -12,6 +12,7 @@ use futures::{StreamExt, TryStreamExt};
 use log::{debug, error, info};
 use serde::Deserialize;
 use shared_mongodb::{database, ClientHolder};
+use std::collections::HashMap;
 use std::io::Write;
 use std::sync::Mutex;
 extern crate sanitize_filename;
@@ -150,6 +151,7 @@ pub async fn import_user_list(
     session: Session,
     payload: Multipart,
     data: web::Data<Mutex<ClientHolder>>,
+    _setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
@@ -202,6 +204,7 @@ pub async fn import_book_list(
     session: Session,
     payload: Multipart,
     data: web::Data<Mutex<ClientHolder>>,
+    _setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data, &session).await?;

@@ -1,5 +1,5 @@
 use crate::error::BibErrorResponse;
-use crate::item::atoi;
+use crate::item::{atoi, SystemSetting};
 use crate::item::{delete_item, search_item, update_item};
 use crate::item::{Book, User};
 use crate::views::content_loader::read_file;
@@ -11,6 +11,7 @@ use actix_web::{web, HttpResponse, Result};
 use log::debug;
 use serde::Deserialize;
 use shared_mongodb::ClientHolder;
+use std::collections::HashMap;
 use std::sync::Mutex;
 
 pub async fn load(_session: Session) -> HttpResponse {
@@ -35,6 +36,7 @@ pub async fn user(
     session: Session,
     form: web::Form<Form1Data>,
     data: web::Data<Mutex<ClientHolder>>,
+    _setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
