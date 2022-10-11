@@ -6,11 +6,13 @@ use crate::views::cache::*;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::check_any_session;
+use crate::views::session::get_string_value;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::debug;
 use serde::{Deserialize, Serialize};
 use shared_mongodb::ClientHolder;
+use std::collections::HashMap;
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
@@ -30,11 +32,18 @@ pub async fn search_book(
     session: Session,
     form: web::Query<FormData>,
     data: web::Data<Mutex<ClientHolder>>,
-    cache: web::Data<Cache>,
+    cache_map: web::Data<HashMap<String, Cache>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
     check_any_session(&session)?;
+
+    let dbname = get_string_value(&session, "dbname")?;
+    let cache = cache_map.get(&dbname);
+    if cache.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let cache = cache.unwrap();
 
     let mut book = Book::default();
     if form.id == "" {
@@ -56,7 +65,7 @@ pub async fn search_book(
 async fn get_book_list(
     session: &Session,
     data: web::Data<Mutex<ClientHolder>>,
-    cache: &web::Data<Cache>,
+    cache: &Cache,
     book: &Book,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db(&data, session).await?;

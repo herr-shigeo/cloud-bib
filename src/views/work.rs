@@ -3,6 +3,7 @@ use crate::item::atoi;
 use crate::item::RentalSetting;
 use crate::item::{search_item, search_items, update_item};
 use crate::item::{Book, BorrowedBook, User};
+use crate::views::cache;
 use crate::views::cache::*;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
@@ -14,6 +15,7 @@ use log::{debug, error};
 use mongodb::Database;
 use serde::Deserialize;
 use shared_mongodb::{database, ClientHolder};
+use std::collections::HashMap;
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
@@ -27,13 +29,20 @@ pub async fn process(
     session: Session,
     form: web::Form<FormData>,
     data: web::Data<Mutex<ClientHolder>>,
-    cache: web::Data<Cache>,
+    cache_map: web::Data<HashMap<String, Cache>>,
     transaction: web::Data<Transaction>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
+
+    let dbname = get_string_value(&session, "dbname")?;
+    let cache = cache_map.get(&dbname);
+    if cache.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let cache = cache.unwrap();
 
     let mut user = User::default();
     if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {
@@ -99,7 +108,7 @@ pub async fn process(
 
 async fn borrow_book(
     db: &Database,
-    cache: &web::Data<Cache>,
+    cache: &Cache,
     transaction: &web::Data<Transaction>,
     user: &mut User,
     book_id: &str,
@@ -178,7 +187,7 @@ async fn borrow_book(
 
 async fn unborrow_book(
     db: &Database,
-    cache: &web::Data<Cache>,
+    cache: &Cache,
     _transaction: &web::Data<Transaction>,
     user: &mut User,
     book_id: &str,

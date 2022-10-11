@@ -31,28 +31,13 @@ pub fn check_or_create_member_session(
 }
 
 pub fn check_session(session: &Session) -> Result<(), BibErrorResponse> {
-    if let Some(dbname) = session
-        .get::<String>("dbname")
-        .map_err(|_| BibErrorResponse::NotAuthorized)?
-    {
-        debug!("SESSION: dbname = {}", dbname);
-        Ok(())
-    } else {
-        Err(BibErrorResponse::NotAuthorized)
-    }
+    get_string_value(session, "dbname")?;
+    Ok(())
 }
 
 pub fn check_member_session(session: &Session) -> Result<u32, BibErrorResponse> {
     check_session(session)?;
-    if let Some(user_id) = session
-        .get::<u32>("user_id")
-        .map_err(|_| BibErrorResponse::NotAuthorized)?
-    {
-        debug!("SESSION user_id: {}", user_id);
-        Ok(user_id)
-    } else {
-        Err(BibErrorResponse::NotAuthorized)
-    }
+    get_int_value(session, "user_id")
 }
 
 pub fn check_any_session(session: &Session) -> Result<(), BibErrorResponse> {
@@ -60,4 +45,28 @@ pub fn check_any_session(session: &Session) -> Result<(), BibErrorResponse> {
         return Ok(());
     }
     check_session(session)
+}
+
+pub fn get_string_value(session: &Session, key: &str) -> Result<String, BibErrorResponse> {
+    if let Some(value) = session
+        .get::<String>(key)
+        .map_err(|_| BibErrorResponse::NotAuthorized)?
+    {
+        debug!("SESSION: key/value = {}/{}", key, value);
+        Ok(value)
+    } else {
+        Err(BibErrorResponse::NotAuthorized)
+    }
+}
+
+pub fn get_int_value(session: &Session, key: &str) -> Result<u32, BibErrorResponse> {
+    if let Some(value) = session
+        .get::<u32>(key)
+        .map_err(|_| BibErrorResponse::NotAuthorized)?
+    {
+        debug!("SESSION: key/value = {}/{}", key, value);
+        Ok(value)
+    } else {
+        Err(BibErrorResponse::NotAuthorized)
+    }
 }
