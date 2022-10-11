@@ -3,7 +3,6 @@ use crate::item::atoi;
 use crate::item::RentalSetting;
 use crate::item::{search_item, search_items, update_item};
 use crate::item::{Book, BorrowedBook, User};
-use crate::views::cache;
 use crate::views::cache::*;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
@@ -30,7 +29,7 @@ pub async fn process(
     form: web::Form<FormData>,
     data: web::Data<Mutex<ClientHolder>>,
     cache_map: web::Data<HashMap<String, Cache>>,
-    transaction: web::Data<Transaction>,
+    transaction_map: web::Data<HashMap<String, Transaction>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
@@ -38,11 +37,18 @@ pub async fn process(
     let db = get_db(&data, &session).await?;
 
     let dbname = get_string_value(&session, "dbname")?;
+
     let cache = cache_map.get(&dbname);
     if cache.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
     let cache = cache.unwrap();
+
+    let transaction = transaction_map.get(&dbname);
+    if transaction.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let transaction = transaction.unwrap();
 
     let mut user = User::default();
     if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {
@@ -109,7 +115,7 @@ pub async fn process(
 async fn borrow_book(
     db: &Database,
     cache: &Cache,
-    transaction: &web::Data<Transaction>,
+    transaction: &Transaction,
     user: &mut User,
     book_id: &str,
     max_borrowing_books: u32,
@@ -188,7 +194,7 @@ async fn borrow_book(
 async fn unborrow_book(
     db: &Database,
     cache: &Cache,
-    _transaction: &web::Data<Transaction>,
+    _transaction: &Transaction,
     user: &mut User,
     book_id: &str,
 ) -> Result<(String, u32), BibErrorResponse> {
