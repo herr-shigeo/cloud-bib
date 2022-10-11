@@ -155,9 +155,6 @@ pub struct RentalSetting {
     pub id: u32,
     pub num_books: u32,
     pub num_days: u32,
-    pub max_num_transactions: u32,
-    pub max_registered_users: u32,
-    pub max_registered_books: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -165,6 +162,9 @@ pub struct SystemSetting {
     pub id: u32,
     pub member_password: String,
     pub dbname: String,
+    pub max_num_transactions: u32,
+    pub max_registered_users: u32,
+    pub max_registered_books: u32,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -328,9 +328,7 @@ impl RentalSetting {
             id: 0,
             num_books: 0,
             num_days: 0,
-            max_num_transactions: 0,
-            max_registered_users: 0,
-            max_registered_books: 0,
+
         }
     }
 
@@ -339,9 +337,6 @@ impl RentalSetting {
             id: 0,
             num_books: atoi(num_books)?,
             num_days: atoi(num_days)?,
-            max_num_transactions: 0,
-            max_registered_users: 0,
-            max_registered_books: 0,
         };
         Ok(r)
     }
@@ -353,6 +348,9 @@ impl SystemSetting {
             id: 0,
             member_password: String::new(),
             dbname: String::new(),
+            max_num_transactions: 0,
+            max_registered_users: 0,
+            max_registered_books: 0,
         }
     }
 }
