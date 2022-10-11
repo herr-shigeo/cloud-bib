@@ -17,7 +17,7 @@ use std::sync::Mutex;
 use lazy_static::lazy_static;
 
 lazy_static! {
-    static ref DB_COMMON_NAME: String =
+    static ref DB_MEMBER_NAME: String =
         env::var("BIB_DB_MEMBER_NAME").unwrap_or("unknown".to_string());
 }
 
@@ -46,7 +46,7 @@ pub async fn login(
     form: web::Form<FormData1>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db_with_name(&data, &DB_COMMON_NAME).await?;
+    let db = get_db_with_name(&data, &DB_MEMBER_NAME).await?;
 
     let user = User::new(&form.user_id, "", "", "", "", "")
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
