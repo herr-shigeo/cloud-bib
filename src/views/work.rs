@@ -147,7 +147,11 @@ async fn borrow_book(
 
     let mut counter = transaction.counter.lock().unwrap();
     *counter += 1;
-    let transaction_id = *counter % (transaction.max_counter + 1);
+    let mut transaction_id = *counter % (transaction.max_counter + 1);
+    if transaction_id == 0 {
+        transaction_id = 1;
+    }
+    *counter = transaction_id;
     drop(counter);
 
     let borrowed_book = BorrowedBook::new(
