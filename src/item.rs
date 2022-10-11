@@ -163,8 +163,6 @@ pub struct RentalSetting {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SystemSetting {
     pub id: u32,
-    pub uname: String,
-    pub password: String,
     pub member_password: String,
     pub dbname: String,
 }
@@ -353,22 +351,9 @@ impl SystemSetting {
     pub fn default() -> Self {
         Self {
             id: 0,
-            uname: String::new(),
-            password: String::new(),
             member_password: String::new(),
             dbname: String::new(),
         }
-    }
-
-    pub fn new(password: &str, member_password: &str) -> Result<Self, Box<dyn error::Error>> {
-        let r = Self {
-            id: 0,
-            uname: String::new(),
-            password: password.to_string(),
-            member_password: member_password.to_string(),
-            dbname: String::new(),
-        };
-        Ok(r)
     }
 }
 
@@ -452,8 +437,8 @@ impl Entity for SystemUser {
     }
 
     async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
-        let query = doc! { "uname" : &self.uname };
-        let update = bson::to_bson(self).unwrap();
+        let query = doc! { "dbname" : &self.dbname };
+        let update = doc! { "password" : self.password.clone() };
         let update = doc! { "$set" : update };
         let collection = self.get_collection(db);
         collection.update(query, update, false).await
@@ -565,20 +550,8 @@ impl Entity for SystemSetting {
         panic!("Not implemented")
     }
 
-    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
-        let query = doc! { "id": self.id };
-        let update;
-        if self.password != "" && self.member_password != "" {
-            update = doc! { "password" : self.password.clone(), "member_password": self.member_password.clone() };
-        } else if self.password != "" {
-            update = doc! { "password" : self.password.clone() };
-        } else {
-            update = doc! { "member_password" : self.member_password.clone() };
-        }
-
-        let update = doc! { "$set" : update };
-        let collection = self.get_collection(db);
-        collection.update(query, update, false).await
+    async fn update(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
+        panic!("Not implemented")
     }
 
     async fn delete(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {

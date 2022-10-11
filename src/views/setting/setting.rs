@@ -1,10 +1,10 @@
 use crate::error::*;
 use crate::item::{insert_item, search_items, update_item, Book, User};
-use crate::item::{RentalSetting, SystemSetting};
+use crate::item::{RentalSetting, SystemUser};
 use crate::views::content_loader::read_csv;
 use crate::views::content_loader::read_file;
 use crate::views::reply::Reply;
-use crate::views::session::check_session;
+use crate::views::session::{check_session, get_string_value};
 use actix_multipart::Multipart;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
@@ -15,9 +15,16 @@ use shared_mongodb::{database, ClientHolder};
 use std::io::Write;
 use std::sync::Mutex;
 extern crate sanitize_filename;
-use crate::views::db_helper::get_db;
-use std::error;
+use crate::views::db_helper::{get_db, get_db_with_name};
 use std::io::{Error, ErrorKind};
+use std::{env, error};
+
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref DB_COMMON_NAME: String =
+        env::var("BIB_DB_NAME").expect("You must set the BIB_DB_NAME environment var!");
+}
 
 pub async fn load() -> HttpResponse {
     let html_data = read_file("src/html/setting.html").unwrap();
@@ -35,7 +42,6 @@ pub struct Form1Data {
 #[derive(Deserialize, Debug)]
 pub struct Form2Data {
     pub password: String,
-    pub member_password: String,
 }
 
 pub async fn update_rental_setting(
@@ -102,18 +108,12 @@ pub async fn update_system_setting(
     form: web::Form<Form2Data>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    debug!("{:?}", form);
-
     check_session(&session)?;
-    let db = get_db(&data, &session).await?;
+    let db = get_db_with_name(&data, &DB_COMMON_NAME).await?;
 
-    let mut setting = match SystemSetting::new(&form.password, &form.member_password) {
-        Ok(setting) => setting,
-        Err(e) => {
-            return Err(BibErrorResponse::InvalidArgument(e.to_string()));
-        }
-    };
-    setting.id = 1;
+    let mut setting = SystemUser::default();
+    setting.password = form.password.clone();
+    setting.dbname = get_string_value(&session, "dbname")?;
 
     match update_item(&db, &setting).await {
         Ok(setting) => setting,
