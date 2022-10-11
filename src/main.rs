@@ -1,4 +1,6 @@
 use crate::item::create_unique_index;
+use crate::item::search_items;
+use crate::item::SystemSetting;
 use crate::item::TransactionItem;
 use crate::views::cache::Cache;
 use crate::views::transaction::*;
@@ -23,8 +25,6 @@ async fn main() -> std::io::Result<()> {
 
     // Get some environ vars
     let port = env::var("PORT").unwrap_or("5000".to_string());
-    let max_transaction_num = env::var("BIB_MAX_TRANSACTION_NUM").unwrap_or("100000".to_string());
-    let max_transaction_num = max_transaction_num.parse::<u32>().unwrap();
 
     let client_uri =
         env::var("BIB_MONGODB_URI").expect("You must set the BIB_MONGODB_URI environment var!");
@@ -61,6 +61,12 @@ async fn main() -> std::io::Result<()> {
             panic!("{:?}", e);
         }
 
+        //Read the SystemSetting
+        let mut setting = SystemSetting::default();
+        setting.id = 1;
+        let setting = search_items(&db, &setting).await;
+        let setting = setting.unwrap().pop().unwrap();
+
         // Create a Transaction
         let mut last_counter = 0;
         let item = TransactionItem::default();
@@ -69,8 +75,11 @@ async fn main() -> std::io::Result<()> {
             let last_transaction = transaction_items.pop();
             last_counter = last_transaction.unwrap().id;
         }
-        info!("last_counter = {}", last_counter);
-        let transaction = Transaction::new(max_transaction_num, last_counter);
+        info!(
+            "last_counter/max_num_transactions = {}/{}",
+            last_counter, setting.max_num_transactions
+        );
+        let transaction = Transaction::new(setting.max_num_transactions, last_counter);
         transaction_map.insert(db_name.to_string(), transaction);
 
         // Create a Cache
