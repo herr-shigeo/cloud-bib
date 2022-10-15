@@ -10,6 +10,7 @@ use crate::views::session::*;
 use crate::views::transaction::*;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
+use log::info;
 use log::{debug, error};
 use mongodb::Database;
 use serde::Deserialize;
@@ -142,6 +143,7 @@ async fn borrow_book(
     let mut book = books.pop().unwrap();
     let borrow_info = cache.get(book.id);
     if borrow_info.is_some() {
+        info!("book_id({}) is hit in the cached", book_id);
         return Err(BibErrorResponse::BookNotReturned);
     }
 
@@ -170,6 +172,12 @@ async fn borrow_book(
 
     // Check the returned data
     let mut done: bool = false;
+    *user = match search_item(db, user).await {
+        Ok(user) => user,
+        Err(_) => {
+            return Err(BibErrorResponse::UserNotFound(user.id));
+        }
+    };
     for book in &user.borrowed_books {
         if book_id == book.book_id {
             debug!("Check passed, book_id = {}", book_id);
@@ -222,6 +230,7 @@ async fn unborrow_book(
     if user.id == 0 {
         let borrow_info = cache.get(book.id);
         if borrow_info.is_none() {
+            info!("book_id({}) is NOT hit in the cached", book_id);
             return Err(BibErrorResponse::BookNotBorrowed);
         }
         user.id = borrow_info.unwrap().owner_id;
@@ -245,6 +254,7 @@ async fn unborrow_book(
         }
     }
     if done == false {
+        info!("book_id({}) is not hit in the User DB", book_id);
         return Err(BibErrorResponse::BookNotBorrowed);
     }
 
