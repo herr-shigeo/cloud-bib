@@ -1,7 +1,6 @@
 use crate::item::*;
 use crate::item::{Book, User};
-use chrono::{TimeZone, Utc};
-use chrono_tz::Europe::Berlin;
+use crate::views::utils::get_nowtime;
 use log::{debug, info};
 use mongodb::Database;
 use std::error;
@@ -37,9 +36,9 @@ impl Transaction {
         counter: u32,
         user: &User,
         book: &Book,
+        time_zone: &str,
     ) -> Result<(), Box<dyn error::Error>> {
-        let utc = Utc::now().naive_utc();
-        let dt = Berlin.from_utc_datetime(&utc);
+        let dt = get_nowtime(time_zone);
         let item = TransactionItem {
             id: counter,
             user_id: user.id,
@@ -59,9 +58,9 @@ impl Transaction {
         user: &User,
         book: &Book,
         borrowed_date: String,
+        time_zone: &str,
     ) -> Result<(), Box<dyn error::Error>> {
-        let utc = Utc::now().naive_utc();
-        let dt = Berlin.from_utc_datetime(&utc);
+        let dt = get_nowtime(time_zone);
         let item = TransactionItem {
             id: counter,
             user_id: user.id,
