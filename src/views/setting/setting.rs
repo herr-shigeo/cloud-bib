@@ -198,7 +198,10 @@ pub async fn import_user_list(
         let record = &records[i];
         let num_field = record.len();
         if num_field != 6 {
-            return Err(BibErrorResponse::InvalidArgument(format!("The number of fields is {}", num_field)));
+            return Err(BibErrorResponse::InvalidArgument(format!(
+                "The number of fields is {}",
+                num_field
+            )));
         }
         debug!(
             "{}, {}, {}, {}, {}, {}",
@@ -282,7 +285,10 @@ pub async fn import_book_list(
         let record = &records[i];
         let num_field = record.len();
         if num_field != 12 {
-            return Err(BibErrorResponse::InvalidArgument(format!("The number of fields is {}", num_field)));
+            return Err(BibErrorResponse::InvalidArgument(format!(
+                "The number of fields is {}",
+                num_field
+            )));
         }
         debug!(
             "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",

@@ -165,6 +165,7 @@ pub struct SystemSetting {
     pub max_num_transactions: u32,
     pub max_registered_users: u32,
     pub max_registered_books: u32,
+    pub time_zone: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -350,6 +351,7 @@ impl SystemSetting {
             max_num_transactions: 0,
             max_registered_users: 0,
             max_registered_books: 0,
+            time_zone: String::new(),
         }
     }
 }
