@@ -202,6 +202,8 @@ function setProgressBar(processing) {
   else {
     prog_elem.style.display = "none";
     myBar_elem.style.display = "none";
+    document.getElementById("user_file_attached").value = '';
+    document.getElementById("book_file_attached").value = '';
   }
 }
 
@@ -406,13 +408,13 @@ function move() {
 <button class="accordion">一括登録</button>
 <div class="panel">
 <form id="form_user_register" name="form_user_register" action="/setting/import_user" method="post" enctype="multipart/form-data">
-  <input type="file" id="file_attached" accept=".csv,.tsv" name="file_attached">
+  <input type="file" id="user_file_attached" accept=".csv,.tsv" name="file_attached">
   <button type="submit" class="submitbtn" onClick="move()">利用者登録</button>
 </form>
 <a href="https://docs.google.com/spreadsheets/d/19ZkmKV5kA_R6dq77RjPWgabXNOFi0KFKTaJ7sxR99SI/edit#gid=269661139" target="_blank">利用者一括登録シート</a>
 
 <form id="form_book_register" name="form_book_register" action="/setting/import_book" method="post" enctype="multipart/form-data">
-  <input type="file" id="file_attached" accept=".csv,.tsv" name="file_attached">
+  <input type="file" id="book_file_attached" accept=".csv,.tsv" name="file_attached">
   <button type="submit" class="submitbtn" onClick="move()">図書登録</button>
 </form>
 <a href="https://docs.google.com/spreadsheets/d/1oAQAKr-6HOtZmCBigSZ8C1-CmIm0AzBqTve6dtpsKZ0/edit#gid=489380937" target="_blank">図書一括登録シート</a>
