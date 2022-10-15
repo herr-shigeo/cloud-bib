@@ -1,5 +1,5 @@
 use crate::error::*;
-use crate::item::{insert_item, search_items, update_item, Book, SystemSetting, User};
+use crate::item::{insert_item, search_item, search_items, update_item, Book, SystemSetting, User};
 use crate::item::{RentalSetting, SystemUser};
 use crate::views::content_loader::read_csv;
 use crate::views::content_loader::read_file;
@@ -93,7 +93,7 @@ pub async fn get_rental_setting(
     };
 
     if setting.len() != 1 {
-        return Err(BibErrorResponse::DataDuplicated);
+        return Err(BibErrorResponse::DataDuplicated(0));
     }
     let setting = setting.pop().unwrap();
 
@@ -151,10 +151,16 @@ pub async fn import_user_list(
     session: Session,
     payload: Multipart,
     data: web::Data<Mutex<ClientHolder>>,
-    _setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
+    let dbname = get_string_value(&session, "dbname")?;
+    let setting = setting_map.get(&dbname);
+    if setting.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let setting = setting.unwrap();
 
     let file_path = match save_file(payload).await {
         Ok(file_path) => file_path,
@@ -170,14 +176,29 @@ pub async fn import_user_list(
         }
     };
 
-    // Check the number of items(TODO)
+    // Check the number of items
+    let nrecords: u32 = records.len().try_into().unwrap();
+    let mut user = User::default();
+    user.id = 0;
+    let users = match search_items(&db, &user).await {
+        Ok(users) => users,
+        Err(_) => {
+            return Err(BibErrorResponse::UserNotFound(user.id));
+        }
+    };
+    let nusers: u32 = users.len().try_into().unwrap();
+    let nsize = nusers + nrecords;
+    if nsize > setting.max_registered_users {
+        return Err(BibErrorResponse::ExceedLimit(nsize));
+    }
 
+    // Check the paramters
     let mut users = vec![];
     for i in 0..records.len() {
         let record = &records[i];
         let num_field = record.len();
         if num_field != 6 {
-            return Err(BibErrorResponse::InvalidArgument(num_field.to_string()));
+            return Err(BibErrorResponse::InvalidArgument(format!("The number of fields is {}", num_field)));
         }
         debug!(
             "{}, {}, {}, {}, {}, {}",
@@ -187,8 +208,16 @@ pub async fn import_user_list(
             &record[0], &record[1], &record[2], &record[3], &record[4], &record[5],
         )
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+        match search_item(&db, &user).await {
+            Ok(user) => {
+                return Err(BibErrorResponse::DataDuplicated(user.id));
+            }
+            Err(_) => {}
+        };
         users.push(user);
     }
+
+    // Update the DB
     for user in users {
         if let Err(e) = insert_item(&db, &user).await {
             database::disconnect(&data);
@@ -204,10 +233,16 @@ pub async fn import_book_list(
     session: Session,
     payload: Multipart,
     data: web::Data<Mutex<ClientHolder>>,
-    _setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
+    let dbname = get_string_value(&session, "dbname")?;
+    let setting = setting_map.get(&dbname);
+    if setting.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let setting = setting.unwrap();
 
     let file_path = match save_file(payload).await {
         Ok(file_path) => file_path,
@@ -225,15 +260,29 @@ pub async fn import_book_list(
         }
     };
 
-    // Check the number of items(TODO)
+    // Check the number of items
+    let nrecords: u32 = records.len().try_into().unwrap();
+    let mut book = Book::default();
+    book.id = 0;
+    let books = match search_items(&db, &book).await {
+        Ok(books) => books,
+        Err(_) => {
+            return Err(BibErrorResponse::UserNotFound(book.id));
+        }
+    };
+    let nbooks: u32 = books.len().try_into().unwrap();
+    let nsize = nbooks + nrecords;
+    if nsize > setting.max_registered_books {
+        return Err(BibErrorResponse::ExceedLimit(nsize));
+    }
 
+    // Check the parameter
     let mut books = vec![];
     for i in 0..records.len() {
         let record = &records[i];
         let num_field = record.len();
         if num_field != 12 {
-            error!("Invalid field num = {}", num_field);
-            return Err(BibErrorResponse::InvalidArgument(num_field.to_string()));
+            return Err(BibErrorResponse::InvalidArgument(format!("The number of fields is {}", num_field)));
         }
         debug!(
             "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
@@ -265,8 +314,17 @@ pub async fn import_book_list(
             &record[6],  // status
         )
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+
+        match search_item(&db, &book).await {
+            Ok(book) => {
+                return Err(BibErrorResponse::DataDuplicated(book.id));
+            }
+            Err(_) => {}
+        };
         books.push(book);
     }
+
+    // Update the DB
     for book in books {
         if let Err(e) = insert_item(&db, &book).await {
             error!("{:?}", e);

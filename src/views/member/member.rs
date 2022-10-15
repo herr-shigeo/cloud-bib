@@ -58,7 +58,7 @@ pub async fn login(
         }
     };
     if users.len() != 1 {
-        return Err(BibErrorResponse::DataDuplicated);
+        return Err(BibErrorResponse::DataDuplicated(0));
     }
     let user = users.pop().unwrap();
 
@@ -133,7 +133,7 @@ pub async fn borrowed_books(
     };
 
     if users.len() != 1 {
-        return Err(BibErrorResponse::DataDuplicated);
+        return Err(BibErrorResponse::DataDuplicated(user.id));
     }
     let user = users.pop().unwrap();
 

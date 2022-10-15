@@ -82,7 +82,7 @@ pub async fn process(
     };
 
     if setting.len() != 1 {
-        return Err(BibErrorResponse::DataDuplicated);
+        return Err(BibErrorResponse::DataDuplicated(0));
     }
     let setting = setting.pop().unwrap();
 
@@ -138,7 +138,7 @@ async fn borrow_book(
         }
     };
     if books.len() != 1 {
-        return Err(BibErrorResponse::DataDuplicated);
+        return Err(BibErrorResponse::DataDuplicated(book.id));
     }
     let mut book = books.pop().unwrap();
     let borrow_info = cache.get(book.id);
@@ -223,7 +223,7 @@ async fn unborrow_book(
         }
     };
     if books.len() != 1 {
-        return Err(BibErrorResponse::DataDuplicated);
+        return Err(BibErrorResponse::DataDuplicated(book.id));
     }
     book = books.pop().unwrap();
 

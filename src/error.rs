@@ -21,7 +21,7 @@ pub enum BibErrorResponse {
     DataNotFound(String),
     UserNotFound(u32),
     BookNotFound(u32),
-    DataDuplicated,
+    DataDuplicated(u32),
     OverBorrowingLimit,
     BookNotReturned,
     BookNotBorrowed,
@@ -103,11 +103,11 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     reason: String::new(),
                 })
             }
-            BibErrorResponse::DataDuplicated => {
+            BibErrorResponse::DataDuplicated(id) => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,
                     errcode: 108,
-                    message: String::from("該当するデータが複数存在しています"),
+                    message: format!("該当するデータが複数存在しています({})", id),
                     reason: String::new(),
                 })
             }

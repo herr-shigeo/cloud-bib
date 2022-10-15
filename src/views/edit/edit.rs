@@ -1,11 +1,11 @@
 use crate::error::BibErrorResponse;
-use crate::item::{atoi, SystemSetting};
+use crate::item::{atoi, search_items, SystemSetting};
 use crate::item::{delete_item, search_item, update_item};
 use crate::item::{Book, User};
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
-use crate::views::session::check_session;
+use crate::views::session::{check_session, get_string_value};
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::debug;
@@ -36,12 +36,18 @@ pub async fn user(
     session: Session,
     form: web::Form<Form1Data>,
     data: web::Data<Mutex<ClientHolder>>,
-    _setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
+    let dbname = get_string_value(&session, "dbname")?;
+    let setting = setting_map.get(&dbname);
+    if setting.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let setting = setting.unwrap();
 
     // Read the User from DB first
     let mut user = User::default();
@@ -56,7 +62,19 @@ pub async fn user(
             user
         }
         Err(_) => {
-            // Check the number of items(TODO)
+            // Check the number of items
+            user.id = 0;
+            let users = match search_items(&db, &user).await {
+                Ok(users) => users,
+                Err(_) => {
+                    return Err(BibErrorResponse::UserNotFound(user.id));
+                }
+            };
+            let nsize: u32 = users.len().try_into().unwrap();
+            if nsize == setting.max_registered_users {
+                return Err(BibErrorResponse::ExceedLimit(nsize));
+            }
+
             User::new(
                 &form.user_id,
                 &form.user_name,
@@ -111,11 +129,18 @@ pub async fn book(
     session: Session,
     form: web::Form<Form2Data>,
     data: web::Data<Mutex<ClientHolder>>,
+    setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
+    let dbname = get_string_value(&session, "dbname")?;
+    let setting = setting_map.get(&dbname);
+    if setting.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let setting = setting.unwrap();
 
     // Read the Book from DB first
     let mut book = Book::default();
@@ -136,7 +161,19 @@ pub async fn book(
             book
         }
         Err(_) => {
-            // Check the number of items(TODO)
+            // Check the number of items
+            book.id = 0;
+            let books = match search_items(&db, &book).await {
+                Ok(books) => books,
+                Err(_) => {
+                    return Err(BibErrorResponse::BookNotFound(book.id));
+                }
+            };
+            let nsize: u32 = books.len().try_into().unwrap();
+            if nsize == setting.max_registered_users {
+                return Err(BibErrorResponse::ExceedLimit(nsize));
+            }
+
             Book::new(
                 &form.book_id,
                 &form.book_title,
