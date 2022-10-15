@@ -1,18 +1,18 @@
 use crate::error::BibErrorResponse;
-use crate::item::TransactionItem;
 use crate::item::{search_items, Book, User};
+use crate::item::{SystemSetting, TransactionItem};
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db;
-use crate::views::session::check_session;
+use crate::views::session::{check_session, get_string_value};
+use crate::views::utils::get_nowtime;
 use crate::Transaction;
 use actix_files::NamedFile;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
-use chrono::{TimeZone, Utc};
-use chrono_tz::Europe::Berlin;
 use csv::WriterBuilder;
 use log::error;
 use shared_mongodb::{database, ClientHolder};
+use std::collections::HashMap;
 use std::error;
 use std::fs::File;
 use std::io::Write;
@@ -25,7 +25,7 @@ pub async fn load(_session: Session) -> HttpResponse {
         .body(html_data)
 }
 
-fn write_user_list(users: Vec<User>) -> Result<String, Box<dyn error::Error>> {
+fn write_user_list(users: Vec<User>, time_zone: &str) -> Result<String, Box<dyn error::Error>> {
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(vec![]);
 
     for user in users {
@@ -42,8 +42,7 @@ fn write_user_list(users: Vec<User>) -> Result<String, Box<dyn error::Error>> {
         })?;
     }
 
-    let utc = Utc::now().naive_utc();
-    let dt = Berlin.from_utc_datetime(&utc);
+    let dt = get_nowtime(time_zone);
     let fname = format!("user_list_{}.csv", dt.format("%Y%m%d"));
     let mut file = File::create(fname.clone())?;
     file.write_all(&wtr.into_inner()?)?;
@@ -54,9 +53,17 @@ fn write_user_list(users: Vec<User>) -> Result<String, Box<dyn error::Error>> {
 pub async fn export_user_list(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
+    setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<NamedFile, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
+    let dbname = get_string_value(&session, "dbname")?;
+
+    let system_setting = setting_map.get(&dbname);
+    if system_setting.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let system_setting = system_setting.unwrap();
 
     let user = User::default();
     let users = match search_items(&db, &user).await {
@@ -67,7 +74,7 @@ pub async fn export_user_list(
         }
     };
 
-    match write_user_list(users) {
+    match write_user_list(users, &system_setting.time_zone) {
         Ok(fname) => {
             return Ok(
                 NamedFile::open(fname).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?
@@ -79,7 +86,7 @@ pub async fn export_user_list(
     };
 }
 
-fn write_book_list(books: Vec<Book>) -> Result<String, Box<dyn error::Error>> {
+fn write_book_list(books: Vec<Book>, time_zone: &str) -> Result<String, Box<dyn error::Error>> {
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(vec![]);
 
     for book in books {
@@ -103,8 +110,7 @@ fn write_book_list(books: Vec<Book>) -> Result<String, Box<dyn error::Error>> {
         })?;
     }
 
-    let utc = Utc::now().naive_utc();
-    let dt = Berlin.from_utc_datetime(&utc);
+    let dt = get_nowtime(time_zone);
     let fname = format!("book_list_{}.csv", dt.format("%Y%m%d"));
     let mut file = File::create(fname.clone())?;
     file.write_all(&wtr.into_inner()?)?;
@@ -115,9 +121,16 @@ fn write_book_list(books: Vec<Book>) -> Result<String, Box<dyn error::Error>> {
 pub async fn export_book_list(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
+    setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<NamedFile, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
+    let dbname = get_string_value(&session, "dbname")?;
+    let system_setting = setting_map.get(&dbname);
+    if system_setting.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let system_setting = system_setting.unwrap();
 
     let book = Book::default();
     let books = match search_items(&db, &book).await {
@@ -129,7 +142,7 @@ pub async fn export_book_list(
         }
     };
 
-    match write_book_list(books) {
+    match write_book_list(books, &system_setting.time_zone) {
         Ok(fname) => {
             return Ok(
                 NamedFile::open(fname).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?
@@ -141,7 +154,10 @@ pub async fn export_book_list(
     };
 }
 
-fn write_transaction_list(items: Vec<TransactionItem>) -> Result<String, Box<dyn error::Error>> {
+fn write_transaction_list(
+    items: Vec<TransactionItem>,
+    time_zone: &str,
+) -> Result<String, Box<dyn error::Error>> {
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(vec![]);
 
     for item in items {
@@ -156,8 +172,7 @@ fn write_transaction_list(items: Vec<TransactionItem>) -> Result<String, Box<dyn
         })?;
     }
 
-    let utc = Utc::now().naive_utc();
-    let dt = Berlin.from_utc_datetime(&utc);
+    let dt = get_nowtime(time_zone);
     let fname = format!("transaction_list_{}.csv", dt.format("%Y%m%d"));
     let mut file = File::create(fname.clone())?;
     file.write_all(&wtr.into_inner()?)?;
@@ -168,9 +183,16 @@ fn write_transaction_list(items: Vec<TransactionItem>) -> Result<String, Box<dyn
 pub async fn export_history_list(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
+    setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<NamedFile, BibErrorResponse> {
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
+    let dbname = get_string_value(&session, "dbname")?;
+    let system_setting = setting_map.get(&dbname);
+    if system_setting.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let system_setting = system_setting.unwrap();
 
     let item = TransactionItem::default();
     let transaction_items = Transaction::search(&db, &item).await;
@@ -179,7 +201,7 @@ pub async fn export_history_list(
         return Err(BibErrorResponse::DataNotFound(String::new()));
     }
 
-    match write_transaction_list(transaction_items) {
+    match write_transaction_list(transaction_items, &system_setting.time_zone) {
         Ok(fname) => {
             return Ok(
                 NamedFile::open(fname).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?

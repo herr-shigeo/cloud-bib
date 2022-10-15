@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use bson::Document;
-use chrono::{Duration, TimeZone, Utc};
-use chrono_tz::Europe::Berlin;
+use chrono::{DateTime, Duration};
+use chrono_tz::Tz;
 use futures::stream::TryStreamExt;
 use mongodb::bson::doc;
 use mongodb::options::*;
@@ -181,15 +181,13 @@ pub struct TransactionItem {
 
 impl User {
     pub fn default() -> Self {
-        let utc = Utc::now().naive_utc();
-        let dt = Berlin.from_utc_datetime(&utc);
         Self {
             id: 0,
             name: String::new(),
             kana: String::new(),
             category: String::new(),
             remark: String::new(),
-            register_date: format!("{}", dt.format("%Y/%m/%d")),
+            register_date: String::new(),
             borrowed_count: 0,
             reserved: String::new(),
             borrowed_books: vec![],
@@ -245,17 +243,16 @@ impl BorrowedBook {
     pub fn new(
         id: u32,
         title: &str,
+        nowtime: DateTime<Tz>,
         borrowing_days: i64,
         transaction_id: u32,
         char: String,
     ) -> Self {
-        let utc = Utc::now().naive_utc();
-        let dt = Berlin.from_utc_datetime(&utc);
-        let deadline = dt + Duration::days(borrowing_days);
+        let deadline = nowtime + Duration::days(borrowing_days);
         Self {
             book_id: id,
             book_title: title.to_string(),
-            borrowed_date: format!("{}", dt.format("%Y/%m/%d %H:%M")),
+            borrowed_date: format!("{}", nowtime.format("%Y/%m/%d %H:%M")),
             return_deadline: format!("{}", deadline.format("%Y/%m/%d %H:%M")),
             transaction_id: transaction_id,
             char: char,
@@ -265,8 +262,6 @@ impl BorrowedBook {
 
 impl Book {
     pub fn default() -> Self {
-        let utc = Utc::now().naive_utc();
-        let dt = Berlin.from_utc_datetime(&utc);
         Self {
             id: 0,
             title: String::new(),
@@ -277,7 +272,7 @@ impl Book {
             char: String::new(),
             remark: String::new(),
             recommendation: String::new(),
-            register_date: format!("{}", dt.format("%Y/%m/%d")),
+            register_date: String::new(),
             register_type: String::new(),
             status: String::new(),
             borrowed_count: 0,

@@ -1,6 +1,7 @@
 use crate::error::*;
 use crate::item::atoi;
 use crate::item::RentalSetting;
+use crate::item::SystemSetting;
 use crate::item::{search_item, search_items, update_item};
 use crate::item::{Book, BorrowedBook, User};
 use crate::views::cache::*;
@@ -8,6 +9,7 @@ use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::*;
 use crate::views::transaction::*;
+use crate::views::utils::get_nowtime;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::info;
@@ -30,14 +32,20 @@ pub async fn process(
     form: web::Form<FormData>,
     data: web::Data<Mutex<ClientHolder>>,
     cache_map: web::Data<HashMap<String, Cache>>,
+    setting_map: web::Data<HashMap<String, SystemSetting>>,
     transaction_map: web::Data<HashMap<String, Transaction>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
     check_session(&session)?;
     let db = get_db(&data, &session).await?;
-
     let dbname = get_string_value(&session, "dbname")?;
+
+    let system_setting = setting_map.get(&dbname);
+    if system_setting.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let system_setting = system_setting.unwrap();
 
     let cache = cache_map.get(&dbname);
     if cache.is_none() {
@@ -53,8 +61,15 @@ pub async fn process(
 
     let mut user = User::default();
     if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {
-        let (book_title, book_id) =
-            unborrow_book(&db, &cache, &transaction, &mut user, &form.returned_book_id).await?;
+        let (book_title, book_id) = unborrow_book(
+            &db,
+            &cache,
+            &transaction,
+            &mut user,
+            &form.returned_book_id,
+            &system_setting.time_zone,
+        )
+        .await?;
         let mut reply = Reply::default();
         reply.returned_book_title = book_title;
         reply.returned_book_id = book_id;
@@ -93,6 +108,7 @@ pub async fn process(
             &transaction,
             &mut user,
             &form.borrowed_book_id,
+            &system_setting.time_zone,
             setting.num_books,
             setting.num_days.into(),
         )
@@ -100,7 +116,15 @@ pub async fn process(
     }
 
     if form.returned_book_id != "" {
-        unborrow_book(&db, &cache, &transaction, &mut user, &form.returned_book_id).await?;
+        unborrow_book(
+            &db,
+            &cache,
+            &transaction,
+            &mut user,
+            &form.returned_book_id,
+            &system_setting.time_zone,
+        )
+        .await?;
     }
 
     let mut reply = Reply::default();
@@ -119,6 +143,7 @@ async fn borrow_book(
     transaction: &Transaction,
     user: &mut User,
     book_id: &str,
+    time_zone: &str,
     max_borrowing_books: u32,
     max_borrowing_days: i64,
 ) -> Result<(), BibErrorResponse> {
@@ -159,6 +184,7 @@ async fn borrow_book(
     let borrowed_book = BorrowedBook::new(
         book_id,
         &book.title,
+        get_nowtime(time_zone),
         max_borrowing_days,
         transaction_id,
         book.char.clone(),
@@ -198,7 +224,7 @@ async fn borrow_book(
     }
 
     debug!("transaction_id = {}", transaction_id);
-    Transaction::borrow(db, transaction_id, user, &book)
+    Transaction::borrow(db, transaction_id, user, &book, time_zone)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))
 }
@@ -209,6 +235,7 @@ async fn unborrow_book(
     _transaction: &Transaction,
     user: &mut User,
     book_id: &str,
+    time_zone: &str,
 ) -> Result<(String, u32), BibErrorResponse> {
     debug!("unborrow_book,id = {}", book_id);
 
@@ -285,7 +312,7 @@ async fn unborrow_book(
     cache.unborrow(book.id);
 
     debug!("transaction_id = {}", transaction_id);
-    Transaction::unborrow(db, transaction_id, user, &book, borrowed_date)
+    Transaction::unborrow(db, transaction_id, user, &book, borrowed_date, time_zone)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
     Ok((book.title, book.id))
