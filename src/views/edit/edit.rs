@@ -2,6 +2,7 @@ use crate::error::BibErrorResponse;
 use crate::item::{atoi, search_items, SystemSetting};
 use crate::item::{delete_item, search_item, update_item};
 use crate::item::{Book, User};
+use crate::views::cache::Cache;
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
@@ -95,6 +96,9 @@ pub async fn user(
                 .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
         }
         "delete" => {
+            if user.borrowed_books.len() > 0 {
+                return Err(BibErrorResponse::NotPossibleToDelete);
+            }
             delete_item(&db, &user)
                 .await
                 .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
@@ -129,6 +133,7 @@ pub async fn book(
     session: Session,
     form: web::Form<Form2Data>,
     data: web::Data<Mutex<ClientHolder>>,
+    cache_map: web::Data<HashMap<String, Cache>>,
     setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
@@ -141,6 +146,12 @@ pub async fn book(
         return Err(BibErrorResponse::NotAuthorized);
     }
     let setting = setting.unwrap();
+
+    let cache = cache_map.get(&dbname);
+    if cache.is_none() {
+        return Err(BibErrorResponse::NotAuthorized);
+    }
+    let cache = cache.unwrap();
 
     // Read the Book from DB first
     let mut book = Book::default();
@@ -200,6 +211,9 @@ pub async fn book(
                 .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
         }
         "delete" => {
+            if cache.get(book.id).is_some() {
+                return Err(BibErrorResponse::NotPossibleToDelete);
+            }
             delete_item(&db, &book)
                 .await
                 .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;

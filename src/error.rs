@@ -27,6 +27,7 @@ pub enum BibErrorResponse {
     BookNotBorrowed,
     SystemError(String),
     ExceedLimit(u32),
+    NotPossibleToDelete,
 }
 
 impl Display for BibErrorResponse {
@@ -148,6 +149,14 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     success: false,
                     errcode: 113,
                     message: format!("追加できる上限を超えています({})", id),
+                    reason: String::new(),
+                })
+            }
+            BibErrorResponse::NotPossibleToDelete => {
+                HttpResponse::build(self.status_code()).json(BibResponseBody {
+                    success: false,
+                    errcode: 114,
+                    message: String::from("未返却処理があるため、削除できません"),
                     reason: String::new(),
                 })
             }
