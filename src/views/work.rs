@@ -264,6 +264,12 @@ async fn unborrow_book(
 
     // Check the returned data
     let mut done: bool = true;
+    *user = match search_item(db, user).await {
+        Ok(user) => user,
+        Err(_) => {
+            return Err(BibErrorResponse::UserNotFound(user.id));
+        }
+    };
     for book in &user.borrowed_books {
         if book_id == book.book_id {
             error!("Check failed, book_id = {}", book_id);
