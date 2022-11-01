@@ -193,6 +193,7 @@ pub async fn import_user_list(
     }
 
     // Check the paramters
+    let mut map: HashMap<u32, bool> = HashMap::new();
     let mut users = vec![];
     for i in 0..records.len() {
         let record = &records[i];
@@ -211,6 +212,9 @@ pub async fn import_user_list(
             &record[0], &record[1], &record[2], &record[3], &record[4], &record[5],
         )
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+        if map.insert(user.id, true).is_some() {
+            return Err(BibErrorResponse::DataDuplicated(user.id));
+        }
         match search_item(&db, &user).await {
             Ok(user) => {
                 return Err(BibErrorResponse::DataDuplicated(user.id));
@@ -280,6 +284,7 @@ pub async fn import_book_list(
     }
 
     // Check the parameter
+    let mut map: HashMap<u32, bool> = HashMap::new();
     let mut books = vec![];
     for i in 0..records.len() {
         let record = &records[i];
@@ -320,7 +325,9 @@ pub async fn import_book_list(
             &record[6],  // status
         )
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
-
+        if map.insert(book.id, true).is_some() {
+            return Err(BibErrorResponse::DataDuplicated(book.id));
+        }
         match search_item(&db, &book).await {
             Ok(book) => {
                 return Err(BibErrorResponse::DataDuplicated(book.id));
