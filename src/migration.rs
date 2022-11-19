@@ -22,7 +22,7 @@ async fn main() {
     env_logger::init();
 
     let client_uri =
-        env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+        env::var("BIB_MONGODB_URI").expect("You must set the BIB_MONGODB_URI environment var!");
     let mut client_options = match ClientOptions::parse(client_uri).await {
         Ok(client_options) => client_options,
         Err(e) => {
@@ -34,50 +34,58 @@ async fn main() {
 
     let client_holder = web::Data::new(Mutex::new(ClientHolder::new(client_options)));
     let db_name =
-        env::var("DATABASE_NAME").expect("You must set the DATABSE_NAME environment var!");
+        env::var("BIB_DB_MEMBER_NAME").expect("You must set the DATABSE_NAME environment var!");
     let db = database::get(&client_holder.clone(), &db_name)
         .await
         .unwrap();
 
-    let mut user = User::default();
-    user.id = 0;
-    let users = match search_items(&db, &user).await {
-        Ok(users) => users,
+    let mut book = Book::default();
+    book.id = 0;
+    let books = match search_items(&db, &book).await {
+        Ok(books) => books,
         Err(_) => {
-            panic!("failed to search users");
+            panic!("failed to search books");
         }
     };
 
-    for user in users {
-        let mut user2 = match UserV2::new(
-            "00000",
-            &user.name,
-            &user.kana,
-            &user.category,
-            &user.remark,
-            &user.register_date,
-        ) {
-            Ok(user2) => user2,
-            Err(_) => {
-                panic!("failed to get users");
+    for mut book in books {
+        let b = book.char.as_bytes();
+        let n = b.len();
+        let mut b2: Vec<u8> = vec![];
+        let mut found = false;
+        for i in 0..n {
+            //info!("{}", b[i]);
+            if b[i] == 0 {
+                found = true;
+            } else {
+                b2.push(b[i]);
             }
-        };
-        user2.id = user.id;
-        for book in user.borrowed_books {
-            let mut book2 = BorrowedBookV2::default();
-            book2.book_id = book.book_id;
-            book2.book_title = book.book_title;
-            book2.borrowed_date = book.borrowed_date;
-            book2.return_deadline = book.return_deadline;
-            book2.transaction_id = book.transaction_id;
-            book2.char = "キャラ不明".to_string();
-            user2.borrowed_books.push(book2);
         }
-        debug!("{:?}", user2);
-        match update_item(&db, &user2).await {
-            Ok(_) => {}
-            Err(_) => {
-                panic!("update failed");
+        if found {
+            info!(
+                "id = {}, char = {}/{:?}",
+                book.id,
+                book.char,
+                book.char.as_bytes()
+            );
+            let new_char = std::str::from_utf8(&b2).unwrap();
+            info!("{}", new_char);
+            info!(
+                "id = {}, char = {}/{:?}",
+                book.id,
+                new_char,
+                new_char.as_bytes()
+            );
+
+            book.char = new_char.to_string();
+            info!("new book = {:?}", book);
+            info!("----------------------------------------------");
+
+            match update_item(&db, &book).await {
+                Ok(_) => {}
+                Err(_) => {
+                    panic!("update failed");
+                }
             }
         }
     }
