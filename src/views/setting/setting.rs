@@ -10,6 +10,7 @@ use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use futures::{StreamExt, TryStreamExt};
 use log::{debug, error, info};
+use mongodb::Database;
 use serde::Deserialize;
 use shared_mongodb::{database, ClientHolder};
 use std::collections::HashMap;
@@ -18,6 +19,7 @@ use std::sync::Mutex;
 extern crate sanitize_filename;
 use crate::views::db_helper::{get_db, get_db_with_name};
 use argon2::Config;
+use futures::future::join_all;
 use rand::Rng;
 use std::io::{Error, ErrorKind};
 use std::{env, error};
@@ -190,9 +192,7 @@ pub async fn import_user_list(
     user.id = 0;
     let users = match search_items(&db, &user).await {
         Ok(users) => users,
-        Err(_) => {
-            return Err(BibErrorResponse::UserNotFound(user.id));
-        }
+        Err(_) => vec![],
     };
     let nusers: u32 = users.len().try_into().unwrap();
     let nsize = nusers + nrecords;
@@ -233,15 +233,45 @@ pub async fn import_user_list(
     }
 
     // Update the DB
-    for user in users {
-        if let Err(e) = insert_item(&db, &user).await {
-            database::disconnect(&data);
-            return Err(BibErrorResponse::SystemError(e.to_string()));
+    let num_threads = 8;
+    let num_users = users.len();
+    let mut num_processed = 0;
+    loop {
+        let mut futures = vec![];
+        loop {
+            if futures.len() == num_threads || num_processed == num_users {
+                break;
+            }
+            futures.push(insert_item(&db, &users[num_processed]));
+            num_processed += 1;
+        }
+        let reses = join_all(futures).await;
+        for res in reses {
+            match res {
+                Err(e) => {
+                    database::disconnect(&data);
+                    return Err(BibErrorResponse::SystemError(e.to_string()));
+                }
+                Ok(_) => {}
+            }
+        }
+        if num_processed == num_users {
+            break;
         }
     }
 
     let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
+}
+
+async fn check_item(db: &Database, id: u32) -> Result<(), BibErrorResponse> {
+    let mut book = Book::default();
+    book.id = id;
+
+    match search_item(&db, &book).await {
+        Ok(book) => Err(BibErrorResponse::DataDuplicated(book.id)),
+        Err(_) => Ok(()),
+    }
 }
 
 pub async fn import_book_list(
@@ -281,9 +311,7 @@ pub async fn import_book_list(
     book.id = 0;
     let books = match search_items(&db, &book).await {
         Ok(books) => books,
-        Err(_) => {
-            return Err(BibErrorResponse::UserNotFound(book.id));
-        }
+        Err(_) => vec![],
     };
     let nbooks: u32 = books.len().try_into().unwrap();
     let nsize = nbooks + nrecords;
@@ -294,63 +322,93 @@ pub async fn import_book_list(
     // Check the parameter
     let mut map: HashMap<u32, bool> = HashMap::new();
     let mut books = vec![];
-    for i in 0..records.len() {
-        let record = &records[i];
-        let num_field = record.len();
-        if num_field != 12 {
-            return Err(BibErrorResponse::InvalidArgument(format!(
-                "The number of fields is {}",
-                num_field
-            )));
-        }
-        debug!(
-            "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
-            &record[0],  // id
-            &record[1],  // title
-            &record[2],  // char
-            &record[3],  // register_type
-            &record[4],  // recommendation
-            &record[5],  // remark
-            &record[6],  // status
-            &record[7],  // author
-            &record[8],  // publisher
-            &record[9],  // series
-            &record[10], // kana
-            &record[11], // register_date
-        );
-        let book = Book::new(
-            &record[0],  // id
-            &record[1],  // title
-            &record[10], // kana
-            &record[9],  // series
-            &record[7],  // author
-            &record[8],  // publisher
-            &record[2],  // char
-            &record[5],  // remark
-            &record[4],  // recommendation
-            &record[11], // register_date
-            &record[3],  // register_type
-            &record[6],  // status
-        )
-        .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
-        if map.insert(book.id, true).is_some() {
-            return Err(BibErrorResponse::DataDuplicated(book.id));
-        }
-        match search_item(&db, &book).await {
-            Ok(book) => {
+    let num_threads = 8;
+    let num_books = records.len();
+    let mut num_processed = 0;
+
+    loop {
+        let mut futures = vec![];
+        loop {
+            if futures.len() == num_threads || num_processed == num_books {
+                break;
+            }
+            let record = &records[num_processed];
+            let num_field = record.len();
+            if num_field != 12 {
+                return Err(BibErrorResponse::InvalidArgument(format!(
+                    "The number of fields is {}",
+                    num_field
+                )));
+            }
+            debug!(
+                "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
+                &record[0],  // id
+                &record[1],  // title
+                &record[2],  // char
+                &record[3],  // register_type
+                &record[4],  // recommendation
+                &record[5],  // remark
+                &record[6],  // status
+                &record[7],  // author
+                &record[8],  // publisher
+                &record[9],  // series
+                &record[10], // kana
+                &record[11], // register_date
+            );
+            let book = Book::new(
+                &record[0],  // id
+                &record[1],  // title
+                &record[10], // kana
+                &record[9],  // series
+                &record[7],  // author
+                &record[8],  // publisher
+                &record[2],  // char
+                &record[5],  // remark
+                &record[4],  // recommendation
+                &record[11], // register_date
+                &record[3],  // register_type
+                &record[6],  // status
+            )
+            .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+            if map.insert(book.id, true).is_some() {
                 return Err(BibErrorResponse::DataDuplicated(book.id));
             }
-            Err(_) => {}
-        };
-        books.push(book);
+            futures.push(check_item(&db, book.id));
+            num_processed += 1;
+            books.push(book);
+        }
+        let reses = join_all(futures).await;
+        for res in reses {
+            res?;
+        }
+        if num_processed == num_books {
+            break;
+        }
     }
 
     // Update the DB
-    for book in books {
-        if let Err(e) = insert_item(&db, &book).await {
-            error!("{:?}", e);
-            database::disconnect(&data);
-            return Err(BibErrorResponse::SystemError(e.to_string()));
+    num_processed = 0;
+    loop {
+        let mut futures = vec![];
+        loop {
+            if futures.len() == num_threads || num_processed == num_books {
+                break;
+            }
+            futures.push(insert_item(&db, &books[num_processed]));
+            num_processed += 1;
+        }
+        let reses = join_all(futures).await;
+        for res in reses {
+            match res {
+                Err(e) => {
+                    database::disconnect(&data);
+                    return Err(BibErrorResponse::SystemError(e.to_string()));
+                }
+                Ok(_) => {}
+            }
+        }
+        if num_processed == num_books {
+            break;
         }
     }
 
