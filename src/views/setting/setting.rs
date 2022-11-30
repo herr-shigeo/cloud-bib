@@ -186,8 +186,13 @@ pub async fn import_user_list(
         }
     };
 
-    // Check the number of items
+    // Check number of items that can be registered at once
     let nrecords: u32 = records.len().try_into().unwrap();
+    if nrecords > setting.max_parallel_registrations {
+        return Err(BibErrorResponse::ExceedLimit(nrecords));
+    }
+
+    // Check the number of items
     let mut user = User::default();
     user.id = 0;
     let users = match search_items(&db, &user).await {
@@ -233,13 +238,11 @@ pub async fn import_user_list(
     }
 
     // Update the DB
-    let num_threads = 8;
-    let num_users = users.len();
-    let mut num_processed = 0;
+    let mut num_processed: usize = 0;
     loop {
         let mut futures = vec![];
         loop {
-            if futures.len() == num_threads || num_processed == num_users {
+            if futures.len() as u32 == setting.num_threads || num_processed as u32 == nrecords {
                 break;
             }
             futures.push(insert_item(&db, &users[num_processed]));
@@ -255,7 +258,7 @@ pub async fn import_user_list(
                 Ok(_) => {}
             }
         }
-        if num_processed == num_users {
+        if num_processed as u32 == nrecords {
             break;
         }
     }
@@ -305,8 +308,13 @@ pub async fn import_book_list(
         }
     };
 
-    // Check the number of items
+    // Check the number of items that can be registered at once
     let nrecords: u32 = records.len().try_into().unwrap();
+    if nrecords > setting.max_parallel_registrations {
+        return Err(BibErrorResponse::ExceedLimit(nrecords));
+    }
+
+    // Check the number of items
     let mut book = Book::default();
     book.id = 0;
     let books = match search_items(&db, &book).await {
@@ -322,14 +330,13 @@ pub async fn import_book_list(
     // Check the parameter
     let mut map: HashMap<u32, bool> = HashMap::new();
     let mut books = vec![];
-    let num_threads = 8;
     let num_books = records.len();
-    let mut num_processed = 0;
+    let mut num_processed: usize = 0;
 
     loop {
         let mut futures = vec![];
         loop {
-            if futures.len() == num_threads || num_processed == num_books {
+            if futures.len() as u32 == setting.num_threads || num_processed == num_books {
                 break;
             }
             let record = &records[num_processed];
@@ -391,7 +398,7 @@ pub async fn import_book_list(
     loop {
         let mut futures = vec![];
         loop {
-            if futures.len() == num_threads || num_processed == num_books {
+            if futures.len() as u32 == setting.num_threads || num_processed as u32 == nrecords {
                 break;
             }
             futures.push(insert_item(&db, &books[num_processed]));
@@ -407,7 +414,7 @@ pub async fn import_book_list(
                 Ok(_) => {}
             }
         }
-        if num_processed == num_books {
+        if num_processed as u32 == nrecords {
             break;
         }
     }
