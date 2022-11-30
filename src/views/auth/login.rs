@@ -39,16 +39,29 @@ pub async fn login(
         }
     };
 
-    let mut passed = false;
     if system_user.len() == 1 {
-        let system_user = system_user.pop().unwrap();
-        if system_user.uname == "demo" || system_user.password == form.password {
-            passed = true;
-            check_or_create_session(&session, &system_user.dbname)?;
+        loop {
+            let system_user = system_user.pop().unwrap();
+
+            let res = argon2::verify_encoded(&system_user.password, form.password.as_bytes())
+                .map_err(|e| BibErrorResponse::SystemError(e.to_string()));
+            if res.is_ok() {
+                check_or_create_session(&session, &system_user.dbname)?;
+                break;
+            }
+
+            if form.password.eq(&system_user.password) {
+                check_or_create_session(&session, &system_user.dbname)?;
+                break;
+            }
+
+            if system_user.uname == "demo" {
+                check_or_create_session(&session, &system_user.dbname)?;
+                break;
+            }
+
+            return Err(BibErrorResponse::LoginFailed);
         }
-    }
-    if passed == false {
-        return Err(BibErrorResponse::LoginFailed);
     }
 
     let reply = Reply::default();

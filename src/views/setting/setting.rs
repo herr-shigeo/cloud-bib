@@ -17,6 +17,8 @@ use std::io::Write;
 use std::sync::Mutex;
 extern crate sanitize_filename;
 use crate::views::db_helper::{get_db, get_db_with_name};
+use argon2::Config;
+use rand::Rng;
 use std::io::{Error, ErrorKind};
 use std::{env, error};
 
@@ -113,8 +115,14 @@ pub async fn update_system_setting(
     let db = get_db_with_name(&data, &DB_COMMON_NAME).await?;
 
     let mut setting = SystemUser::default();
-    setting.password = form.password.clone();
     setting.dbname = get_string_value(&session, "dbname")?;
+
+    let salt: [u8; 32] = rand::thread_rng().gen();
+    let config = Config::default();
+    let hashed_password = argon2::hash_encoded(form.password.as_bytes(), &salt, &config)
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    setting.password = hashed_password;
 
     match update_item(&db, &setting).await {
         Ok(setting) => setting,
