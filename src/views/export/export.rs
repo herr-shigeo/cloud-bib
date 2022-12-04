@@ -28,6 +28,17 @@ pub async fn load(_session: Session) -> HttpResponse {
 fn write_user_list(users: Vec<User>, time_zone: &str) -> Result<String, Box<dyn error::Error>> {
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(vec![]);
 
+    wtr.write_record(&[
+        "利用者ID",
+        "氏名",
+        "カナ",
+        "利用者区分",
+        "備考",
+        "登録日",
+        "貸出回数",
+        "",
+    ])?;
+
     for user in users {
         wtr.serialize(User {
             id: user.id,
@@ -89,21 +100,41 @@ pub async fn export_user_list(
 fn write_book_list(books: Vec<Book>, time_zone: &str) -> Result<String, Box<dyn error::Error>> {
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(vec![]);
 
+    wtr.write_record(&[
+        "図書ID",
+        "タイトル",
+        "分類マーク",
+        "登録区分",
+        "推薦",
+        "破損状況",
+        "注記",
+        "著者",
+        "出版社",
+        "シリーズ",
+        "タイトルヨミ",
+        "登録日",
+        "貸出数",
+        "",
+        "",
+        "",
+    ])?;
+
     for book in books {
         wtr.serialize(Book {
             id: book.id,
             title: book.title.clone(),
-            kana: book.kana.clone(),
             char: book.char.clone(),
-            recommendation: book.recommendation.clone(),
-            status: book.status.clone(),
             register_type: book.register_type.clone(),
+            recommendation: book.recommendation.clone(),
+            remark: book.remark.clone(),
+            status: book.status.clone(),
             author: book.author.clone(),
             publisher: book.publisher.clone(),
             series: book.series.clone(),
-            remark: book.remark.clone(),
+            kana: book.kana.clone(),
             register_date: book.register_date.clone(),
             borrowed_count: book.borrowed_count.clone(),
+
             reserved: book.reserved.clone(),
             owner_id: None,
             return_deadline: None,
@@ -159,6 +190,16 @@ fn write_transaction_list(
     time_zone: &str,
 ) -> Result<String, Box<dyn error::Error>> {
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(vec![]);
+
+    wtr.write_record(&[
+        "",
+        "利用者ID",
+        "利用者氏名",
+        "図書ID",
+        "図書タイトル",
+        "貸出日",
+        "返却日",
+    ])?;
 
     for item in items {
         wtr.serialize(TransactionItem {

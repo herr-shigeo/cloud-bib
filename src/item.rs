@@ -143,8 +143,8 @@ pub struct Book {
     pub series: String,
     pub kana: String,
     pub register_date: String,
-
     pub borrowed_count: u32,
+
     pub reserved: String,
     pub owner_id: Option<u32>,
     pub return_deadline: Option<String>,
