@@ -208,18 +208,19 @@ function setProgressBar(processing) {
 }
 
 function move() {
-  setProgressBar(true);
   var elem = document.getElementById("myBar");
   elem.style.display = "block";
-  var width = 1;
-  var id = setInterval(frame, 2000);
+  var width = 0;
+  var id = setInterval(frame, 1000);
+  setProgressBar(true);
+
   function frame() {
-    if (width >= 100) {
-      clearInterval(id);
-      g_processing = false;
-    } else {
-      width += 0.5
+    if (g_processing) {
+      width += 1
       elem.style.width = width + "%";
+    }
+    else {
+      clearInterval(id);
     }
   }
 }
