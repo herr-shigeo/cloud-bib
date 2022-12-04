@@ -28,6 +28,7 @@ pub enum BibErrorResponse {
     SystemError(String),
     ExceedLimit(u32),
     NotPossibleToDelete,
+    ExceedLimitInParallel(u32),
 }
 
 impl Display for BibErrorResponse {
@@ -160,6 +161,13 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     reason: String::new(),
                 })
             }
+            BibErrorResponse::ExceedLimitInParallel(id) => HttpResponse::build(self.status_code())
+                .json(BibResponseBody {
+                    success: false,
+                    errcode: 115,
+                    message: format!("一度に追加できる上限を超えています({})", id),
+                    reason: String::new(),
+                }),
         }
     }
 }

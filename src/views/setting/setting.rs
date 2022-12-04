@@ -189,7 +189,9 @@ pub async fn import_user_list(
     // Check number of items that can be registered at once
     let nrecords: u32 = records.len().try_into().unwrap();
     if nrecords > setting.max_parallel_registrations {
-        return Err(BibErrorResponse::ExceedLimit(nrecords));
+        return Err(BibErrorResponse::ExceedLimitInParallel(
+            setting.max_parallel_registrations,
+        ));
     }
 
     // Check the number of items
@@ -311,7 +313,9 @@ pub async fn import_book_list(
     // Check the number of items that can be registered at once
     let nrecords: u32 = records.len().try_into().unwrap();
     if nrecords > setting.max_parallel_registrations {
-        return Err(BibErrorResponse::ExceedLimit(nrecords));
+        return Err(BibErrorResponse::ExceedLimitInParallel(
+            setting.max_parallel_registrations,
+        ));
     }
 
     // Check the number of items
