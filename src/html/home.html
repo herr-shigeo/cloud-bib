@@ -118,7 +118,7 @@ function setStatus(msg) {
 <p>貸出処理をするには利用者IDを入力して下さい</p>
 <form name="user_select" action="/user" method="get" enctype="application/x-www-form-urlencoded">
   <label for="user_id"><b><font size="+1">利用者ID</font></b></label>
-  <input type="text" id="user_id" name="user_id" style="ime-mode: disabled" placeholder="半角">
+  <input type="text" id="user_id" name="user_id" style="ime-mode: disabled" placeholder="半角数字">
 </form>
 
 <button class="accordion">利用者検索</button>
@@ -172,7 +172,7 @@ function setStatus(msg) {
   <input type="hidden" name="user_id" value="">
   <input type="hidden" name="borrowed_book_id" value="">
   <label for="returned_book_id"><b><font size="+1">返却図書ID</font></b></label>
-  <input type="text" id="returned_book_id" name="returned_book_id" onfocus="this.value=''" style="ime-mode: disabled" placeholder="半角">
+  <input type="text" id="returned_book_id" name="returned_book_id" onfocus="this.value=''" style="ime-mode: disabled" placeholder="半角数字">
 </form>
   <input type="submit" id="invisible_submit" onClick="setStatus('')" style="display: none;">
 </form>
