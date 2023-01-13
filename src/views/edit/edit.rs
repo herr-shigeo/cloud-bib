@@ -67,9 +67,7 @@ pub async fn user(
             user.id = 0;
             let users = match search_items(&db, &user).await {
                 Ok(users) => users,
-                Err(_) => {
-                    return Err(BibErrorResponse::UserNotFound(user.id));
-                }
+                Err(_) => vec![],
             };
             let nsize: u32 = users.len().try_into().unwrap();
             if nsize == setting.max_registered_users {
@@ -176,9 +174,7 @@ pub async fn book(
             book.id = 0;
             let books = match search_items(&db, &book).await {
                 Ok(books) => books,
-                Err(_) => {
-                    return Err(BibErrorResponse::BookNotFound(book.id));
-                }
+                Err(_) => vec![],
             };
             let nsize: u32 = books.len().try_into().unwrap();
             if nsize == setting.max_registered_users {
