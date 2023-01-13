@@ -29,7 +29,7 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     };
     app.route(
         &base_path.define(String::from("/")),
-        web::get().to(index::load),
+        web::get().to(about::load),
     )
     .route(
         &base_path.define(String::from("/css/{filename:.*}")),
@@ -44,8 +44,8 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
         web::get().to(index::js_files),
     )
     .route(
-        &base_path.define(String::from("/about")),
-        web::get().to(about::load),
+        &base_path.define(String::from("/login")),
+        web::get().to(index::load),
     )
     .route(
         &base_path.define(String::from("/home")),
