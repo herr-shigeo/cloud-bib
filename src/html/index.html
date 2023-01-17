@@ -14,6 +14,14 @@ $(document).ready(function() {
     success:  processJson
   };
   $('#form').ajaxForm(options);
+
+  document.getElementById("user_admin").onchange = function() {
+    document.getElementById("user_id").disabled = true;
+  };
+
+  document.getElementById("user_user").onchange = function() {
+    document.getElementById("user_id").disabled = false;
+  };
 });
 
 function processJson(data) {
@@ -21,6 +29,7 @@ function processJson(data) {
     window.location.href = '/home';
   }
 }
+
 </script>
 </head>
 
@@ -37,6 +46,8 @@ function processJson(data) {
     <label for="user_admin">管理者</label>
     <input type="radio" name="user_category" id="user_user" value="user">
     <label for="user_user">利用者</label>
+    <label for="user_id"><b>利用者ID</b></label>
+    <input type="text" name="user_id" id="user_id" disabled>
     <div class="btncontainer">
       <button type="submit" class="submitbtn">ログイン</button>
     </div>

@@ -1,6 +1,9 @@
-body {font-family: Arial, Helvetica, sans-serif;}
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
 
-input[type=text], input[type=password] {
+input[type="text"],
+input[type="password"] {
   width: 70%;
   padding: 12px 10px;
   margin: 14px 14px;
@@ -9,7 +12,8 @@ input[type=text], input[type=password] {
   box-sizing: border-box;
 }
 
-.full-container input[type=text], input[type=password] {
+.full-container input[type="text"],
+input[type="password"] {
   width: 100%;
   padding: 12px 10px;
   margin: 14px 0;
@@ -19,7 +23,7 @@ input[type=text], input[type=password] {
 }
 
 button {
-  background-color: #04AA6D;
+  background-color: #04aa6d;
   color: white;
   border-radius: 6px;
   padding: 10px 20px;
@@ -42,7 +46,7 @@ hr {
 
 /* Set a style for the submit button */
 .submitbtn {
-  background-color: #04AA6D;
+  background-color: #04aa6d;
   color: white;
   border-radius: 6px;
   padding: 10px 20px;
@@ -102,16 +106,12 @@ span.password {
 }
 
 .topnav a.active {
-  background-color: #04AA6D;
+  background-color: #04aa6d;
   color: white;
 }
 
 .topnav-right {
   float: right;
-}
-
-.divscroll {
-  <div style="padding-left:16px">
 }
 
 table {
@@ -120,12 +120,11 @@ table {
 }
 
 table th {
-  background-color: #2196F3;
+  background-color: #2196f3;
   color: white;
   text-align: left;
   padding: 8px;
 }
- 
 
 table.user-info {
   width: 100%;
@@ -142,7 +141,7 @@ table.grid {
 }
 
 table.grid th {
-  background-color: #2196F3;
+  background-color: #2196f3;
   color: white;
   text-align: left;
   padding: 8px;
@@ -159,18 +158,18 @@ table.grid tr:hover {
 }
 
 table.grid thead {
-  display:table-header-group;
+  display: table-header-group;
   vertical-align: middle;
 }
- 
+
 table.grid tfoot {
-  display:table-footer-group;
-  background-color: #2196F3;
+  display: table-footer-group;
+  background-color: #2196f3;
   color: white;
   text-align: left;
   padding: 8px;
 }
- 
+
 .accordion {
   background-color: #eee;
   font-weight: bold;
@@ -185,8 +184,9 @@ table.grid tfoot {
   transition: 0.4s;
 }
 
-.active, .accordion:hover {
-  background-color: #ccc; 
+.active,
+.accordion:hover {
+  background-color: #ccc;
 }
 
 .panel {
@@ -197,7 +197,7 @@ table.grid tfoot {
 }
 
 /* Style the search field */
-form.search input[type=text] {
+form.search input[type="text"] {
   padding: 10px;
   font-size: 17px;
   border: 1px solid grey;
@@ -211,7 +211,7 @@ form.search button {
   float: left;
   width: 30%;
   padding: 10px;
-  background: #2196F3;
+  background: #2196f3;
   color: white;
   font-size: 17px;
   border: 1px solid grey;
