@@ -49,6 +49,8 @@ pub async fn login(
             let system_user = system_user.pop().unwrap();
 
             if form.user_category == "admin" {
+                return Err(BibErrorResponse::NotAuthorized);
+            } else if form.user_category == "operator" {
                 // Verify the admin password
                 let res = argon2::verify_encoded(&system_user.password, form.password.as_bytes())
                     .map_err(|e| BibErrorResponse::SystemError(e.to_string()));
@@ -106,11 +108,18 @@ pub async fn login(
     }
 
     let mut reply = Reply::default();
-    if form.user_category == "admin" {
-        reply.path_to_home = "/home".to_owned();
-    } else {
-        reply.path_to_home = "/member/home".to_owned();
-    }
 
+    match form.user_category.as_str() {
+        "admin" => {
+            reply.path_to_home = "/account".to_owned();
+        }
+        "operator" => {
+            reply.path_to_home = "/home".to_owned();
+        }
+        "user" => {
+            reply.path_to_home = "/member/home".to_owned();
+        }
+        &_ => {}
+    }
     Ok(HttpResponse::Ok().json(reply))
 }

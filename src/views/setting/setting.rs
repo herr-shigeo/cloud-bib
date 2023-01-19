@@ -113,6 +113,8 @@ pub async fn update_system_setting(
     form: web::Form<Form2Data>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
+    debug!("{:?}", form);
+
     check_session(&session)?;
     let db = get_db_with_name(&data, &DB_COMMON_NAME).await?;
 

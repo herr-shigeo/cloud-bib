@@ -18,23 +18,16 @@
       integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
       crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
-    <script>
-      function openAdminDemo() {
-        var formData = new FormData(document.getElementById("formId"));
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "submit.php", true);
-        xhr.send(formData);
-      }
-    </script>
-  </head>
+    </head>
 
   <body>
     <div class="topnav">
       <a class="active" href="/login">ログイン</a>
-      <a href="/edit/main">ユーザー登録</a>
+      <a href="/acount/register">アカウント作成</a>
       <a href="/search/main">マニュアル</a>
-      <a
-        href="https://twitter.com/messages/compose?recipient_id=1530991195333308417">問い合わせ</a>
+<!--
+      <a href="https://twitter.com/messages/compose?recipient_id=1530991195333308417">問い合わせ</a>
+-->
     </div>
 
     <div style="padding-left: 6px">
@@ -57,12 +50,12 @@
       </ul>
 
       <h2>製品デモ</h2>
-      以下よりログインして、すべての機能を試すことができます。
+      以下のデモ画面にて、実際の機能を試すことができます。
       <form id="form" name="form" action="/auth/login" method="post">
         <input type="hidden" name="uname" value="demo" />
         <input type="hidden" name="password" value="demo" />
         <button type="submit" class="submitbtn">
-          管理者のデモ画面にログイン
+          司書のデモ画面へ
         </button>
       </form>
 
@@ -104,7 +97,9 @@
         </li>
       </ul>
 
+<!--
       <h2>お問い合わせ</h2>
+-->
       <p>
         <a
           href="https://twitter.com/messages/compose?recipient_id=1530991195333308417">CloudBibサポート</a>
