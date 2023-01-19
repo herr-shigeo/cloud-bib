@@ -1,456 +1,661 @@
 <!DOCTYPE html>
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.cloudbib.net/css/default.css">
-<script src="https://www.cloudbib.net/js/util.js"></script>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-<script src="https://www.cloudbib.net/js/jquery.autoKana.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js" integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn" crossorigin="anonymous"></script>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://www.cloudbib.net/css/default.css" />
+    <script src="https://www.cloudbib.net/js/util.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.min.js"
+      integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+      crossorigin="anonymous"></script>
+    <script src="https://www.cloudbib.net/js/jquery.autoKana.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
+      integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
+      crossorigin="anonymous"></script>
 
-<script>
-function get_link(data){
-    $('#form').submit();
-};
+    <script>
+      function get_link(data) {
+        $("#form").submit();
+      }
 
-$(document).ready(function() { 
-  var options = {
-    dataType: 'json',
-    success:  processJson
-  };
-  $('#form').ajaxForm(options);
+      $(document).ready(function () {
+        var options = {
+          dataType: "json",
+          success: processJson,
+        };
+        $("#form").ajaxForm(options);
 
-  var options1 = {
-    dataType: 'json',
-    success:  processUserList
-  };
-  $('#form_user_list').ajaxForm(options1);
+        var options1 = {
+          dataType: "json",
+          success: processUserList,
+        };
+        $("#form_user_list").ajaxForm(options1);
 
-  var options2 = {
-    dataType: 'json',
-    success:  processUserUpdate
-  };
-  $('#form_user_update').ajaxForm(options2);
+        var options2 = {
+          dataType: "json",
+          success: processUserUpdate,
+        };
+        $("#form_user_update").ajaxForm(options2);
 
-  var options3 = {
-    dataType: 'json',
-    success:  processBookList
-  };
-  $('#form_book_list').ajaxForm(options3);
+        var options3 = {
+          dataType: "json",
+          success: processBookList,
+        };
+        $("#form_book_list").ajaxForm(options3);
 
+        var options4 = {
+          dataType: "json",
+          success: processBookUpdate,
+        };
+        $("#form_book_update").ajaxForm(options4);
 
-  var options4 = {
-    dataType: 'json',
-    success:  processBookUpdate
-  };
-  $('#form_book_update').ajaxForm(options4);
+        var options5 = {
+          dataType: "json",
+          success: processRegister,
+          error: processError,
+          timeout: 0,
+        };
+        $("#form_user_register").ajaxForm(options5);
+        $("#form_book_register").ajaxForm(options5);
 
-  var options5 = {
-    dataType: 'json',
-    success:  processRegister,
-    error:  processError,
-    timeout: 0
-  };
-  $('#form_user_register').ajaxForm(options5);
-  $('#form_book_register').ajaxForm(options5);
+        $(function () {
+          $.fn.autoKana('input[name="book_title"]', 'input[name="book_kana"]', {
+            katakana: true,
+          });
+        });
 
-  $(function() {
-    $.fn.autoKana('input[name="book_title"]', 'input[name="book_kana"]', {katakana:true});
-  });
+        setCurrentDate();
+      });
 
-  setCurrentDate();
-});
+      function processJson(data) {
+        handleAuthError(data, "/login");
+      }
 
-function processJson(data) {
-  handleAuthError(data, '/login')
-}
+      function processUserList(data) {
+        document.getElementById("form_user_list").reset();
 
-function processUserList(data) {
-  document.getElementById("form_user_list").reset();
+        if (handleAuthError(data, "/login")) {
+          return;
+        }
+        if (handleError(data)) {
+          return;
+        }
 
-  if (handleAuthError(data, '/login')) {
-    return;
-  }
-  if (handleError(data)) {
-    return;
-  }
+        var user = data["user_list"][0];
+        document.getElementById("user_id").value = user.id;
+        document.getElementById("user_name").value = user.name;
+        document.getElementById("user_kana").value = user.kana;
+        document.getElementById("user_remark").value = user.remark;
+        document.getElementById("user_register_date").value =
+          user.register_date;
+        if (user.category == "生徒")
+          document.getElementById("user_seito").checked = true;
+        else if (user.category == "講師")
+          document.getElementById("user_koushi").checked = true;
+        else if (user.category == "その他")
+          document.getElementById("user_other").checked = true;
+      }
 
-  var user = data['user_list'][0];
-  document.getElementById("user_id").value = user.id;
-  document.getElementById("user_name").value = user.name;
-  document.getElementById("user_kana").value = user.kana;
-  document.getElementById("user_remark").value = user.remark;
-  document.getElementById("user_register_date").value = user.register_date;
-  if (user.category == "生徒")
-    document.getElementById("user_seito").checked = true;
-  else if (user.category == "講師")
-    document.getElementById("user_koushi").checked = true;
-  else if (user.category == "その他")
-    document.getElementById("user_other").checked = true;
-}
+      function processBookList(data) {
+        document.getElementById("form_book_list").reset();
 
-function processBookList(data) {
-  document.getElementById("form_book_list").reset();
+        if (handleAuthError(data, "/login")) {
+          return;
+        }
+        if (handleError(data)) {
+          return;
+        }
 
-  if (handleAuthError(data, '/login')) {
-    return;
-  }
-  if (handleError(data)) {
-    return;
-  }
+        var book = data["book_list"][0];
+        document.getElementById("book_id").value = book.id;
+        document.getElementById("book_title").value = book.title;
+        document.getElementById("book_kana").value = book.kana;
+        document.getElementById("book_series").value = book.series;
+        document.getElementById("book_author").value = book.author;
+        document.getElementById("book_publisher").value = book.publisher;
+        document.getElementById("book_char").value = book.char;
+        document.getElementById("book_remark").value = book.remark;
+        document.getElementById("book_status").value = book.status;
+        document.getElementById("book_recommendation").value =
+          book.recommendation;
+        if (book.register_type == "購入")
+          document.getElementById("book_bought").checked = true;
+        else if (book.register_type == "寄贈")
+          document.getElementById("book_ippan").checked = true;
+        else if (book.register_type == "財団")
+          document.getElementById("book_zaidan").checked = true;
+        document.getElementById("book_register_date").value =
+          book.register_date;
+      }
 
-  var book = data['book_list'][0];
-  document.getElementById("book_id").value = book.id;
-  document.getElementById("book_title").value = book.title;
-  document.getElementById("book_kana").value = book.kana;
-  document.getElementById("book_series").value = book.series;
-  document.getElementById("book_author").value = book.author;
-  document.getElementById("book_publisher").value = book.publisher;
-  document.getElementById("book_char").value = book.char;
-  document.getElementById("book_remark").value = book.remark;
-  document.getElementById("book_status").value = book.status;
-  document.getElementById("book_recommendation").value = book.recommendation;
-  if (book.register_type == "購入")
-    document.getElementById("book_bought").checked = true;
-  else if (book.register_type == "寄贈")
-    document.getElementById("book_ippan").checked = true;
-  else if (book.register_type == "財団")
-    document.getElementById("book_zaidan").checked = true;
-  document.getElementById("book_register_date").value = book.register_date;
-}
+      function processUserUpdate(data) {
+        document.getElementById("form_user_update").reset();
+        document.getElementById("user_id_search").focus();
 
-function processUserUpdate(data) {
-  document.getElementById("form_user_update").reset();
-  document.getElementById("user_id_search").focus();
+        if (handleAuthError(data, "/login")) {
+          return;
+        }
+        if (handleError(data)) {
+          return;
+        }
 
-  if (handleAuthError(data, '/login')) {
-    return;
-  }
-  if (handleError(data)) {
-    return;
-  }
+        alert("データを更新しました");
+        setCurrentDate();
+      }
 
-  alert('データを更新しました');
-  setCurrentDate();
-}
+      function processBookUpdate(data) {
+        document.getElementById("form_book_update").reset();
+        document.getElementById("book_id_search").focus();
 
-function processBookUpdate(data) {
-  document.getElementById("form_book_update").reset();
-  document.getElementById("book_id_search").focus();
+        if (handleAuthError(data, "/login")) {
+          return;
+        }
+        if (handleError(data)) {
+          return;
+        }
 
-  if (handleAuthError(data, '/login')) {
-    return;
-  }
-  if (handleError(data)) {
-    return;
-  }
+        alert("データを更新しました");
+        setCurrentDate();
+      }
 
-  alert('データを更新しました');
-  setCurrentDate();
-}
+      function setCurrentDate() {
+        const date = new Date();
+        const str_date = date
+          .toLocaleDateString("en-GB", { timeZone: "Europe/Berlin" })
+          .split("/")
+          .reverse()
+          .join("/");
+        document.getElementById("user_register_date").value = str_date;
+        document.getElementById("book_register_date").value = str_date;
+      }
 
-function setCurrentDate() {
-  const date = new Date();
-  const str_date = date.toLocaleDateString('en-GB', { timeZone: 'Europe/Berlin' }).split('/').reverse().join('/');
-  document.getElementById("user_register_date").value = str_date;
-  document.getElementById("book_register_date").value = str_date;
-}
+      function processRegister(data) {
+        setProgressBar(false);
+        if (handleAuthError(data, "/login")) {
+          return;
+        }
+        if (handleError(data)) {
+          return;
+        }
+        alert("登録しました");
+      }
 
-function processRegister(data) {
-  setProgressBar(false);
-  if (handleAuthError(data, '/login')) {
-    return;
-  }
-  if (handleError(data)) {
-    return;
-  }
-  alert('登録しました');
-}
+      function processError(jqXHR, exception) {
+        setProgressBar(false);
+        if (jqXHR.status === 0) {
+          return "Not connected.\nPlease verify your network connection.";
+        } else if (jqXHR.status == 404) {
+          return "The requested page not found. [404]";
+        } else if (jqXHR.status == 500) {
+          return "Internal Server Error [500].";
+        } else if (exception === "parsererror") {
+          return "Requested JSON parse failed.";
+        } else if (exception === "timeout") {
+          return "Time out error.";
+        } else if (exception === "abort") {
+          return "Ajax request aborted.";
+        } else {
+          return "Uncaught Error.\n" + jqXHR.responseText;
+        }
+      }
 
-function processError(jqXHR, exception) {
-  setProgressBar(false);
-  if (jqXHR.status === 0) {
-    return ('Not connected.\nPlease verify your network connection.');
-  } else if (jqXHR.status == 404) {
-    return ('The requested page not found. [404]');
-  } else if (jqXHR.status == 500) {
-    return ('Internal Server Error [500].');
-  } else if (exception === 'parsererror') {
-    return ('Requested JSON parse failed.');
-  } else if (exception === 'timeout') {
-    return ('Time out error.');
-  } else if (exception === 'abort') {
-    return ('Ajax request aborted.');
-  } else {
-    return ('Uncaught Error.\n' + jqXHR.responseText);
-  }
-}
+      var g_processing = false;
 
+      function setProgressBar(processing) {
+        g_processing = processing;
+        var prog_elem = document.getElementById("progress");
+        var myBar_elem = document.getElementById("myBar");
+        if (processing) {
+          prog_elem.style.display = "block";
+          myBar_elem.style.display = "block";
+        } else {
+          prog_elem.style.display = "none";
+          myBar_elem.style.display = "none";
+          document.getElementById("user_file_attached").value = "";
+          document.getElementById("book_file_attached").value = "";
+        }
+      }
 
-var g_processing = false;
+      function move() {
+        var elem = document.getElementById("myBar");
+        elem.style.display = "block";
+        var width = 0;
+        var id = setInterval(frame, 1000);
+        setProgressBar(true);
 
-function setProgressBar(processing) {
-  g_processing = processing;
-  var prog_elem = document.getElementById("progress");
-  var myBar_elem = document.getElementById("myBar");
-  if (processing) {
-    prog_elem.style.display = "block";
-    myBar_elem.style.display = "block";
-  }
-  else {
-    prog_elem.style.display = "none";
-    myBar_elem.style.display = "none";
-    document.getElementById("user_file_attached").value = '';
-    document.getElementById("book_file_attached").value = '';
-  }
-}
+        function frame() {
+          if (g_processing) {
+            width += 1;
+            elem.style.width = width + "%";
+          } else {
+            clearInterval(id);
+          }
+        }
+      }
+    </script>
+  </head>
 
-function move() {
-  var elem = document.getElementById("myBar");
-  elem.style.display = "block";
-  var width = 0;
-  var id = setInterval(frame, 1000);
-  setProgressBar(true);
+  <body>
+    <form id="form" name="form" action="/auth/logout" method="post">
+      <input type="submit" id="invisible_logout" style="display: none" />
+    </form>
 
-  function frame() {
-    if (g_processing) {
-      width += 1
-      elem.style.width = width + "%";
-    }
-    else {
-      clearInterval(id);
-    }
-  }
-}
-
-</script>
-</head>
-
-<body>
-
-<form id="form" name="form" action="/auth/logout" method="post">
-<input type="submit" id="invisible_logout" style="display: none;">
-</form>
-
-<div class="topnav">
-  <a class="active" href="/home">ホーム</a>
-  <a href="/search/main">図書検索</a>
-  <a href="/edit/main">登録・編集</a>
-  <a href="/export/main">出力</a>
-  <a href="/setting/main">設定</a>
-  <a href="/history">貸出履歴</a>
-  <div class="topnav-right">
-    <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
-  </div>
-</div>
-
-<h3 style="color:#666666">登録・編集</h3>
-<hr>
-<button class="accordion">利用者</button>
-<div class="panel">
-<p>既存データを修正する場合は、利用者IDを入力後にEnterを押してデータを読み出す</p>
-<form id="form_user_list" name="form_user_list" action="/search/user" method="get" enctype="application/x-www-form-urlencoded">
-  <label for="value"><b>利用者ID</b></label>
-  <input type="text" name="id" placeholder="半角数字" id="user_id_search">
-  <input type="hidden" name="name" placeholder="" value="">
-  <input type="hidden" name="kana" placeholder="" value="">
-  <input type="hidden" name="category" value="">
-</form>
-<form id="form_user_update" name="form_user_update" action="/edit/user" method="post">
-  <div class="container">
-    <p>項目を入力/修正後、実行ボタンを押して実行</p>
-    <table>
-    <tr>
-    <td>
-    <label for="user_id"><b>利用者ID*</b></label>
-    <input type="text" name="user_id" id="user_id" placeholder="半角数字" required>
-    </td>
-    <td>
-    <b>利用者区分</b>
-    <input type="radio" name="user_category" id="user_seito" value="生徒">
-    <label for="user_setio">生徒</label>
-    <input type="radio" name="user_category" id="user_koushi" value="講師">
-    <label for="user_koushi">講師</label>
-    <input type="radio" name="user_category" id="user_other" value="その他" checked>
-    <label for="user_other">その他</label>
-    </td>
-    <td>
-    <label for="user_remark"><b>備考</b></label>
-    <input type="text" name="user_remark" placeholder="" id="user_remark">
-    </td>
-    </tr>
-    <tr>
-    <td>
-    <label for="user_name"><b>氏名*</b></label>
-    <input type="text" name="user_name" id="user_name" placeholder="全角" required>
-    </td>
-    <td>
-    <label for="user_kana"><b>カナ*</b></label>
-    <input type="text" name="user_kana" id="user_kana" placeholder="全角" required>
-    </td>
-    <td>
-    <label for="user_register_date"><b>登録日</b></label>
-    <input type="text" name="user_register_date" id="user_register_date" placeholder="半角 yyyy/mm/dd">
-    </td>
-    </tr>
-    </table>
-
-    <div class="container">
-      <input type="radio" name="operation" id="user_update" value="update" checked>
-      <label for="user_update"><b>更新</b></lable>
-      <input type="radio" name="operation" id="user_delete" value="delete">
-      <label for="user_delete"><b>削除</b></lable>
-      <br>
-      <button type="submit" class="submitbtn">実行</button>
+    <div class="topnav">
+      <a class="active" href="/home">ホーム</a>
+      <a href="/search/main">図書検索</a>
+      <a href="/edit/main">登録・編集</a>
+      <a href="/export/main">出力</a>
+      <a href="/setting/main">設定</a>
+      <a href="/history">貸出履歴</a>
+      <div class="topnav-right">
+        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+      </div>
     </div>
-  </div>
-</form>
-</div>
 
-<button class="accordion">図書</button>
-<div class="panel">
-<p>既存データを修正する場合は、図書IDを入力後にEnterを押してデータを読み出す</p>
-<form id="form_book_list" name="form_book_list" action="/search/book" method="get" enctype="application/x-www-form-urlencoded">
-  <label for="value"><b>図書ID</b></label>
-  <input type="text" name="id" id="book_id_search" placeholder="半角数字">
-  <input type="hidden" name="title" value="">
-  <input type="hidden" name="kana" value="">
-  <input type="hidden" name="author" value="">
-</form>
-<form id="form_book_update" name="form_book_update" action="/edit/book" method="post">
-  <div class="container">
-    <p>項目を入力/修正後、実行ボタンを押して実行</p>
-    <table>
-    <tr>
-    <td>
-    <label for="book_id"><b>図書ID*</b></label>
-    <input type="text" name="book_id" id="book_id" placeholder="半角数字" required>
-    </td>
-    <td>
-    <label for="book_char"><b>分類マーク</b></label>
-    <input type="text" name="book_char" id="book_char" placeholder="">
-    </td>
-    </tr>
-    <tr>
-    <td>
-    <label for="book_title"><b>タイトル*</b></label>
-    <input type="text" name="book_title" id="book_title" placeholder="すべて全角 / ＤＶＤはタイトル前に入れる" required>
-    </td>
-    <td>
-    <label for="book_series"><b>シリーズ</b></label>
-    <input type="text" name="book_series" id="book_series" placeholder="">
-    </td>
-    </tr>
-    <tr>
-    <td>
-    <label for="book_kana"><b>タイトルヨミ*</b></label>
-    <input type="text" name="book_kana" id="book_kana" placeholder="全角カナ" required>
-    </td>
-    <td>
-    <label for="book_author"><b>著者</b></label>
-    <input type="text" name="book_author" id="book_author" placeholder="">
-    </td>
-    </tr>
-    <tr>
-    <td>
-    <label for="book_publisher"><b>出版社</b></label>
-    <input type="text" name="book_publisher" id="book_publisher" placeholder="">
-    </td>
-    <td>
-    <label for="book_recommendation"><b>推薦</b></label>
-    <input type="text" name="book_recommendation" id="book_recommendation" placeholder="【〇〇推薦】を記入する">
-    </td>
-    </tr>
-    <tr>
-    <td>
-    <label for="book_remark"><b>注記</b></label>
-    <input type="text" name="book_remark" id="book_remark" placeholder="">
-    </td>
-    <td>
-    <label for="book_status"><b>破損状況</b></label>
-    <input type="text" name="book_status" id="book_status" placeholder="">
-    </td>
-    <tr>
-    </tr>
-    <td>
-    <label for="book_register_date"><b>登録日</b></label>
-    <input type="text" name="book_register_date" id="book_register_date" placeholder="半角 yyyy/mm/dd">
-    </td>
-    <td>
-    <b>登録区分</b>
-    <input type="radio" name="book_register_type" id="book_bought" value="購入" checked>
-    <label for="book_bought">購入</label>
-    <input type="radio" name="book_register_type" id="book_ippan" value="寄贈">
-    <label for="book_ippan">寄贈</label>
-    <input type="radio" name="book_register_type" id="book_zaidan" value="財団">
-    <label for="book_zaidan">財団</label>
-    </td>
-    </tr>
-    </table>
+    <h3 style="color: #666666">登録・編集</h3>
+    <hr />
+    <button class="accordion">利用者</button>
+    <div class="panel">
+      <p>
+        既存データを修正する場合は、利用者IDを入力後にEnterを押してデータを読み出す
+      </p>
+      <form
+        id="form_user_list"
+        name="form_user_list"
+        action="/search/user"
+        method="get"
+        enctype="application/x-www-form-urlencoded">
+        <label for="value"><b>利用者ID</b></label>
+        <input
+          type="text"
+          name="id"
+          placeholder="半角数字"
+          id="user_id_search"
+          />
+        <input type="hidden" name="name" placeholder="" value="" />
+        <input type="hidden" name="kana" placeholder="" value="" />
+        <input type="hidden" name="category" value="" />
+      </form>
+      <form
+        id="form_user_update"
+        name="form_user_update"
+        action="/edit/user"
+        method="post">
+        <div class="container">
+          <p>項目を入力/修正後、実行ボタンを押して実行</p>
+          <table>
+            <tr>
+              <td>
+                <label for="user_id"><b>利用者ID*</b></label>
+                <input
+                  type="text"
+                  name="user_id"
+                  id="user_id"
+                  placeholder="半角数字"
+                  required
+                  />
+              </td>
+              <td>
+                <b>利用者区分</b>
+                <input
+                  type="radio"
+                  name="user_category"
+                  id="user_seito"
+                  value="生徒"
+                  />
+                <label for="user_setio">生徒</label>
+                <input
+                  type="radio"
+                  name="user_category"
+                  id="user_koushi"
+                  value="講師"
+                  />
+                <label for="user_koushi">講師</label>
+                <input
+                  type="radio"
+                  name="user_category"
+                  id="user_other"
+                  value="その他"
+                  checked
+                  />
+                <label for="user_other">その他</label>
+              </td>
+              <td>
+                <label for="user_remark"><b>備考</b></label>
+                <input
+                  type="text"
+                  name="user_remark"
+                  placeholder=""
+                  id="user_remark"
+                  />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="user_name"><b>氏名*</b></label>
+                <input
+                  type="text"
+                  name="user_name"
+                  id="user_name"
+                  placeholder="全角"
+                  required
+                  />
+              </td>
+              <td>
+                <label for="user_kana"><b>カナ*</b></label>
+                <input
+                  type="text"
+                  name="user_kana"
+                  id="user_kana"
+                  placeholder="全角"
+                  required
+                  />
+              </td>
+              <td>
+                <label for="user_register_date"><b>登録日</b></label>
+                <input
+                  type="text"
+                  name="user_register_date"
+                  id="user_register_date"
+                  placeholder="半角 yyyy/mm/dd"
+                  />
+              </td>
+            </tr>
+          </table>
 
-    <div class="container">
-      <input type="radio" name="operation" id="book_update" value="update" checked>
-      <label for="book_update"><b>更新</b></lable>
-      <input type="radio" name="operation" id="book_delete" value="delete">
-      <label for="book_delete"><b>削除</b></lable>
-      <br>
-      <button type="submit" class="submitbtn">実行</button>
+          <div class="container">
+            <input
+              type="radio"
+              name="operation"
+              id="user_update"
+              value="update"
+              checked
+              />
+            <label for="user_update"><b>更新</b></label>
+            <input
+              type="radio"
+              name="operation"
+              id="user_delete"
+              value="delete"
+              />
+            <label for="user_delete"><b>削除</b></label>
+            <br />
+            <button type="submit" class="submitbtn">実行</button>
+          </div>
+        </div>
+      </form>
     </div>
-  </div>
-</form>
-</div>
 
-<button class="accordion">一括登録</button>
-<div class="panel">
-<form id="form_user_register" name="form_user_register" action="/setting/import_user" method="post" enctype="multipart/form-data">
-  <input type="file" id="user_file_attached" accept=".csv,.tsv" name="file_attached">
-  <button type="submit" class="submitbtn" onClick="move()">利用者登録</button>
-</form>
+    <button class="accordion">図書</button>
+    <div class="panel">
+      <p>
+        既存データを修正する場合は、図書IDを入力後にEnterを押してデータを読み出す
+      </p>
+      <form
+        id="form_book_list"
+        name="form_book_list"
+        action="/search/book"
+        method="get"
+        enctype="application/x-www-form-urlencoded">
+        <label for="value"><b>図書ID</b></label>
+        <input
+          type="text"
+          name="id"
+          id="book_id_search"
+          placeholder="半角数字"
+          />
+        <input type="hidden" name="title" value="" />
+        <input type="hidden" name="kana" value="" />
+        <input type="hidden" name="author" value="" />
+      </form>
+      <form
+        id="form_book_update"
+        name="form_book_update"
+        action="/edit/book"
+        method="post">
+        <div class="container">
+          <p>項目を入力/修正後、実行ボタンを押して実行</p>
+          <table>
+            <tr>
+              <td>
+                <label for="book_id"><b>図書ID*</b></label>
+                <input
+                  type="text"
+                  name="book_id"
+                  id="book_id"
+                  placeholder="半角数字"
+                  required
+                  />
+              </td>
+              <td>
+                <label for="book_char"><b>分類マーク</b></label>
+                <input
+                  type="text"
+                  name="book_char"
+                  id="book_char"
+                  placeholder=""
+                  />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_title"><b>タイトル*</b></label>
+                <input
+                  type="text"
+                  name="book_title"
+                  id="book_title"
+                  placeholder="すべて全角 / ＤＶＤはタイトル前に入れる"
+                  required
+                  />
+              </td>
+              <td>
+                <label for="book_series"><b>シリーズ</b></label>
+                <input
+                  type="text"
+                  name="book_series"
+                  id="book_series"
+                  placeholder=""
+                  />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_kana"><b>タイトルヨミ*</b></label>
+                <input
+                  type="text"
+                  name="book_kana"
+                  id="book_kana"
+                  placeholder="全角カナ"
+                  required
+                  />
+              </td>
+              <td>
+                <label for="book_author"><b>著者</b></label>
+                <input
+                  type="text"
+                  name="book_author"
+                  id="book_author"
+                  placeholder=""
+                  />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_publisher"><b>出版社</b></label>
+                <input
+                  type="text"
+                  name="book_publisher"
+                  id="book_publisher"
+                  placeholder=""
+                  />
+              </td>
+              <td>
+                <label for="book_recommendation"><b>推薦</b></label>
+                <input
+                  type="text"
+                  name="book_recommendation"
+                  id="book_recommendation"
+                  placeholder="【〇〇推薦】を記入する"
+                  />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_remark"><b>注記</b></label>
+                <input
+                  type="text"
+                  name="book_remark"
+                  id="book_remark"
+                  placeholder=""
+                  />
+              </td>
+              <td>
+                <label for="book_status"><b>破損状況</b></label>
+                <input
+                  type="text"
+                  name="book_status"
+                  id="book_status"
+                  placeholder=""
+                  />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_register_date"><b>登録日</b></label>
+                <input
+                  type="text"
+                  name="book_register_date"
+                  id="book_register_date"
+                  placeholder="半角 yyyy/mm/dd"
+                  />
+              </td>
+              <td>
+                <b>登録区分</b>
+                <input
+                  type="radio"
+                  name="book_register_type"
+                  id="book_bought"
+                  value="購入"
+                  checked
+                  />
+                <label for="book_bought">購入</label>
+                <input
+                  type="radio"
+                  name="book_register_type"
+                  id="book_ippan"
+                  value="寄贈"
+                  />
+                <label for="book_ippan">寄贈</label>
+                <input
+                  type="radio"
+                  name="book_register_type"
+                  id="book_zaidan"
+                  value="財団"
+                  />
+                <label for="book_zaidan">財団</label>
+              </td>
+            </tr>
+          </table>
 
-<form id="form_book_register" name="form_book_register" action="/setting/import_book" method="post" enctype="multipart/form-data">
-  <input type="file" id="book_file_attached" accept=".csv,.tsv" name="file_attached">
-  <button type="submit" class="submitbtn" onClick="move()">図書登録</button>
-</form>
-</div>
+          <div class="container">
+            <input
+              type="radio"
+              name="operation"
+              id="book_update"
+              value="update"
+              checked
+              />
+            <label for="book_update"><b>更新</b></label>
+            <input
+              type="radio"
+              name="operation"
+              id="book_delete"
+              value="delete"
+              />
+            <label for="book_delete"><b>削除</b></label>
+            <br />
+            <button type="submit" class="submitbtn">実行</button>
+          </div>
+        </div>
+      </form>
+    </div>
 
-<div id="progress" style="display: none">
-  <div id="myBar" style="display: none"></div>
-</div>
+    <button class="accordion">一括登録</button>
+    <div class="panel">
+      <form
+        id="form_user_register"
+        name="form_user_register"
+        action="/setting/import_user"
+        method="post"
+        enctype="multipart/form-data">
+        <input
+          type="file"
+          id="user_file_attached"
+          accept=".csv,.tsv"
+          name="file_attached"
+          />
+        <button type="submit" class="submitbtn" onClick="move()">
+          利用者登録
+        </button>
+      </form>
 
-<script>
-var acc = document.getElementsByClassName("accordion");
-acc[0].addEventListener("click", function() {
-  this.classList.toggle("active");
-  var panel = this.nextElementSibling;
-  if (panel.style.display === "block") {
-    panel.style.display = "none";
-  } else {
-    panel.style.display = "block";
-    document.getElementById("user_id_search").focus();
-  }
-});
+      <form
+        id="form_book_register"
+        name="form_book_register"
+        action="/setting/import_book"
+        method="post"
+        enctype="multipart/form-data">
+        <input
+          type="file"
+          id="book_file_attached"
+          accept=".csv,.tsv"
+          name="file_attached"
+          />
+        <button type="submit" class="submitbtn" onClick="move()">
+          図書登録
+        </button>
+      </form>
+    </div>
 
-acc[1].addEventListener("click", function() {
-  this.classList.toggle("active");
-  var panel = this.nextElementSibling;
-  if (panel.style.display === "block") {
-    panel.style.display = "none";
-  } else {
-    panel.style.display = "block";
-    document.getElementById("book_id_search").focus();
-  }
-});
+    <div id="progress" style="display: none">
+      <div id="myBar" style="display: none"></div>
+    </div>
 
-acc[2].addEventListener("click", function() {
-  this.classList.toggle("active");
-  var panel = this.nextElementSibling;
-  if (panel.style.display === "block") {
-    panel.style.display = "none";
-  } else {
-    panel.style.display = "block";
-  }
-});
-</script>
+    <script>
+      var acc = document.getElementsByClassName("accordion");
+      acc[0].addEventListener("click", function () {
+        this.classList.toggle("active");
+        var panel = this.nextElementSibling;
+        if (panel.style.display === "block") {
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+          document.getElementById("user_id_search").focus();
+        }
+      });
 
-</body>
+      acc[1].addEventListener("click", function () {
+        this.classList.toggle("active");
+        var panel = this.nextElementSibling;
+        if (panel.style.display === "block") {
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+          document.getElementById("book_id_search").focus();
+        }
+      });
+
+      acc[2].addEventListener("click", function () {
+        this.classList.toggle("active");
+        var panel = this.nextElementSibling;
+        if (panel.style.display === "block") {
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+        }
+      });
+    </script>
+  </body>
 </html>

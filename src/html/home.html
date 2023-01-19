@@ -1,202 +1,257 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://www.cloudbib.net/css/default.css">
-<script src="https://www.cloudbib.net/js/util.js"></script>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js" integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn" crossorigin="anonymous"></script>
-<script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"
+      />
+    <link rel="stylesheet" href="https://www.cloudbib.net/css/default.css" />
+    <script src="https://www.cloudbib.net/js/util.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.min.js"
+      integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+      crossorigin="anonymous"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
+      integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
+      crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script>
+      function get_link(data) {
+        $("#form").submit();
+      }
 
-<script>
-function get_link(data){
-    $('#form').submit();
-};
+      $(document).ready(function () {
+        var options = {
+          dataType: "json",
+          success: processJson,
+        };
+        $("#form").ajaxForm(options);
+        $("#form_user").ajaxForm(options);
 
-$(document).ready(function() { 
-  var options = {
-    dataType: 'json',
-    success:  processJson
-  };
-  $('#form').ajaxForm(options);
-  $('#form_user').ajaxForm(options);
+        var options2 = {
+          dataType: "json",
+          success: processReturn,
+        };
+        $("#form_unborrow").ajaxForm(options2);
 
-  var options2 = {
-    dataType: 'json',
-    success:  processReturn
-  };
-  $('#form_unborrow').ajaxForm(options2);
+        document.getElementById("user_id").focus();
+      });
 
-  document.getElementById("user_id").focus();
-});
+      function processReturn(data) {
+        document.getElementById("form").reset();
 
-function processReturn(data) {
-  document.getElementById("form").reset();
+        if (handleAuthError(data, "/login")) {
+          return;
+        }
 
-  if (handleAuthError(data, '/login')) {
-    return;
-  }
+        var msg;
+        if (!data["success"]) {
+          msg =
+            '<b style="color:red"><font size="+2">返却できません</font></b><br><font size="-1">(' +
+            data["message"] +
+            ")</font>";
+        } else {
+          var user = data["user"];
+          var name = user["name"];
+          var id = user["id"];
+          var book_title = data["returned_book_title"];
+          var book_id = data["returned_book_id"];
+          msg =
+            '<font size="+2">' +
+            name +
+            "</font> (" +
+            id +
+            ') さんが <font size="+2" style="color:navy">' +
+            book_title +
+            "</font> (" +
+            book_id +
+            ") を返却しました";
+        }
+        setStatus(msg);
+        document.getElementById("form_unborrow").reset();
+      }
 
-  var msg;
-  if (!data['success']) {
-    msg = '<b style="color:red"><font size="+2">返却できません</font></b><br><font size="-1">(' + data['message'] + ')</font>';
-  }
-  else {
-    var user = data['user'];
-    var name = user['name'];
-    var id = user['id'];
-    var book_title = data['returned_book_title'];
-    var book_id = data['returned_book_id'];
-    msg = '<font size="+2">' + name + '</font> (' + id +') さんが <font size="+2" style="color:navy">' + book_title + '</font> (' + book_id  + ') を返却しました'
-  }
-  setStatus(msg);
-  document.getElementById("form_unborrow").reset();
-}
+      function processJson(data) {
+        document.getElementById("form_user").reset();
 
-function processJson(data) {
-  document.getElementById("form_user").reset();
+        if (handleAuthError(data, "/login")) {
+          return;
+        }
+        if (handleError(data)) {
+          return;
+        }
 
-  if (handleAuthError(data, '/login')) {
-    return;
-  }
-  if (handleError(data)) {
-    return;
-  }
+        var dataSet = data["user_list"];
+        var datatable = $("#user_list_table").DataTable();
+        datatable.clear();
+        datatable.destroy();
+        $("#user_list_table").DataTable({
+          scrollX: false,
+          autoWidth: false,
+          data: dataSet,
+          columns: [
+            { data: "id" },
+            { data: "name" },
+            { data: "kana" },
+            { data: "category" },
+            { data: "remark" },
+            { data: "borrowed_count" },
+            { data: "register_date" },
+          ],
+        });
+      }
 
-  var dataSet = data['user_list'];
-  var datatable = $('#user_list_table').DataTable();
-  datatable.clear();
-  datatable.destroy();
-  $('#user_list_table').DataTable({
-    "scrollX": false,
-    "autoWidth": false,
-    "data": dataSet,
-    "columns": [
-      { "data": "id" },
-      { "data": "name" },
-      { "data": "kana" },
-      { "data": "category" },
-      { "data": "remark" },
-      { "data": "borrowed_count" },
-      { "data": "register_date" },
-    ]
-  });
-}
+      function setStatus(msg) {
+        $(".status p").html(msg);
+      }
+    </script>
+  </head>
 
-function setStatus(msg) {
-  $(".status p").html(msg);
-}
+  <body>
+    <form id="form" name="form" action="/auth/logout" method="post">
+      <input type="submit" id="invisible_logout" style="display: none" />
+    </form>
 
-</script>
-</head>
+    <div class="topnav">
+      <a class="active" href="/home">ホーム</a>
+      <a href="/search/main">図書検索</a>
+      <a href="/edit/main">登録・編集</a>
+      <a href="/export/main">出力</a>
+      <a href="/setting/main">設定</a>
+      <a href="/history">貸出履歴</a>
+      <div class="topnav-right">
+        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+      </div>
+    </div>
 
-<body>
+    <h3 style="color: #666666">ホーム</h3>
+    <hr />
 
-<form id="form" name="form" action="/auth/logout" method="post">
-<input type="submit" id="invisible_logout" style="display: none;">
-</form>
+    <div style="padding-left: 6px">
+      <p>貸出処理をするには利用者IDを入力して下さい</p>
+      <form
+        name="user_select"
+        action="/user"
+        method="get"
+        enctype="application/x-www-form-urlencoded">
+        <label for="user_id"><b><font size="+1">利用者ID</font></b></label>
+        <input
+          type="text"
+          id="user_id"
+          name="user_id"
+          style="ime-mode: disabled"
+          placeholder="半角数字"
+          />
+      </form>
 
-<div class="topnav">
-  <a class="active" href="/home">ホーム</a>
-  <a href="/search/main">図書検索</a>
-  <a href="/edit/main">登録・編集</a>
-  <a href="/export/main">出力</a>
-  <a href="/setting/main">設定</a>
-  <a href="/history">貸出履歴</a>
-  <div class="topnav-right">
-    <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
-  </div>
-</div>
+      <button class="accordion">利用者検索</button>
+      <div class="panel">
+        <p>キーワードを入力後にEnterを押して検索</p>
+        <form
+          id="form_user"
+          name="form_user"
+          action="/search/user"
+          method="get"
+          enctype="application/x-www-form-urlencoded">
+          <table>
+            <tr>
+              <td>
+                <label for="value"><b>氏名</b></label>
+                <input type="text" placeholder="全角" name="name" id="name" />
+              </td>
+              <td>
+                <label for="value"><b>カナ</b></label>
+                <input type="text" placeholder="全角" name="kana" id="kana" />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="value"><b>利用者ID</b></label>
+                <input
+                  type="text"
+                  placeholder="半角数字"
+                  name="id"
+                  id="user_id"
+                  />
+              </td>
+              <td>
+                <label for="value"><b>利用者区分</b></label>
+                <input
+                  type="text"
+                  placeholder="生徒/講師/後援会員/その他"
+                  name="category"
+                  />
+              </td>
+            </tr>
+          </table>
+          <button type="submit">検索</button>
+          何も入力せずに検索ボタンを押すと、全ての利用者が表示されます。
+        </form>
+        <h3>検索結果</h3>
+        <div style="overflow-x: auto">
+          <table id="user_list_table" class="display compact nowrap">
+            <thead>
+              <tr>
+                <th>利用者ID</th>
+                <th>氏名</th>
+                <th>カナ</th>
+                <th>利用者区分</th>
+                <th>備考</th>
+                <th>貸出回数</th>
+                <th>登録日</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+      <hr />
+      <p>返却処理をするには図書IDを入力して下さい</p>
+      <form
+        id="form_unborrow"
+        name="form_unborrow"
+        action="/work"
+        method="post"
+        enctype="application/x-www-form-urlencoded">
+        <input type="hidden" name="user_id" value="" />
+        <input type="hidden" name="borrowed_book_id" value="" />
+        <label for="returned_book_id"><b><font size="+1">返却図書ID</font></b></label>
+        <input
+          type="text"
+          id="returned_book_id"
+          name="returned_book_id"
+          onfocus="this.value=''"
+          style="ime-mode: disabled"
+          placeholder="半角数字"
+          />
+        <input
+          type="submit"
+          id="invisible_submit"
+          onClick="setStatus('')"
+          style="display: none"
+          />
+      </form>
+      <hr />
+      <div class="status">
+        <p></p>
+      </div>
+    </div>
 
-<h3 style="color:#666666">ホーム</h3>
-<hr>
+    <script>
+      var acc = document.getElementsByClassName("accordion");
 
-<div style="padding-left:6px">
-
-<p>貸出処理をするには利用者IDを入力して下さい</p>
-<form name="user_select" action="/user" method="get" enctype="application/x-www-form-urlencoded">
-  <label for="user_id"><b><font size="+1">利用者ID</font></b></label>
-  <input type="text" id="user_id" name="user_id" style="ime-mode: disabled" placeholder="半角数字">
-</form>
-
-<button class="accordion">利用者検索</button>
-<div class="panel">
-<p>キーワードを入力後にEnterを押して検索</p>
-<form id="form_user" name="form_user" action="/search/user" method="get" enctype="application/x-www-form-urlencoded">
-  <table>
-  <tr>
-  <td>
-  <label for="value"><b>氏名</b></label>
-  <input type="text" placeholder="全角" name="name" id="name">
-  </td>
-  <td>
-  <label for="value"><b>カナ</b></label>
-  <input type="text" placeholder="全角" name="kana" id="kana">
-  </td>
-  </tr>
-  <tr>
-  <td>
-  <label for="value"><b>利用者ID</b></label>
-  <input type="text" placeholder="半角数字" name="id" id="user_id">
-  </td>
-  <td>
-  <label for="value"><b>利用者区分</b></label>
-  <input type="text" placeholder="生徒/講師/後援会員/その他" name="category">
-  </td>
-  </tr>
-  </table>
-  <button type="submit">検索</button>　何も入力せずに検索ボタンを押すと、全ての利用者が表示されます。
-</form>
-<h3>検索結果</h3>
-<div style="overflow-x: auto;">
-<table id="user_list_table" class="display compact nowrap">
-  <thead>
-    <tr>
-      <th>利用者ID</th>
-      <th>氏名</th>
-      <th>カナ</th>
-      <th>利用者区分</th>
-      <th>備考</th>
-      <th>貸出回数</th>
-      <th>登録日</th>
-    </tr>
-  </thead>
-</table>
-</div>
-</div>
-<hr>
-<p>返却処理をするには図書IDを入力して下さい</p>
-<form id="form_unborrow" name="form_unborrow" action="/work" method="post" enctype="application/x-www-form-urlencoded">
-  <input type="hidden" name="user_id" value="">
-  <input type="hidden" name="borrowed_book_id" value="">
-  <label for="returned_book_id"><b><font size="+1">返却図書ID</font></b></label>
-  <input type="text" id="returned_book_id" name="returned_book_id" onfocus="this.value=''" style="ime-mode: disabled" placeholder="半角数字">
-</form>
-  <input type="submit" id="invisible_submit" onClick="setStatus('')" style="display: none;">
-</form>
-<hr>
-<div class="status">
-<p></p>
-</div>
-</div>
-
-<script>
-var acc = document.getElementsByClassName("accordion");
-
-acc[0].addEventListener("click", function() {
-  this.classList.toggle("active");
-  var panel = this.nextElementSibling;
-  if (panel.style.display === "block") {
-    panel.style.display = "none";
-  } else {
-    panel.style.display = "block";
-    document.getElementById("name").focus();
-  }
-});
-</script>
-
-</body>
+      acc[0].addEventListener("click", function () {
+        this.classList.toggle("active");
+        var panel = this.nextElementSibling;
+        if (panel.style.display === "block") {
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+          document.getElementById("name").focus();
+        }
+      });
+    </script>
+  </body>
 </html>
-
