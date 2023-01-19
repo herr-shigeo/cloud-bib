@@ -49,13 +49,13 @@ $(document).ready(function() {
 
 function processJson(data) {
   document.getElementById("form").reset();
-  if (handleAuthError(data, '/member')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
 }
 
 function processBorrowList(data) {
-  if (handleAuthError(data, '/member')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
   if (handleError(data)) {
@@ -90,7 +90,7 @@ function processBorrowList(data) {
 }
 
 function processTransactionList(data) {
-  if (handleAuthError(data, '/member')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
   if (handleError(data)) {

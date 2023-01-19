@@ -35,7 +35,7 @@ $(document).ready(function() {
 function processReturn(data) {
   document.getElementById("form").reset();
 
-  if (handleAuthError(data, '/')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
 
@@ -58,7 +58,7 @@ function processReturn(data) {
 function processJson(data) {
   document.getElementById("form_user").reset();
 
-  if (handleAuthError(data, '/')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
   if (handleError(data)) {

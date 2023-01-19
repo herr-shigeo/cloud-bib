@@ -30,7 +30,7 @@ $(document).ready(function() {
 });
 
 function processResult(data) {
-  if (handleAuthError(data, '/')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
   if (handleError(data)) {
@@ -40,7 +40,7 @@ function processResult(data) {
 }
 
 function processUpdate(data) {
-  if (handleAuthError(data, '/')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
   if (handleError(data)) {

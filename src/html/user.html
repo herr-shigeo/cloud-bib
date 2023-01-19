@@ -27,7 +27,7 @@ $(document).ready(function() {
 function processJson(data) {
   document.getElementById("form1").reset();
 
-  if (handleAuthError(data, '/')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
   if (handleError(data)) {

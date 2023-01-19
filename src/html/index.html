@@ -26,34 +26,62 @@ $(document).ready(function() {
 
 function processJson(data) {
   if (!handleError(data)) {
-    window.location.href = '/home';
+    window.location.href = data.path_to_home;
   }
+}
+
+function postForm(formId) {
+  var form = document.getElementById(formId);
+  var data = new FormData(form);
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", form.action, true);
+  xhr.send(data);
 }
 
 </script>
 </head>
 
 <body>
-  <h3><b style="color:blue"><font size ="+2">CloudBib</font></b></h3>
+  <div class="topnav">
+    <a class="active" href="/">ホーム</a>
+    <a href="/search/main">マニュアル</a>
+    <a
+      href="https://twitter.com/messages/compose?recipient_id=1530991195333308417"
+      >問い合わせ</a
+    >
+  </div>
+
+  <div style="padding-left: 6px">
+    <h3><b style="color:black"><font size ="+2">クラウド図書管理システム CloudBib</font></b></h3>
+  </div>
+
+ 
+    <img src="image/banner.jpg" width="360" />
+ <hr>
+
   <form id="form" name="form" action="/auth/login" method="post">
   <div class="full-container">
     <label for="uname"><b>ユーザー名</b></label>
     <input type="text" placeholder="" name="uname" required>
     <label for="password"><b>パスワード</b></label>
     <input type="password" placeholder="" name="password" required>
+    <hr>
     <b>ユーザー区分</b>
     <input type="radio" name="user_category" id="user_admin" value="admin" checked=true>
     <label for="user_admin">管理者</label>
     <input type="radio" name="user_category" id="user_user" value="user">
-    <label for="user_user">利用者</label>
+    <label for="user_user">利用者</label><br/>
+    <hr>
     <label for="user_id"><b>利用者ID</b></label>
     <input type="text" name="user_id" id="user_id" disabled>
     <div class="btncontainer">
-      <button type="submit" class="submitbtn">ログイン</button>
+      <button type="submit" class="submitbtn" onclick="document.getElementById('user_id').removeAttribute('disabled'); postForm('form')">ログイン</button>
     </div>
   </div>
   </form> 
-  <br/>
-  <br/>
+
+
+
 </body>
 </html>

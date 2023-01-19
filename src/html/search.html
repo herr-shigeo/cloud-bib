@@ -67,7 +67,7 @@ $(document).ready(function() {
 
 function processJson(data) {
   document.getElementById("form").reset();
-  if (handleAuthError(data, '/')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
 }
@@ -75,7 +75,7 @@ function processJson(data) {
 function processDelayedList(data) {
   document.getElementById("form_delayed").reset();
 
-  if (handleAuthError(data, '/')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
   if (handleError(data)) {
@@ -115,7 +115,7 @@ function processDelayedList(data) {
 function processBookList(data) {
   document.getElementById("form_book").reset();
 
-  if (handleAuthError(data, '/')) {
+  if (handleAuthError(data, '/login')) {
     return;
   }
   if (handleError(data)) {

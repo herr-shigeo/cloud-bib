@@ -5,6 +5,7 @@ use serde::Serialize;
 #[derive(Serialize, Debug)]
 pub struct Reply {
     pub success: bool,
+    pub path_to_home: String,
     pub transaction_list: Vec<TransactionItem>,
     pub user: User,
     pub borrowed_books: Vec<BorrowedBook>,
@@ -22,6 +23,7 @@ impl Reply {
     pub fn default() -> Self {
         Self {
             success: true,
+            path_to_home: String::new(),
             transaction_list: vec![],
             borrowed_books: vec![],
             user: User::default(),
