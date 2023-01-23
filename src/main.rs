@@ -6,6 +6,7 @@ use crate::views::cache::Cache;
 use crate::views::transaction::*;
 use actix_session::CookieSession;
 use actix_web::{web, App, HttpServer};
+use item::SystemUser;
 use log::info;
 use mongodb::options::{ClientOptions, Tls, TlsOptions};
 use rand::prelude::*;
@@ -35,14 +36,26 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    let db_names = env::var("BIB_DB_SYSTEM_NAME")
-        .expect("You must set the BIB_DB_SYSTEM_NAME environment var!");
-    let db_names_vec = db_names.split(" ").collect::<Vec<&str>>();
-
     // Set up the DB client holder
     let tls_options = TlsOptions::builder().build();
     client_options.tls = Some(Tls::Enabled(tls_options));
     let client_holder = web::Data::new(Mutex::new(ClientHolder::new(client_options)));
+
+    // Get all users' names
+    let db_name = env::var("BIB_DB_NAME").expect("You must set the BIB_DB_NAME environment var!");
+    let db = database::get(&client_holder.clone(), &db_name)
+        .await
+        .unwrap();
+
+    let system_user = SystemUser::default();
+    let system_users = match search_items(&db, &system_user).await {
+        Ok(system_users) => system_users,
+        Err(_) => vec![],
+    };
+    let mut db_names_vec: Vec<String> = vec![];
+    for system_user in system_users {
+        db_names_vec.push(system_user.uname + "-system");
+    }
 
     // Create a session data
     let mut csp_rng = ChaCha20Rng::from_entropy();
@@ -55,7 +68,7 @@ async fn main() -> std::io::Result<()> {
     let mut setting_map: HashMap<String, SystemSetting> = HashMap::new();
 
     for db_name in db_names_vec {
-        let db = database::get(&client_holder.clone(), db_name)
+        let db = database::get(&client_holder.clone(), &db_name)
             .await
             .unwrap();
 
@@ -91,9 +104,9 @@ async fn main() -> std::io::Result<()> {
         cache.construct(&db).await;
         cache_map.insert(db_name.to_string(), cache);
     }
-    let transaction_map = web::Data::new(transaction_map);
-    let cache_map = web::Data::new(cache_map);
-    let setting_map = web::Data::new(setting_map);
+    let transaction_map = web::Data::new(Mutex::new(transaction_map));
+    let cache_map = web::Data::new(Mutex::new(cache_map));
+    let setting_map = web::Data::new(Mutex::new(setting_map));
 
     HttpServer::new(move || {
         let app = App::new()

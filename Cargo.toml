@@ -33,7 +33,7 @@ serde_derive = "1.0.136"
 shared_mongodb = "0.1.5"
 lazy_static = "1.4.0"
 rust-argon2 = "1.0"
-async-stripe = { version = "0.15", features = ["runtime-tokio-hyper"] }
+#async-stripe = { version = "0.15", features = ["runtime-tokio-hyper"] }
 
 [dependencies.mongodb]
 version = "2.2.1"

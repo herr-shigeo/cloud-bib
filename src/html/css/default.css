@@ -3,7 +3,9 @@ body {
 }
 
 input[type="text"],
-input[type="password"] {
+input[type="email"],
+input[type="password"],
+select {
   width: 70%;
   padding: 12px 10px;
   margin: 14px 14px;
@@ -13,7 +15,9 @@ input[type="password"] {
 }
 
 .full-container input[type="text"],
-input[type="password"] {
+input[type="email"],
+input[type="password"],
+select {
   width: 100%;
   padding: 12px 10px;
   margin: 14px 0;
@@ -22,7 +26,9 @@ input[type="password"] {
   box-sizing: border-box;
 }
 
-input[type="text"]:disabled{background-color:lightgray;}
+input[type="text"]:disabled {
+  background-color: lightgray;
+}
 
 button {
   background-color: #04aa6d;
@@ -119,6 +125,11 @@ span.password {
 table {
   width: 100%;
   border: 1px solid #ddd;
+}
+
+table.noborder-table {
+  width: 100%;
+  border: none;
 }
 
 table th {
@@ -241,4 +252,10 @@ form.search::after {
   width: 1%;
   height: 30px;
   background-color: LightGreen;
+}
+
+.footer {
+  font-size: 11px;
+  text-align: center;
+  padding: 16px;
 }

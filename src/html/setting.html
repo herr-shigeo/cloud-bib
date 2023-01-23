@@ -24,7 +24,7 @@
       $(document).ready(function () {
         var options1 = {
           dataType: "json",
-          success: processResult,
+          success: processJson,
         };
         $("#form").ajaxForm(options1);
         $("#form1").ajaxForm(options1);
@@ -35,34 +35,12 @@
           success: processUpdate,
         };
         $("#form5").ajaxForm(options2);
+        
         document.getElementById("invisible_submit").click();
+        document.getElementsByClassName("accordion")[0].click();
       });
 
-      function postPasswordForm() {
-        const newPassword = document.getElementById("password").value;
-        const confirmPassword =
-          document.getElementById("confirm_password").value;
-
-        // Validate the form inputs
-        if (!newPassword) {
-          alert("新しいパスワードを入力して下さい");
-          return false;
-        }
-        if (!confirmPassword) {
-          alert("新しいパスワードを入力して下さい");
-          return false;
-        }
-        if (newPassword !== confirmPassword) {
-          alert("入力した２つのパスワードが一致しません");
-          return false;
-        }
-
-        postForm("form2");
-
-        return false;
-      }
-
-      function processResult(data) {
+      function processJson(data) {
         if (handleAuthError(data, "/login")) {
           return;
         }
@@ -107,7 +85,7 @@
     <hr />
     <button class="accordion">貸出設定</button>
     <div class="panel">
-      <form id="form1" name="form1" action="/setting/rental" method="post">
+      <form id="form1" name="form1" action="/setting/update" method="post">
         <table>
           <tr>
             <td>
@@ -117,39 +95,6 @@
             <td>
               <label for="num_days">最大貸出日数</label>
               <input type="text" id="num_days" name="num_days" />
-            </td>
-          </tr>
-        </table>
-        <button type="submit" class="submitbtn">変更</button>
-      </form>
-    </div>
-
-    <button class="accordion">管理者パスワード</button>
-    <div class="panel">
-      <form
-        id="form2"
-        name="form2"
-        action="/setting/system"
-        onsubmit="return postPasswordForm()"
-      >
-        <table>
-          <tr>
-            <td>
-              <label for="password">新パスワード </label>
-              <input
-                type="text"
-                id="password"
-                name="password"
-                placeholder="半角英数"
-              />
-              <br />
-              <label for="password">新パスワード(確認)</label>
-              <input
-                type="text"
-                id="confirm_password"
-                name="confirm_password"
-                placeholder="半角英数"
-              />
             </td>
           </tr>
         </table>

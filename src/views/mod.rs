@@ -1,7 +1,9 @@
 use actix_web::web;
 mod about;
+mod account;
 mod auth;
 pub mod cache;
+mod constatns;
 mod content_loader;
 mod db_helper;
 mod edit;
@@ -11,11 +13,14 @@ mod home;
 mod index;
 mod maintain;
 mod member;
+mod notation;
 mod path;
+mod privacy;
 mod reply;
 mod search;
 mod session;
 mod setting;
+mod terms;
 pub mod transaction;
 mod user;
 mod utils;
@@ -48,6 +53,18 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
         web::get().to(index::load),
     )
     .route(
+        &base_path.define(String::from("/notation")),
+        web::get().to(notation::load),
+    )
+    .route(
+        &base_path.define(String::from("/terms")),
+        web::get().to(terms::load),
+    )
+    .route(
+        &base_path.define(String::from("/privacy")),
+        web::get().to(privacy::load),
+    )
+    .route(
         &base_path.define(String::from("/home")),
         web::get().to(home::load),
     )
@@ -66,10 +83,6 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     .route(
         &base_path.define(String::from("/history/search")),
         web::get().to(history::search),
-    )
-    .route(
-        &base_path.define(String::from("/history/show_member")),
-        web::get().to(history::show_member),
     );
 
     search::search_factory(app);
@@ -79,4 +92,5 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     member::member_factory(app);
     edit::edit_factory(app);
     maintain::maintain_factory(app);
+    account::account_factory(app);
 }

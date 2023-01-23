@@ -3,7 +3,7 @@ use crate::item::{search_items, Book, User};
 use crate::item::{SystemSetting, TransactionItem};
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db;
-use crate::views::session::{check_session, get_string_value};
+use crate::views::session::check_operator_session;
 use crate::views::utils::get_nowtime;
 use crate::Transaction;
 use actix_files::NamedFile;
@@ -33,6 +33,7 @@ fn write_user_list(users: Vec<User>, time_zone: &str) -> Result<String, Box<dyn 
         "氏名",
         "カナ",
         "利用者区分",
+        "学年クラス",
         "備考",
         "登録日",
         "貸出回数",
@@ -64,17 +65,18 @@ fn write_user_list(users: Vec<User>, time_zone: &str) -> Result<String, Box<dyn 
 pub async fn export_user_list(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<NamedFile, BibErrorResponse> {
-    check_session(&session)?;
+    let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
-    let dbname = get_string_value(&session, "dbname")?;
 
-    let system_setting = setting_map.get(&dbname);
-    if system_setting.is_none() {
+    let setting_map = setting_map.lock().unwrap();
+    let setting = setting_map.get(&dbname);
+    if setting.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
-    let system_setting = system_setting.unwrap();
+    let setting = setting.unwrap().clone();
+    drop(setting_map);
 
     let user = User::default();
     let users = match search_items(&db, &user).await {
@@ -85,7 +87,7 @@ pub async fn export_user_list(
         }
     };
 
-    match write_user_list(users, &system_setting.time_zone) {
+    match write_user_list(users, &setting.time_zone) {
         Ok(fname) => {
             return Ok(
                 NamedFile::open(fname).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?
@@ -152,16 +154,18 @@ fn write_book_list(books: Vec<Book>, time_zone: &str) -> Result<String, Box<dyn 
 pub async fn export_book_list(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<NamedFile, BibErrorResponse> {
-    check_session(&session)?;
+    let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
-    let dbname = get_string_value(&session, "dbname")?;
-    let system_setting = setting_map.get(&dbname);
-    if system_setting.is_none() {
+
+    let setting_map = setting_map.lock().unwrap();
+    let setting = setting_map.get(&dbname);
+    if setting.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
-    let system_setting = system_setting.unwrap();
+    let setting = setting.unwrap().clone();
+    drop(setting_map);
 
     let book = Book::default();
     let books = match search_items(&db, &book).await {
@@ -173,7 +177,7 @@ pub async fn export_book_list(
         }
     };
 
-    match write_book_list(books, &system_setting.time_zone) {
+    match write_book_list(books, &setting.time_zone) {
         Ok(fname) => {
             return Ok(
                 NamedFile::open(fname).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?
@@ -224,16 +228,18 @@ fn write_transaction_list(
 pub async fn export_history_list(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<NamedFile, BibErrorResponse> {
-    check_session(&session)?;
+    let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
-    let dbname = get_string_value(&session, "dbname")?;
-    let system_setting = setting_map.get(&dbname);
-    if system_setting.is_none() {
+
+    let setting_map = setting_map.lock().unwrap();
+    let setting = setting_map.get(&dbname);
+    if setting.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
-    let system_setting = system_setting.unwrap();
+    let setting = setting.unwrap().clone();
+    drop(setting_map);
 
     let item = TransactionItem::default();
     let transaction_items = Transaction::search(&db, &item).await;
@@ -242,7 +248,7 @@ pub async fn export_history_list(
         return Err(BibErrorResponse::DataNotFound(String::new()));
     }
 
-    match write_transaction_list(transaction_items, &system_setting.time_zone) {
+    match write_transaction_list(transaction_items, &setting.time_zone) {
         Ok(fname) => {
             return Ok(
                 NamedFile::open(fname).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?

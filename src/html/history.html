@@ -48,7 +48,7 @@
         document.getElementById("form").reset();
         document.getElementById("form_transaction").reset();
 
-        if (handleAuthError(data, "/")) {
+        if (handleAuthError(data, "/login")) {
           return;
         }
         if (handleError(data)) {

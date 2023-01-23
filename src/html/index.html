@@ -21,11 +21,10 @@
         var radioButtonUser = document.getElementById("user_user");
         var userIdText = document.getElementById("user_id");
         if (radioButtonUser.checked) {
-            document.getElementById("user_id").disabled = false;
-          }
-          else {
-            document.getElementById("user_id").disabled = true;
-          }
+          document.getElementById("user_id").disabled = false;
+        } else {
+          document.getElementById("user_id").disabled = true;
+        }
       }
 
       $(document).ready(function () {
@@ -40,15 +39,15 @@
         var radioButtonAdmin = document.getElementById("user_admin");
         var userIdText = document.getElementById("user_id");
 
-        radioButtonOperator.addEventListener("change", function() {
+        radioButtonOperator.addEventListener("change", function () {
           updateUserIdText();
         });
 
-        radioButtonUser.addEventListener("change", function() {
+        radioButtonUser.addEventListener("change", function () {
           updateUserIdText();
         });
 
-        radioButtonAdmin.addEventListener("change", function() {
+        radioButtonAdmin.addEventListener("change", function () {
           updateUserIdText();
         });
       });
@@ -57,7 +56,6 @@
         updateUserIdText();
         if (!handleError(data)) {
           window.location.href = data.path_to_home;
-
         }
       }
     </script>
@@ -65,79 +63,99 @@
 
   <body>
     <div class="topnav">
-      <a class="active" href="/">ホーム</a>
-      <a href="/search/main">マニュアル</a>
+      <a class="active" href="/">製品ホーム</a>
+      <a href="/manual">マニュアル</a>
       <a
-        href="https://twitter.com/messages/compose?recipient_id=1530991195333308417"
+        href="https://twitter.com/messages/compose?recipient_id=1618571454580137984"
         >問い合わせ</a
+      >
       >
     </div>
 
     <div style="padding-left: 6px">
-      <h3>
-        <b style="color: black"
-          ><font size="+2">クラウド図書管理システム CloudBib</font></b
-        >
-      </h3>
+      <h1>
+        <font size="+3" style="color: royalblue">CloudBib</font
+        ><font size="+2" style="color: royalblue"> - ログイン</font>
+      </h1>
     </div>
-
-    <img src="image/banner.jpg" width="360" />
     <hr />
 
     <form id="form" name="form" action="/auth/login" method="post">
-      <div class="full-container">
-        <label for="uname"><b>ユーザー名</b></label>
-        <input type="text" placeholder="" name="uname" id="uname" required />
-        <label for="password"><b>パスワード</b></label>
-        <input
-          type="password"
-          placeholder=""
-          name="password"
-          id="password"
-          required
-        />
-        <hr />
+      <div class="container">
+        <div class="full-container">
+          <label for="uname"><b>ユーザー名</b></label>
+          <input
+            type="text"
+            name="uname"
+            id="uname"
+            pattern="[a-zA-Z0-9]+"
+            required
+          />
 
-        <b>ユーザー区分</b>
-        <input
-          type="radio"
-          name="user_category"
-          id="user_operator"
-          value="operator"
-          checked="true"
-        />
-        <label for="user_operator">司書</label>
+          <b>ユーザー区分</b>
+          <input
+            type="radio"
+            name="user_category"
+            id="user_operator"
+            value="operator"
+            checked="true"
+          />
+          <label for="user_operator">司書</label>
 
-        <input
-          type="radio"
-          name="user_category"
-          id="user_user"
-          value="user"
-        />
-        <label for="user_user">利用者</label>
+          <input
+            type="radio"
+            name="user_category"
+            id="user_user"
+            value="user"
+          />
+          <label for="user_user">利用者</label>
 
-        <input
-          type="radio"
-          name="user_category"
-          id="user_admin"
-          value="admin"
-        />
-        <label for="user_admin">管理者</label>
-        <br />
+          <input
+            type="radio"
+            name="user_category"
+            id="user_admin"
+            value="admin"
+          />
+          <label for="user_admin">管理者</label>
+          <br /><br />
 
-        <hr />
-        <label for="user_id"><b>利用者ID</b></label>
-        <input type="text" name="user_id" id="user_id" disabled />
-        <div class="btncontainer">
-          <button
-            type="submit"
-            class="submitbtn"
-            onclick="document.getElementById('user_id').removeAttribute('disabled');"
-          >
-            ログイン
-          </button>
+          <label for="password"><b>パスワード</b></label>
+          <input
+            type="password"
+            placeholder=""
+            name="password"
+            id="password"
+            required
+          /><br />
+          <font size="-1" style="color: gray"
+            >選択したユーザ区分に応じたパスワードを入力してください</font
+          ><br /><br />
+
+          <label for="user_id"><b>利用者ID</b></label>
+          <input type="text" name="user_id" id="user_id" disabled />
+          <font size="-1" style="color: gray"
+            >利用者としてログインする場合は、利用者IDを入力してください</font
+          ><br /><br />
+
+          <div class="btncontainer">
+            <button
+              type="submit"
+              class="submitbtn"
+              onclick="document.getElementById('user_id').removeAttribute('disabled');"
+            >
+              ログイン
+            </button>
+          </div>
+          <br />
+          <a href="/reset"> <font size="-1">パスワードをお忘れの場合</font></a>
         </div>
       </div>
     </form>
+
+    <br />
+    <div class="footer">
+      <a href="/terms" target="_blank">利用規約</a> | <a href="/privacy" target="_blank">プライバシーポリシー</a> |
+      <a href="/notation" target="_blank">特商法表記</a>
+    </div>
   </body>
 </html>

@@ -6,32 +6,55 @@
     <link
       rel="stylesheet"
       href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"
-      />
+    />
     <link rel="stylesheet" href="https://www.cloudbib.net/css/about.css" />
     <script src="https://www.cloudbib.net/js/util.js"></script>
     <script
       src="https://code.jquery.com/jquery-3.5.1.min.js"
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-      crossorigin="anonymous"></script>
+      crossorigin="anonymous"
+    ></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
       integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"></script>
+      crossorigin="anonymous"
+    ></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
-    </head>
+
+    <script>
+      $(document).ready(function () {
+        var options = {
+          dataType: "json",
+          success: processJson,
+        };
+        $("#form").ajaxForm(options);
+      });
+
+      function processJson(data) {
+        if (!handleError(data)) {
+          window.location.href = data.path_to_home;
+        }
+      }
+    </script>
+  </head>
 
   <body>
     <div class="topnav">
       <a class="active" href="/login">ログイン</a>
-      <a href="/acount/register">アカウント作成</a>
-      <a href="/search/main">マニュアル</a>
-<!--
-      <a href="https://twitter.com/messages/compose?recipient_id=1530991195333308417">問い合わせ</a>
--->
+      <a href="/account/register">アカウント作成</a>
+      <a href="/manual">マニュアル</a>
+      <a
+        href="https://twitter.com/messages/compose?recipient_id=1618571454580137984"
+        >問い合わせ</a
+      >
     </div>
 
     <div style="padding-left: 6px">
-      <h1>クラウド図書管理システム CloudBib</h1>
+      <h1>
+        <font size="+3" style="color: royalblue"
+          >クラウド図書管理システム CloudBib</font
+        >
+      </h1>
 
       <img src="image/banner.jpg" width="512" />
 
@@ -54,9 +77,9 @@
       <form id="form" name="form" action="/auth/login" method="post">
         <input type="hidden" name="uname" value="demo" />
         <input type="hidden" name="password" value="demo" />
-        <button type="submit" class="submitbtn">
-          司書のデモ画面へ
-        </button>
+        <input type="hidden" name="user_category" value="operator" />
+        <input type="hidden" name="user_id" value="" />
+        <button type="submit" class="submitbtn">司書のデモ画面へ</button>
       </form>
 
       <h2>機能一覧</h2>
@@ -74,37 +97,37 @@
       </ul>
 
       <h2>料金プラン</h2>
-      <p>すべての機能が無料で利用できます。</p>
-      <!--
-<p>月額利用料のみで、初期費用等はありません。</p>
-<table>
-  <thead>
-    <tr><th></th><th>標準価格</th></tr>
-  </thead>
-<tr><td>月額利用料</td><td>3000円</td></tr>
-<tr><td>初期費用等</td><td>0円</td></tr>
-</table>
--->
+      <p>現在は、無料プランのみ提供しております。</p>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>フリー</th>
+          </tr>
+        </thead>
+        <tr>
+          <td>月額利用料</td>
+          <td>0円</td>
+        </tr>
+        <tr>
+          <td>初期費用等</td>
+          <td>0円</td>
+        </tr>
+        <tr>
+          <td>スペック</td>
+          <td>
+            登録できる利用者は100名まで<br />
+            登録できる図書は1000冊まで<br />
+            保存できる履歴は最新の10,000件まで<br />
+          </td>
+        </tr>
+      </table>
+    </div>
 
-      <h2>制限事項</h2>
-      <ul>
-        <li>登録できる利用者は最大1,000名</li>
-        <li>登録できる図書は最大10,000冊</li>
-        <li>保存できる履歴は最新の100,000件</li>
-        <li>バーコードラベルを作成する機能はありません。</li>
-        <li>
-          日曜日の21:00から翌月曜日3:00まではシステムメンテナンスのため、稼働停止することがあります。
-        </li>
-      </ul>
-
-<!--
-      <h2>お問い合わせ</h2>
--->
-      <p>
-        <a
-          href="https://twitter.com/messages/compose?recipient_id=1530991195333308417">CloudBibサポート</a>
-      </p>
-      <br /><br />
+    <br />
+    <div class="footer">
+      <a href="/terms" target="_blank">利用規約</a> | <a href="/privacy" target="_blank">プライバシーポリシー</a> |
+      <a href="/notation" target="_blank">特商法表記</a>
     </div>
   </body>
 </html>

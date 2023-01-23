@@ -1,10 +1,10 @@
 use crate::error::*;
+use crate::item::RentalSetting;
 use crate::item::{insert_item, search_item, search_items, update_item, Book, SystemSetting, User};
-use crate::item::{RentalSetting, SystemUser};
 use crate::views::content_loader::read_csv;
 use crate::views::content_loader::read_file;
 use crate::views::reply::Reply;
-use crate::views::session::{check_session, get_string_value};
+use crate::views::session::check_operator_session;
 use actix_multipart::Multipart;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
@@ -17,10 +17,8 @@ use std::collections::HashMap;
 use std::io::Write;
 use std::sync::Mutex;
 extern crate sanitize_filename;
-use crate::views::db_helper::{get_db, get_db_with_name};
-use argon2::Config;
+use crate::views::db_helper::get_db;
 use futures::future::join_all;
-use rand::Rng;
 use std::io::{Error, ErrorKind};
 use std::{env, error};
 
@@ -56,7 +54,7 @@ pub async fn update_rental_setting(
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
-    check_session(&session)?;
+    check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
 
     let mut setting = match RentalSetting::new(&form.num_books, &form.num_days) {
@@ -83,7 +81,7 @@ pub async fn get_rental_setting(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    check_session(&session)?;
+    check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
 
     let mut setting = RentalSetting::default();
@@ -105,38 +103,6 @@ pub async fn get_rental_setting(
     reply.num_books = setting.num_books;
     reply.num_days = setting.num_days;
 
-    Ok(HttpResponse::Ok().json(reply))
-}
-
-pub async fn update_system_setting(
-    session: Session,
-    form: web::Form<Form2Data>,
-    data: web::Data<Mutex<ClientHolder>>,
-) -> Result<HttpResponse, BibErrorResponse> {
-    debug!("{:?}", form);
-
-    check_session(&session)?;
-    let db = get_db_with_name(&data, &DB_COMMON_NAME).await?;
-
-    let mut setting = SystemUser::default();
-    setting.dbname = get_string_value(&session, "dbname")?;
-
-    let salt: [u8; 32] = rand::thread_rng().gen();
-    let config = Config::default();
-    let hashed_password = argon2::hash_encoded(form.password.as_bytes(), &salt, &config)
-        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
-
-    setting.password = hashed_password;
-
-    match update_item(&db, &setting).await {
-        Ok(setting) => setting,
-        Err(e) => {
-            database::disconnect(&data);
-            return Err(BibErrorResponse::DataNotFound(e.to_string()));
-        }
-    }
-
-    let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
 }
 
@@ -163,16 +129,18 @@ pub async fn import_user_list(
     session: Session,
     payload: Multipart,
     data: web::Data<Mutex<ClientHolder>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    check_session(&session)?;
+    let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
-    let dbname = get_string_value(&session, "dbname")?;
+
+    let setting_map = setting_map.lock().unwrap();
     let setting = setting_map.get(&dbname);
     if setting.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
-    let setting = setting.unwrap();
+    let setting = setting.unwrap().clone();
+    drop(setting_map);
 
     let file_path = match save_file(payload).await {
         Ok(file_path) => file_path,
@@ -285,16 +253,18 @@ pub async fn import_book_list(
     session: Session,
     payload: Multipart,
     data: web::Data<Mutex<ClientHolder>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    check_session(&session)?;
+    let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
-    let dbname = get_string_value(&session, "dbname")?;
+
+    let setting_map = setting_map.lock().unwrap();
     let setting = setting_map.get(&dbname);
     if setting.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
-    let setting = setting.unwrap();
+    let setting = setting.unwrap().clone();
+    drop(setting_map);
 
     let file_path = match save_file(payload).await {
         Ok(file_path) => file_path,

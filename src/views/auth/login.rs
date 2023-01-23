@@ -1,5 +1,5 @@
 use crate::error::BibErrorResponse;
-use crate::item::{search_items, SystemSetting, SystemUser, User};
+use crate::item::{search_items, SystemUser, User};
 use crate::views::db_helper::get_db_with_name;
 use crate::views::reply::Reply;
 use crate::views::session::*;
@@ -7,7 +7,6 @@ use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use serde::Deserialize;
 use shared_mongodb::{database, ClientHolder};
-use std::collections::HashMap;
 use std::env;
 use std::sync::Mutex;
 
@@ -30,7 +29,6 @@ pub async fn login(
     session: Session,
     form: web::Form<FormData>,
     data: web::Data<Mutex<ClientHolder>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;
 
@@ -49,36 +47,73 @@ pub async fn login(
             let system_user = system_user.pop().unwrap();
 
             if form.user_category == "admin" {
-                return Err(BibErrorResponse::NotAuthorized);
-            } else if form.user_category == "operator" {
                 // Verify the admin password
                 let res = argon2::verify_encoded(&system_user.password, form.password.as_bytes())
                     .map_err(|e| BibErrorResponse::SystemError(e.to_string()));
                 if res.is_ok() {
-                    check_or_create_session(&session, &system_user.dbname)?;
+                    create_session(
+                        &session,
+                        &system_user.uname,
+                        &system_user.dbname,
+                        &form.user_category,
+                        None,
+                    )?;
                     break;
                 }
                 if form.password.eq(&system_user.password) {
-                    check_or_create_session(&session, &system_user.dbname)?;
+                    create_session(
+                        &session,
+                        &system_user.uname,
+                        &system_user.dbname,
+                        &form.user_category,
+                        None,
+                    )?;
+                    break;
+                }
+            } else if form.user_category == "operator" {
+                // Verify the operator password
+                let res = argon2::verify_encoded(
+                    &system_user.operator_password,
+                    form.password.as_bytes(),
+                )
+                .map_err(|e| BibErrorResponse::SystemError(e.to_string()));
+                if res.is_ok() {
+                    create_session(
+                        &session,
+                        &system_user.uname,
+                        &system_user.dbname,
+                        &form.user_category,
+                        None,
+                    )?;
+                    break;
+                }
+                if form.password.eq(&system_user.operator_password) {
+                    create_session(
+                        &session,
+                        &system_user.uname,
+                        &system_user.dbname,
+                        &form.user_category,
+                        None,
+                    )?;
                     break;
                 }
                 if system_user.uname == "demo" {
-                    check_or_create_session(&session, &system_user.dbname)?;
+                    create_session(
+                        &session,
+                        &system_user.uname,
+                        &system_user.dbname,
+                        &form.user_category,
+                        None,
+                    )?;
                     break;
                 }
             } else if form.user_category == "user" {
-                let setting = setting_map.get(&system_user.dbname);
-                if setting.is_none() {
-                    return Err(BibErrorResponse::NotAuthorized);
-                }
-                let setting = setting.unwrap();
-
                 // Verify the user password
                 let res =
-                    argon2::verify_encoded(&setting.member_password, form.password.as_bytes())
+                    argon2::verify_encoded(&system_user.user_password, form.password.as_bytes())
                         .map_err(|e| BibErrorResponse::SystemError(e.to_string()));
                 if res.is_err() {
-                    if form.password != setting.member_password {
+                    if form.password != system_user.user_password {
                         return Err(BibErrorResponse::LoginFailed);
                     }
                 }
@@ -99,19 +134,26 @@ pub async fn login(
                 }
                 let user = users.pop().unwrap();
 
-                check_or_create_member_session(&session, user.id, &system_user.dbname)?;
+                create_session(
+                    &session,
+                    &system_user.uname,
+                    &system_user.dbname,
+                    &form.user_category,
+                    Some(user.id),
+                )?;
                 break;
-            } else {
-                return Err(BibErrorResponse::LoginFailed);
             }
+            return Err(BibErrorResponse::LoginFailed);
         }
+    } else {
+        return Err(BibErrorResponse::DataNotFound(form.uname.clone()));
     }
 
     let mut reply = Reply::default();
 
     match form.user_category.as_str() {
         "admin" => {
-            reply.path_to_home = "/account".to_owned();
+            reply.path_to_home = "/account/main".to_owned();
         }
         "operator" => {
             reply.path_to_home = "/home".to_owned();

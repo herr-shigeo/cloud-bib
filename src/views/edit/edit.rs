@@ -6,7 +6,7 @@ use crate::views::cache::Cache;
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
-use crate::views::session::{check_session, get_string_value};
+use crate::views::session::check_operator_session;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::debug;
@@ -37,18 +37,20 @@ pub async fn user(
     session: Session,
     form: web::Form<Form1Data>,
     data: web::Data<Mutex<ClientHolder>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
-    check_session(&session)?;
+    let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
-    let dbname = get_string_value(&session, "dbname")?;
+
+    let setting_map = setting_map.lock().unwrap();
     let setting = setting_map.get(&dbname);
     if setting.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
-    let setting = setting.unwrap();
+    let setting = setting.unwrap().clone();
+    drop(setting_map);
 
     // Read the User from DB first
     let mut user = User::default();
@@ -131,25 +133,21 @@ pub async fn book(
     session: Session,
     form: web::Form<Form2Data>,
     data: web::Data<Mutex<ClientHolder>>,
-    cache_map: web::Data<HashMap<String, Cache>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
+    cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
-    check_session(&session)?;
+    let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
-    let dbname = get_string_value(&session, "dbname")?;
+
+    let setting_map = setting_map.lock().unwrap();
     let setting = setting_map.get(&dbname);
     if setting.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
-    let setting = setting.unwrap();
-
-    let cache = cache_map.get(&dbname);
-    if cache.is_none() {
-        return Err(BibErrorResponse::NotAuthorized);
-    }
-    let cache = cache.unwrap();
+    let setting = setting.unwrap().clone();
+    drop(setting_map);
 
     // Read the Book from DB first
     let mut book = Book::default();
@@ -207,6 +205,13 @@ pub async fn book(
                 .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
         }
         "delete" => {
+            let cache_map = cache_map.lock().unwrap();
+            let cache = cache_map.get(&dbname);
+            if cache.is_none() {
+                return Err(BibErrorResponse::NotAuthorized);
+            }
+            let cache = cache.unwrap();
+
             if cache.get(book.id).is_some() {
                 return Err(BibErrorResponse::NotPossibleToDelete);
             }

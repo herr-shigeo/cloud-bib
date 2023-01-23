@@ -5,8 +5,8 @@ use crate::item::Book;
 use crate::views::cache::*;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
-use crate::views::session::check_any_session;
-use crate::views::session::get_string_value;
+use crate::views::session::check_operator_session;
+use crate::views::session::check_user_session;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::debug;
@@ -21,6 +21,7 @@ pub struct FormData {
     pub title: String,
     pub kana: String,
     pub author: String,
+    pub user_id: String,
 }
 
 #[derive(Serialize, Debug)]
@@ -32,13 +33,22 @@ pub async fn search_book(
     session: Session,
     form: web::Query<FormData>,
     data: web::Data<Mutex<ClientHolder>>,
-    cache_map: web::Data<HashMap<String, Cache>>,
+    cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
-    check_any_session(&session)?;
+    let user_id = form
+        .user_id
+        .parse()
+        .map_err(|_db| BibErrorResponse::InvalidArgument(form.user_id.to_owned()))?;
+    let dbname;
+    if user_id == 0 {
+        dbname = check_operator_session(&session)?;
+    } else {
+        dbname = check_user_session(&session, user_id)?;
+    }
 
-    let dbname = get_string_value(&session, "dbname")?;
+    let cache_map = cache_map.lock().unwrap();
     let cache = cache_map.get(&dbname);
     if cache.is_none() {
         return Err(BibErrorResponse::NotAuthorized);

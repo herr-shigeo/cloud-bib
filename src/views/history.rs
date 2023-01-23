@@ -3,7 +3,6 @@ use crate::item::atoi;
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
-use crate::views::session::{check_member_session, check_session};
 use crate::Transaction;
 use crate::TransactionItem;
 use actix_session::Session;
@@ -35,7 +34,6 @@ pub async fn search(
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
-    check_session(&session)?;
     let db = get_db(&data, &session).await?;
 
     let mut user_id = 0;
@@ -51,22 +49,6 @@ pub async fn search(
     }
 
     let item = TransactionItem::new(user_id, &form.user_name, book_id, &form.book_title);
-    let mut transaction_items = Transaction::search(&db, &item).await;
-
-    let mut reply = Reply::default();
-    reply.transaction_list.append(&mut transaction_items);
-    Ok(HttpResponse::Ok().json(reply))
-}
-
-pub async fn show_member(
-    session: Session,
-    data: web::Data<Mutex<ClientHolder>>,
-) -> Result<HttpResponse, BibErrorResponse> {
-    let user_id = check_member_session(&session)?;
-    let db = get_db(&data, &session).await?;
-
-    let mut item = TransactionItem::default();
-    item.user_id = user_id;
     let mut transaction_items = Transaction::search(&db, &item).await;
 
     let mut reply = Reply::default();

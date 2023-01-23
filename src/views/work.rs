@@ -31,40 +31,30 @@ pub async fn process(
     session: Session,
     form: web::Form<FormData>,
     data: web::Data<Mutex<ClientHolder>>,
-    cache_map: web::Data<HashMap<String, Cache>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
-    transaction_map: web::Data<HashMap<String, Transaction>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
+    cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
+    transaction_map: web::Data<Mutex<HashMap<String, Transaction>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
 
-    check_session(&session)?;
+    let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
-    let dbname = get_string_value(&session, "dbname")?;
 
+    let setting_map = setting_map.lock().unwrap();
     let system_setting = setting_map.get(&dbname);
     if system_setting.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
-    let system_setting = system_setting.unwrap();
-
-    let cache = cache_map.get(&dbname);
-    if cache.is_none() {
-        return Err(BibErrorResponse::NotAuthorized);
-    }
-    let cache = cache.unwrap();
-
-    let transaction = transaction_map.get(&dbname);
-    if transaction.is_none() {
-        return Err(BibErrorResponse::NotAuthorized);
-    }
-    let transaction = transaction.unwrap();
+    let system_setting = system_setting.unwrap().clone();
+    drop(setting_map);
 
     let mut user = User::default();
     if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {
         let (book_title, book_id) = unborrow_book(
             &db,
-            &cache,
-            &transaction,
+            &dbname,
+            &cache_map,
+            &transaction_map,
             &mut user,
             &form.returned_book_id,
             &system_setting.time_zone,
@@ -104,8 +94,9 @@ pub async fn process(
     if form.borrowed_book_id != "" {
         borrow_book(
             &db,
-            &cache,
-            &transaction,
+            &dbname,
+            &cache_map,
+            &transaction_map,
             &mut user,
             &form.borrowed_book_id,
             &system_setting.time_zone,
@@ -118,8 +109,9 @@ pub async fn process(
     if form.returned_book_id != "" {
         unborrow_book(
             &db,
-            &cache,
-            &transaction,
+            &dbname,
+            &cache_map,
+            &transaction_map,
             &mut user,
             &form.returned_book_id,
             &system_setting.time_zone,
@@ -139,8 +131,9 @@ pub async fn process(
 
 async fn borrow_book(
     db: &Database,
-    cache: &Cache,
-    transaction: &Transaction,
+    dbname: &String,
+    cache_map: &web::Data<Mutex<HashMap<String, Cache>>>,
+    transaction_map: &web::Data<Mutex<HashMap<String, Transaction>>>,
     user: &mut User,
     book_id: &str,
     time_zone: &str,
@@ -166,20 +159,36 @@ async fn borrow_book(
         return Err(BibErrorResponse::DataDuplicated(book.id));
     }
     let mut book = books.pop().unwrap();
-    let borrow_info = cache.get(book.id);
-    if borrow_info.is_some() {
-        info!("book_id({}) is hit in the cached", book_id);
-        return Err(BibErrorResponse::BookNotReturned);
+    {
+        let cache_map = cache_map.lock().unwrap();
+        let cache = cache_map.get(dbname);
+        if cache.is_none() {
+            return Err(BibErrorResponse::NotAuthorized);
+        }
+        let borrow_info = cache.unwrap().get(book.id);
+        if borrow_info.is_some() {
+            info!("book_id({}) is hit in the cached", book_id);
+            return Err(BibErrorResponse::BookNotReturned);
+        }
     }
 
-    let mut counter = transaction.counter.lock().unwrap();
-    *counter += 1;
-    let mut transaction_id = *counter % (transaction.max_counter + 1);
-    if transaction_id == 0 {
-        transaction_id = 1;
+    let mut transaction_id;
+    {
+        let transaction_map = transaction_map.lock().unwrap();
+        let transaction = transaction_map.get(dbname);
+        if transaction.is_none() {
+            return Err(BibErrorResponse::NotAuthorized);
+        }
+        let transaction = transaction.unwrap();
+
+        let mut counter = transaction.counter.lock().unwrap();
+        *counter += 1;
+        transaction_id = *counter % (transaction.max_counter + 1);
+        if transaction_id == 0 {
+            transaction_id = 1;
+        }
+        *counter = transaction_id;
     }
-    *counter = transaction_id;
-    drop(counter);
 
     let borrowed_book = BorrowedBook::new(
         book_id,
@@ -189,6 +198,7 @@ async fn borrow_book(
         transaction_id,
         book.char.clone(),
     );
+
     let return_deadline = borrowed_book.return_deadline.clone();
     user.borrowed_books.push(borrowed_book);
     user.borrowed_count += 1;
@@ -215,7 +225,14 @@ async fn borrow_book(
         return Err(BibErrorResponse::SystemError("Check failed".to_string()));
     }
 
-    cache.borrow(book.id, user.id, return_deadline);
+    {
+        let cache_map = cache_map.lock().unwrap();
+        let cache = cache_map.get(dbname);
+        if cache.is_none() {
+            return Err(BibErrorResponse::NotAuthorized);
+        }
+        cache.unwrap().borrow(book.id, user.id, return_deadline);
+    }
 
     // Don't propagate error
     book.borrowed_count += 1;
@@ -231,8 +248,9 @@ async fn borrow_book(
 
 async fn unborrow_book(
     db: &Database,
-    cache: &Cache,
-    _transaction: &Transaction,
+    dbname: &String,
+    cache_map: &web::Data<Mutex<HashMap<String, Cache>>>,
+    _transaction_map: &web::Data<Mutex<HashMap<String, Transaction>>>,
     user: &mut User,
     book_id: &str,
     time_zone: &str,
@@ -255,7 +273,12 @@ async fn unborrow_book(
     book = books.pop().unwrap();
 
     if user.id == 0 {
-        let borrow_info = cache.get(book.id);
+        let cache_map = cache_map.lock().unwrap();
+        let cache = cache_map.get(dbname);
+        if cache.is_none() {
+            return Err(BibErrorResponse::NotAuthorized);
+        }
+        let borrow_info = cache.unwrap().get(book.id);
         if borrow_info.is_none() {
             info!("book_id({}) is NOT hit in the cached", book_id);
             return Err(BibErrorResponse::BookNotBorrowed);
@@ -309,7 +332,14 @@ async fn unborrow_book(
     }
     debug!("Check passed, book_id = {}", book_id);
 
-    cache.unborrow(book.id);
+    {
+        let cache_map = cache_map.lock().unwrap();
+        let cache = cache_map.get(dbname);
+        if cache.is_none() {
+            return Err(BibErrorResponse::NotAuthorized);
+        }
+        cache.unwrap().unborrow(book.id);
+    }
 
     debug!("transaction_id = {}", transaction_id);
     Transaction::unborrow(db, transaction_id, user, &book, borrowed_date, time_zone)

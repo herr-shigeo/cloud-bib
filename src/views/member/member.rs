@@ -19,8 +19,7 @@ pub struct FormData2 {
 }
 
 pub async fn load_home(session: Session) -> HttpResponse {
-    let user_id = check_member_session(&session).unwrap_or(0);
-
+    let user_id = get_user_id(&session).unwrap_or(0);
     let html_data = read_file("src/html/member_home.html")
         .unwrap()
         .replace("{{USER_ID}}", &user_id.to_string());
@@ -29,8 +28,11 @@ pub async fn load_home(session: Session) -> HttpResponse {
         .body(html_data)
 }
 
-pub async fn load_search(_session: Session) -> HttpResponse {
-    let html_data = read_file("src/html/member_search.html").unwrap();
+pub async fn load_search(session: Session) -> HttpResponse {
+    let user_id = get_user_id(&session).unwrap_or(0);
+    let html_data = read_file("src/html/member_search.html")
+        .unwrap()
+        .replace("{{USER_ID}}", &user_id.to_string());
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(html_data)
@@ -40,7 +42,7 @@ pub async fn borrowed_books(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let user_id = check_member_session(&session)?;
+    let user_id = get_user_id(&session)?;
     let mut reply = Reply::default();
 
     let db = get_db(&data, &session).await?;

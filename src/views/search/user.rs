@@ -4,7 +4,7 @@ use crate::item::search_items;
 use crate::item::User;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
-use crate::views::session::check_session;
+use crate::views::session::check_operator_session;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use log::debug;
@@ -26,7 +26,7 @@ pub async fn search_user(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
-    check_session(&session)?;
+    check_operator_session(&session)?;
 
     let mut user = User::default();
     if form.id == "" {

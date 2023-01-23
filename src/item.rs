@@ -3,6 +3,7 @@ use bson::Document;
 use chrono::{DateTime, Duration};
 use chrono_tz::Tz;
 use futures::stream::TryStreamExt;
+use log::info;
 use mongodb::bson::doc;
 use mongodb::options::*;
 use mongodb::Database;
@@ -32,14 +33,18 @@ pub trait Entity {
         db.collection::<Self>(self.get_collection_name())
     }
 
-    async fn create_unique_index(&self, db: &Database) -> Result<(), Box<dyn error::Error>>
+    async fn create_unique_index(
+        &self,
+        db: &Database,
+        field: &str,
+    ) -> Result<(), Box<dyn error::Error>>
     where
         Self: std::marker::Sized,
         Self: std::marker::Send,
     {
         let options = IndexOptions::builder().unique(true).build();
         let model = IndexModel::builder()
-            .keys(doc! {"id": 1})
+            .keys(doc! {field: 1})
             .options(options)
             .build();
         let collection = self.get_collection(db);
@@ -88,9 +93,9 @@ pub async fn search_item<T: Entity>(db: &Database, item: &T) -> Result<T, Box<dy
 
 pub async fn create_unique_index(db: &Database) -> Result<(), Box<dyn error::Error>> {
     let item = User::default();
-    item.create_unique_index(db).await?;
+    item.create_unique_index(db, "id").await?;
     let item = Book::default();
-    item.create_unique_index(db).await?;
+    item.create_unique_index(db, "id").await?;
     Ok(())
 }
 
@@ -113,10 +118,21 @@ pub struct User {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum MonthlyPlan {
+    Free,
+    Small,
+    Standard,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SystemUser {
     pub uname: String,
+    pub email: String,
     pub password: String,
+    pub operator_password: String,
+    pub user_password: String,
     pub dbname: String,
+    pub plan: MonthlyPlan,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -160,8 +176,6 @@ pub struct RentalSetting {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SystemSetting {
     pub id: u32,
-    pub member_password: String,
-    pub dbname: String,
     pub max_num_transactions: u32,
     pub max_registered_users: u32,
     pub max_registered_books: u32,
@@ -223,8 +237,12 @@ impl SystemUser {
     pub fn default() -> Self {
         Self {
             uname: String::new(),
+            email: String::new(),
             password: String::new(),
+            operator_password: String::new(),
+            user_password: String::new(),
             dbname: String::new(),
+            plan: MonthlyPlan::Free,
         }
     }
 }
@@ -324,8 +342,8 @@ impl RentalSetting {
     pub fn default() -> Self {
         Self {
             id: 0,
-            num_books: 0,
-            num_days: 0,
+            num_books: 10,
+            num_days: 14,
         }
     }
 
@@ -343,14 +361,12 @@ impl SystemSetting {
     pub fn default() -> Self {
         Self {
             id: 0,
-            member_password: String::new(),
-            dbname: String::new(),
             max_num_transactions: 0,
             max_registered_users: 0,
             max_registered_books: 0,
-            time_zone: String::new(),
-            num_threads: 0,
-            max_parallel_registrations: 0,
+            time_zone: String::from("Tokyo"),
+            num_threads: 10,
+            max_parallel_registrations: 1000,
         }
     }
 }
@@ -430,20 +446,24 @@ impl Entity for User {
 
 #[async_trait]
 impl Entity for SystemUser {
-    async fn insert(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
-        panic!("Not implemented")
+    async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let collection = self.get_collection(db);
+        collection.insert_one(self, None).await?;
+        Ok(())
     }
 
     async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
-        let query = doc! { "dbname" : &self.dbname };
-        let update = doc! { "password" : self.password.clone() };
+        let query = doc! { "uname" : &self.uname };
+        let update = bson::to_bson(self).unwrap();
         let update = doc! { "$set" : update };
         let collection = self.get_collection(db);
         collection.update(query, update, false).await
     }
 
-    async fn delete(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
-        panic!("Not implemented")
+    async fn delete(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let query = doc! { "uname" : &self.uname };
+        let collection = self.get_collection(db);
+        collection.delete(query).await
     }
 
     async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
@@ -451,7 +471,10 @@ impl Entity for SystemUser {
     }
 
     async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
-        let query = doc! { "uname": &self.uname};
+        let mut query = doc! {};
+        if self.uname != "" {
+            query = doc! { "uname": &self.uname};
+        }
         let collection = self.get_collection(db);
         collection.search(query).await
     }
@@ -511,13 +534,15 @@ impl Entity for Book {
 
 #[async_trait]
 impl Entity for RentalSetting {
-    async fn insert(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
-        panic!("Not implemented")
+    async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let collection = self.get_collection(db);
+        collection.insert_one(self, None).await?;
+        Ok(())
     }
 
     async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
-        let query = doc! { "id": self.id };
-        let update = doc! { "num_books" : self.num_books, "num_days": self.num_days };
+        let query = doc! { "id" : self.id };
+        let update = bson::to_bson(self).unwrap();
         let update = doc! { "$set" : update };
         let collection = self.get_collection(db);
         collection.update(query, update, false).await
@@ -544,12 +569,18 @@ impl Entity for RentalSetting {
 
 #[async_trait]
 impl Entity for SystemSetting {
-    async fn insert(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
-        panic!("Not implemented")
+    async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let collection = self.get_collection(db);
+        collection.insert_one(self, None).await?;
+        Ok(())
     }
 
-    async fn update(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
-        panic!("Not implemented")
+    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let query = doc! { "id" : self.id };
+        let update = bson::to_bson(self).unwrap();
+        let update = doc! { "$set" : update };
+        let collection = self.get_collection(db);
+        collection.update(query, update, false).await
     }
 
     async fn delete(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
@@ -652,7 +683,8 @@ where
         if result.deleted_count == 1 {
             return Ok(());
         } else {
-            panic!("Not implemented")
+            info!("Data does not eixst");
+            return Ok(());
         }
     }
 

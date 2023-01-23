@@ -6,8 +6,7 @@ use crate::item::User;
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
-use crate::views::session::check_session;
-use crate::views::session::get_string_value;
+use crate::views::session::check_operator_session;
 use crate::views::utils::get_nowtime;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
@@ -35,16 +34,18 @@ pub struct DelayedBook {
 pub async fn search_delayed_list(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
-    setting_map: web::Data<HashMap<String, SystemSetting>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    check_session(&session)?;
+    let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
-    let dbname = get_string_value(&session, "dbname")?;
-    let system_setting = setting_map.get(&dbname);
-    if system_setting.is_none() {
+
+    let setting_map = setting_map.lock().unwrap();
+    let setting = setting_map.get(&dbname);
+    if setting.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
     }
-    let system_setting = system_setting.unwrap();
+    let setting = setting.unwrap().clone();
+    drop(setting_map);
 
     let user = User::default();
     let users = match search_items(&db, &user).await {
@@ -59,7 +60,7 @@ pub async fn search_delayed_list(
     for user in users {
         for book in user.borrowed_books {
             let deadline = &book.return_deadline;
-            let is_over = match check_deadline(deadline, &system_setting.time_zone) {
+            let is_over = match check_deadline(deadline, &setting.time_zone) {
                 Ok(is_over) => is_over,
                 Err(e) => {
                     return Err(BibErrorResponse::SystemError(e.to_string()));

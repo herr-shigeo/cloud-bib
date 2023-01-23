@@ -57,7 +57,7 @@
 
       function processJson(data) {
         document.getElementById("form").reset();
-        if (handleAuthError(data, "/member")) {
+        if (handleAuthError(data, "/login")) {
           return;
         }
       }
@@ -65,7 +65,7 @@
       function processBookList(data) {
         document.getElementById("form_book").reset();
 
-        if (handleAuthError(data, "/member")) {
+        if (handleAuthError(data, "/login")) {
           return;
         }
         if (handleError(data)) {
@@ -151,6 +151,7 @@
             </td>
           </tr>
         </table>
+        <input type="hidden" name="user_id" id="user_id" value="{{USER_ID}}" />
         <button type="submit">検索</button> 何も入力せずに検索ボタンを押すと、全図書が表示されます。
       </form>
       <h3>検索結果</h3>

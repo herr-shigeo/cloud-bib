@@ -1,7 +1,6 @@
 use crate::views::content_loader::read_file;
 use actix_files::NamedFile;
 use actix_web::{HttpRequest, HttpResponse, Result};
-use log::debug;
 use std::path::PathBuf;
 
 pub async fn load() -> HttpResponse {
@@ -16,7 +15,6 @@ pub async fn css_files(req: HttpRequest) -> Result<NamedFile> {
     let mut path = PathBuf::from("src/html/css");
     path.push(file_name);
 
-    debug!("{:?}", path);
     Ok(NamedFile::open(path)?)
 }
 
@@ -25,7 +23,6 @@ pub async fn image_files(req: HttpRequest) -> Result<NamedFile> {
     let mut path = PathBuf::from("src/html/image");
     path.push(file_name);
 
-    debug!("{:?}", path);
     Ok(NamedFile::open(path)?)
 }
 
@@ -34,6 +31,5 @@ pub async fn js_files(req: HttpRequest) -> Result<NamedFile> {
     let mut path = PathBuf::from("src/html/js");
     path.push(file_name);
 
-    debug!("{:?}", path);
     Ok(NamedFile::open(path)?)
 }

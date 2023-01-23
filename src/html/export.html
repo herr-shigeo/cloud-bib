@@ -22,12 +22,12 @@
       $(document).ready(function () {
         var options1 = {
           dataType: "json",
-          success: processResult,
+          success: processJson,
         };
         $("#form").ajaxForm(options1);
       });
 
-      function processResult(data) {
+      function processJson(data) {
         if (handleAuthError(data, "/login")) {
           return;
         }

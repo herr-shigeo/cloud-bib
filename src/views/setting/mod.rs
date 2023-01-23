@@ -15,12 +15,8 @@ pub fn setting_factory(app: &mut web::ServiceConfig) {
         web::get().to(setting::get_rental_setting),
     )
     .route(
-        &base_path.define(String::from("/rental")),
+        &base_path.define(String::from("/update")),
         web::post().to(setting::update_rental_setting),
-    )
-    .route(
-        &base_path.define(String::from("/system")),
-        web::post().to(setting::update_system_setting),
     )
     .route(
         &base_path.define(String::from("/import_user")),

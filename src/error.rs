@@ -29,6 +29,7 @@ pub enum BibErrorResponse {
     ExceedLimit(u32),
     NotPossibleToDelete,
     ExceedLimitInParallel(u32),
+    UserExists,
 }
 
 impl Display for BibErrorResponse {
@@ -137,18 +138,10 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     reason: String::new(),
                 })
             }
-            BibErrorResponse::SystemError(reason) => {
-                HttpResponse::build(self.status_code()).json(BibResponseBody {
-                    success: false,
-                    errcode: 112,
-                    message: String::from("システムエラーが発生しました"),
-                    reason: reason.to_string(),
-                })
-            }
             BibErrorResponse::ExceedLimit(id) => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,
-                    errcode: 113,
+                    errcode: 112,
                     message: format!("追加できる上限を超えています({})", id),
                     reason: String::new(),
                 })
@@ -156,7 +149,7 @@ impl actix_web::error::ResponseError for BibErrorResponse {
             BibErrorResponse::NotPossibleToDelete => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,
-                    errcode: 114,
+                    errcode: 113,
                     message: String::from("未返却処理があるため、削除できません"),
                     reason: String::new(),
                 })
@@ -164,10 +157,26 @@ impl actix_web::error::ResponseError for BibErrorResponse {
             BibErrorResponse::ExceedLimitInParallel(id) => HttpResponse::build(self.status_code())
                 .json(BibResponseBody {
                     success: false,
-                    errcode: 115,
+                    errcode: 114,
                     message: format!("一度に追加できる上限を超えています({})", id),
                     reason: String::new(),
                 }),
+            BibErrorResponse::UserExists => {
+                HttpResponse::build(self.status_code()).json(BibResponseBody {
+                    success: false,
+                    errcode: 115,
+                    message: String::from("このユーザ名は既に存在します"),
+                    reason: String::new(),
+                })
+            }
+            BibErrorResponse::SystemError(reason) => {
+                HttpResponse::build(self.status_code()).json(BibResponseBody {
+                    success: false,
+                    errcode: 199,
+                    message: String::from("システムエラーが発生しました"),
+                    reason: reason.to_string(),
+                })
+            }
         }
     }
 }
