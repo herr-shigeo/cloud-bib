@@ -28,6 +28,7 @@ pub struct Form1Data {
     pub user_name: String,
     pub user_kana: String,
     pub user_category: String,
+    pub user_grade: String,
     pub user_remark: String,
     pub operation: String,
     pub user_register_date: String,
@@ -60,6 +61,7 @@ pub async fn user(
             user.name = form.user_name.clone();
             user.kana = form.user_kana.clone();
             user.category = form.user_category.clone();
+            user.grade = form.user_grade.clone();
             user.remark = form.user_remark.clone();
             user.register_date = form.user_register_date.clone();
             user
@@ -81,6 +83,7 @@ pub async fn user(
                 &form.user_name,
                 &form.user_kana,
                 &form.user_category,
+                &form.user_grade,
                 &form.user_remark,
                 &form.user_register_date,
             )
@@ -116,16 +119,21 @@ pub async fn user(
 pub struct Form2Data {
     pub book_id: String,
     pub book_title: String,
-    pub book_kana: String,
-    pub book_series: String,
+    pub book_location: String,
+    pub book_category: String,
+    pub book_status: String,
     pub book_author: String,
     pub book_publisher: String,
-    pub book_char: String,
+    pub book_series: String,
+    pub book_volume: String,
+    pub book_kana: String,
+    pub book_category_symbol: String,
+    pub book_library_symbol: String,
+    pub book_volume_symbol: String,
+    pub book_forbidden: String,
     pub book_remark: String,
-    pub book_recommendation: String,
-    pub book_register_type: String,
     pub book_register_date: String,
-    pub book_status: String,
+    pub book_register_type: String,
     pub operation: String,
 }
 
@@ -155,16 +163,21 @@ pub async fn book(
     book = match search_item(&db, &book).await {
         Ok(mut book) => {
             book.title = form.book_title.clone();
-            book.kana = form.book_kana.clone();
-            book.series = form.book_series.clone();
+            book.location = form.book_location.clone();
+            book.category = form.book_category.clone();
+            book.status = form.book_status.clone();
             book.author = form.book_author.clone();
             book.publisher = form.book_publisher.clone();
-            book.char = form.book_char.clone();
+            book.series = form.book_series.clone();
+            book.volume = form.book_volume.clone();
+            book.kana = form.book_kana.clone();
+            book.category_symbol = form.book_category_symbol.clone();
+            book.library_symbol = form.book_library_symbol.clone();
+            book.volume_symbol = form.book_volume_symbol.clone();
+            book.forbidden = form.book_forbidden.clone();
             book.remark = form.book_remark.clone();
-            book.recommendation = form.book_recommendation.clone();
             book.register_date = form.book_register_date.clone();
             book.register_type = form.book_register_type.clone();
-            book.status = form.book_status.clone();
             book
         }
         Err(_) => {
@@ -182,16 +195,21 @@ pub async fn book(
             Book::new(
                 &form.book_id,
                 &form.book_title,
-                &form.book_kana,
-                &form.book_series,
+                &form.book_location,
+                &form.book_category,
+                &form.book_status,
                 &form.book_author,
                 &form.book_publisher,
-                &form.book_char,
+                &form.book_series,
+                &form.book_volume,
+                &form.book_kana,
+                &form.book_category_symbol,
+                &form.book_library_symbol,
+                &form.book_volume_symbol,
+                &form.book_forbidden,
                 &form.book_remark,
-                &form.book_recommendation,
                 &form.book_register_date,
                 &form.book_register_type,
-                &form.book_status,
             )
             .unwrap()
         }

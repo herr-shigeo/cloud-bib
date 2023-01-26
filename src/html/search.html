@@ -6,21 +6,23 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-      />
+    />
     <link
       rel="stylesheet"
       href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"
-      />
+    />
     <link rel="stylesheet" href="https://www.cloudbib.net/css/default.css" />
     <script src="https://www.cloudbib.net/js/util.js"></script>
     <script
       src="https://code.jquery.com/jquery-3.5.1.min.js"
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-      crossorigin="anonymous"></script>
+      crossorigin="anonymous"
+    ></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
       integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"></script>
+      crossorigin="anonymous"
+    ></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
       function get_link(data) {
@@ -62,16 +64,21 @@
           columns: [
             { data: "id" },
             { data: "title" },
-            { data: "char" },
-            { data: "recommendation" },
+            { data: "location" },
+            { data: "category" },
             { data: "owner_id" },
+            { data: "forbidden" },
             { data: "status" },
-            { data: "register_type" },
             { data: "author" },
             { data: "publisher" },
             { data: "series" },
+            { data: "volume" },
+            { data: "category_symbol" },
+            { data: "library_symbol" },
+            { data: "volume_symbol" },
             { data: "remark" },
             { data: "register_date" },
+            { data: "register_type" },
             { data: "borrowed_count" },
           ],
         });
@@ -124,7 +131,7 @@
             { data: "user_name" },
             { data: "book.book_id" },
             { data: "book.book_title" },
-            { data: "book.char" },
+            { data: "book.location" },
             { data: "book.borrowed_date" },
             { data: "book.return_deadline" },
           ],
@@ -144,7 +151,7 @@
         var dataSet = data["book_list"];
         $.each(dataSet, function (i, d) {
           if (d.owner_id == null) {
-            d.owner_id = "貸出可能";
+            d.owner_id = "";
           } else {
             var dt = d.return_deadline.split(" ");
             d.owner_id = "貸出中 (" + d.owner_id + ", 〜" + dt[0] + ")";
@@ -161,21 +168,26 @@
           columns: [
             { data: "id" },
             { data: "title" },
-            { data: "char" },
-            { data: "recommendation" },
+            { data: "location" },
+            { data: "category" },
             { data: "owner_id" },
+            { data: "forbidden" },
             { data: "status" },
-            { data: "register_type" },
             { data: "author" },
             { data: "publisher" },
             { data: "series" },
+            { data: "volume" },
+            { data: "category_symbol" },
+            { data: "library_symbol" },
+            { data: "volume_symbol" },
             { data: "remark" },
             { data: "register_date" },
+            { data: "register_type" },
             { data: "borrowed_count" },
           ],
           columnDefs: [
             {
-              targets: 12,
+              targets: 17,
               className: "dt-body-center",
             },
           ],
@@ -211,17 +223,13 @@
         name="form_book"
         action="/search/book"
         method="get"
-        enctype="application/x-www-form-urlencoded">
+        enctype="application/x-www-form-urlencoded"
+      >
         <table>
           <tr>
             <td>
               <label for="value"><b>タイトル</b></label>
-              <input
-                type="text"
-                placeholder="全角"
-                name="title"
-                id="book_title"
-                />
+              <input type="text" placeholder="" name="title" id="book_title" />
             </td>
             <td>
               <label for="value"><b>ID</b></label>
@@ -230,25 +238,20 @@
                 placeholder="半角数字"
                 name="id"
                 id="book_id"
-                />
+              />
             </td>
             <td>
               <label for="value"><b>ヨミ</b></label>
-              <input
-                type="text"
-                placeholder="全角カナ"
-                name="kana"
-                id="book_kana"
-                />
+              <input type="text" placeholder="" name="kana" id="book_kana" />
             </td>
             <td>
               <label for="value"><b>著者</b></label>
               <input
                 type="text"
-                placeholder="全角"
+                placeholder=""
                 name="author"
                 id="book_author"
-                />
+              />
             </td>
           </tr>
         </table>
@@ -263,16 +266,21 @@
             <tr>
               <th>図書ID</th>
               <th>タイトル</th>
-              <th>分類マーク</th>
-              <th>推薦</th>
+              <th>保管場所</th>
+              <th>図書分類</th>
               <th>貸出状況</th>
+              <th>禁帯出</th>
               <th>破損状況</th>
-              <th>登録区分</th>
               <th>著者</th>
               <th>出版社</th>
               <th>シリーズ</th>
-              <th>注記</th>
+              <th>巻数</th>
+              <th>分類記号</th>
+              <th>図書記号</th>
+              <th>巻冊記号</th>
+              <th>備考</th>
               <th>登録日</th>
+              <th>登録区分</th>
               <th>貸出数</th>
             </tr>
           </thead>
@@ -288,7 +296,8 @@
         name="form1"
         action="/search/delayed"
         method="get"
-        enctype="application/x-www-form-urlencoded">
+        enctype="application/x-www-form-urlencoded"
+      >
         <button type="submit">検索</button>
       </form>
       <h3>検索結果</h3>

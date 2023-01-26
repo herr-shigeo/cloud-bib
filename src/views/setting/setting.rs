@@ -183,18 +183,15 @@ pub async fn import_user_list(
     for i in 0..records.len() {
         let record = &records[i];
         let num_field = record.len();
-        if num_field != 6 {
+        if num_field != 7 {
             return Err(BibErrorResponse::InvalidArgument(format!(
                 "The number of fields is {}",
                 num_field
             )));
         }
-        debug!(
-            "{}, {}, {}, {}, {}, {}",
-            &record[0], &record[1], &record[2], &record[3], &record[4], &record[5]
-        );
+        debug!("{:?}", record);
         let user = User::new(
-            &record[0], &record[1], &record[2], &record[3], &record[4], &record[5],
+            &record[0], &record[1], &record[2], &record[3], &record[4], &record[5], &record[6],
         )
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
         if map.insert(user.id, true).is_some() {
@@ -317,40 +314,31 @@ pub async fn import_book_list(
             }
             let record = &records[num_processed];
             let num_field = record.len();
-            if num_field != 12 {
+            if num_field != 17 {
                 return Err(BibErrorResponse::InvalidArgument(format!(
                     "The number of fields is {}",
                     num_field
                 )));
             }
-            debug!(
-                "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
-                &record[0],  // id
-                &record[1],  // title
-                &record[2],  // char
-                &record[3],  // register_type
-                &record[4],  // recommendation
-                &record[5],  // remark
-                &record[6],  // status
-                &record[7],  // author
-                &record[8],  // publisher
-                &record[9],  // series
-                &record[10], // kana
-                &record[11], // register_date
-            );
+            debug!("{:?}", record);
             let book = Book::new(
                 &record[0],  // id
                 &record[1],  // title
-                &record[10], // kana
-                &record[9],  // series
-                &record[7],  // author
-                &record[8],  // publisher
-                &record[2],  // char
-                &record[5],  // remark
-                &record[4],  // recommendation
-                &record[11], // register_date
-                &record[3],  // register_type
-                &record[6],  // status
+                &record[2],  // location
+                &record[3],  // category
+                &record[4],  // status
+                &record[5],  // author
+                &record[6],  // publisher
+                &record[7],  // series
+                &record[8],  // volume
+                &record[9],  // kana
+                &record[10], // category_symbol
+                &record[11], // library_symbol
+                &record[12], // volume_symbol
+                &record[13], // forbidden
+                &record[14], // remark
+                &record[15], // register_date
+                &record[16], // register_type
             )
             .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
             if map.insert(book.id, true).is_some() {

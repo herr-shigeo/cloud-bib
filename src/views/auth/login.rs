@@ -120,7 +120,7 @@ pub async fn login(
 
                 // Verify the user name
                 let db = get_db_with_name(&data, &system_user.dbname).await?;
-                let user = User::new(&form.user_id, "", "", "", "", "")
+                let user = User::new(&form.user_id, "", "", "", "", "", "")
                     .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
                 let mut users = match search_items(&db, &user).await {
                     Ok(users) => users,

@@ -6,17 +6,19 @@
     <link
       rel="stylesheet"
       href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"
-      />
+    />
     <link rel="stylesheet" href="https://www.cloudbib.net/css/default.css" />
     <script src="https://www.cloudbib.net/js/util.js"></script>
     <script
       src="https://code.jquery.com/jquery-3.5.1.min.js"
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-      crossorigin="anonymous"></script>
+      crossorigin="anonymous"
+    ></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
       integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"></script>
+      crossorigin="anonymous"
+    ></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
       function get_link(data) {
@@ -75,7 +77,7 @@
         var dataSet = data["book_list"];
         $.each(dataSet, function (i, d) {
           if (d.owner_id == null) {
-            d.owner_id = "貸出可能";
+            d.owner_id = "";
           } else {
             var dt = d.return_deadline.split(" ");
             d.owner_id = "貸出中 (〜" + dt[0] + ")";
@@ -95,8 +97,7 @@
             { data: "series" },
             { data: "author" },
             { data: "owner_id" },
-            { data: "char" },
-            { data: "recommendation" },
+            { data: "location" },
             { data: "register_date" },
           ],
         });
@@ -124,17 +125,13 @@
         name="form_book"
         action="/search/book"
         method="get"
-        enctype="application/x-www-form-urlencoded">
+        enctype="application/x-www-form-urlencoded"
+      >
         <table>
           <tr>
             <td>
-              <label for="value"><b>タイトル（全角）</b></label>
-              <input
-                type="text"
-                placeholder="例）かいけつゾロリ、歴史、コナン、ＤＶＤ"
-                name="title"
-                id="book_title"
-                />
+              <label for="value"><b>タイトル</b></label>
+              <input type="text" placeholder="" name="title" id="book_title" />
             </td>
             <td>
               <input type="hidden" placeholder="" name="id" id="book_id" />
@@ -144,15 +141,16 @@
               <label for="value"><b>著者</b></label>
               <input
                 type="text"
-                placeholder="全角"
+                placeholder=""
                 name="author"
                 id="book_author"
-                />
+              />
             </td>
           </tr>
         </table>
         <input type="hidden" name="user_id" id="user_id" value="{{USER_ID}}" />
-        <button type="submit">検索</button> 何も入力せずに検索ボタンを押すと、全図書が表示されます。
+        <button type="submit">検索</button>
+        何も入力せずに検索ボタンを押すと、全図書が表示されます。
       </form>
       <h3>検索結果</h3>
       <div style="overflow-x: auto">
@@ -164,8 +162,7 @@
               <th>シリーズ</th>
               <th>著者</th>
               <th>貸出状況</th>
-              <th>分類マーク</th>
-              <th>推薦</th>
+              <th>保管場所</th>
               <th>登録日</th>
             </tr>
           </thead>

@@ -172,6 +172,10 @@ async fn borrow_book(
         }
     }
 
+    if book.forbidden == "禁帯出" {
+        return Err(BibErrorResponse::NotAllowedToBorrow);
+    }
+
     let mut transaction_id;
     {
         let transaction_map = transaction_map.lock().unwrap();
@@ -196,7 +200,7 @@ async fn borrow_book(
         get_nowtime(time_zone),
         max_borrowing_days,
         transaction_id,
-        book.char.clone(),
+        book.location.clone(),
     );
 
     let return_deadline = borrowed_book.return_deadline.clone();

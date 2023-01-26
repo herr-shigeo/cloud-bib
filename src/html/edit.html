@@ -8,12 +8,14 @@
     <script
       src="https://code.jquery.com/jquery-3.5.1.min.js"
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-      crossorigin="anonymous"></script>
+      crossorigin="anonymous"
+    ></script>
     <script src="https://www.cloudbib.net/js/jquery.autoKana.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
       integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"></script>
+      crossorigin="anonymous"
+    ></script>
 
     <script>
       function get_link(data) {
@@ -88,12 +90,13 @@
         document.getElementById("user_name").value = user.name;
         document.getElementById("user_kana").value = user.kana;
         document.getElementById("user_remark").value = user.remark;
+        document.getElementById("user_grade").value = user.grade;
         document.getElementById("user_register_date").value =
           user.register_date;
         if (user.category == "生徒")
           document.getElementById("user_seito").checked = true;
-        else if (user.category == "講師")
-          document.getElementById("user_koushi").checked = true;
+        else if (user.category == "教職員")
+          document.getElementById("user_kyoshokuin").checked = true;
         else if (user.category == "その他")
           document.getElementById("user_other").checked = true;
       }
@@ -111,21 +114,35 @@
         var book = data["book_list"][0];
         document.getElementById("book_id").value = book.id;
         document.getElementById("book_title").value = book.title;
-        document.getElementById("book_kana").value = book.kana;
-        document.getElementById("book_series").value = book.series;
+        document.getElementById("book_location").value = book.location;
+        document.getElementById("book_category").value = book.category;
+        document.getElementById("book_status").value = book.status;
         document.getElementById("book_author").value = book.author;
         document.getElementById("book_publisher").value = book.publisher;
-        document.getElementById("book_char").value = book.char;
+        document.getElementById("book_series").value = book.series;
+        document.getElementById("book_volume").value = book.volume;
+        document.getElementById("book_kana").value = book.kana;
+        document.getElementById("book_category_symbol").value =
+          book.category_symbol;
+        document.getElementById("book_library_symbol").value =
+          book.library_symbol;
+        document.getElementById("book_volume_symbol").value =
+          book.volume_symbol;
+        if (book.forbidden == "禁帯出") {
+          document.getElementById("book_forbidden_true").checked = true;
+        } else if (book.forbidden == "貸出可") {
+          document.getElementById("book_forbidden_false").checked = true;
+        }
         document.getElementById("book_remark").value = book.remark;
-        document.getElementById("book_status").value = book.status;
-        document.getElementById("book_recommendation").value =
-          book.recommendation;
+        book.recommendation;
         if (book.register_type == "購入")
           document.getElementById("book_bought").checked = true;
-        else if (book.register_type == "寄贈")
+        else if (book.register_type == "一般寄贈")
           document.getElementById("book_ippan").checked = true;
-        else if (book.register_type == "財団")
+        else if (book.register_type == "財団寄贈")
           document.getElementById("book_zaidan").checked = true;
+        else if (book.register_type == "その他　")
+          document.getElementById("book_other").checked = true;
         document.getElementById("book_register_date").value =
           book.register_date;
       }
@@ -266,14 +283,15 @@
         name="form_user_list"
         action="/search/user"
         method="get"
-        enctype="application/x-www-form-urlencoded">
+        enctype="application/x-www-form-urlencoded"
+      >
         <label for="value"><b>利用者ID</b></label>
         <input
           type="text"
           name="id"
           placeholder="半角数字"
           id="user_id_search"
-          />
+        />
         <input type="hidden" name="name" placeholder="" value="" />
         <input type="hidden" name="kana" placeholder="" value="" />
         <input type="hidden" name="category" value="" />
@@ -282,7 +300,8 @@
         id="form_user_update"
         name="form_user_update"
         action="/edit/user"
-        method="post">
+        method="post"
+      >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>
           <table>
@@ -295,7 +314,7 @@
                   id="user_id"
                   placeholder="半角数字"
                   required
-                  />
+                />
               </td>
               <td>
                 <b>利用者区分</b>
@@ -304,23 +323,32 @@
                   name="user_category"
                   id="user_seito"
                   value="生徒"
-                  />
+                />
                 <label for="user_setio">生徒</label>
                 <input
                   type="radio"
                   name="user_category"
-                  id="user_koushi"
-                  value="講師"
-                  />
-                <label for="user_koushi">講師</label>
+                  id="user_kyoshokuin"
+                  value="教職員"
+                />
+                <label for="user_kyoshokuin">教職員</label>
                 <input
                   type="radio"
                   name="user_category"
                   id="user_other"
                   value="その他"
                   checked
-                  />
+                />
                 <label for="user_other">その他</label>
+              </td>
+              <td>
+                <label for="user_grade"><b>学年クラス</b></label>
+                <input
+                  type="text"
+                  name="user_grade"
+                  placeholder=""
+                  id="user_grade"
+                />
               </td>
               <td>
                 <label for="user_remark"><b>備考</b></label>
@@ -329,7 +357,7 @@
                   name="user_remark"
                   placeholder=""
                   id="user_remark"
-                  />
+                />
               </td>
             </tr>
             <tr>
@@ -339,19 +367,18 @@
                   type="text"
                   name="user_name"
                   id="user_name"
-                  placeholder="全角"
+                  placeholder=""
                   required
-                  />
+                />
               </td>
               <td>
-                <label for="user_kana"><b>カナ*</b></label>
+                <label for="user_kana"><b>カナ</b></label>
                 <input
                   type="text"
                   name="user_kana"
                   id="user_kana"
-                  placeholder="全角"
-                  required
-                  />
+                  placeholder=""
+                />
               </td>
               <td>
                 <label for="user_register_date"><b>登録日</b></label>
@@ -360,8 +387,9 @@
                   name="user_register_date"
                   id="user_register_date"
                   placeholder="半角 yyyy/mm/dd"
-                  />
+                />
               </td>
+              <td></td>
             </tr>
           </table>
 
@@ -372,16 +400,16 @@
               id="user_update"
               value="update"
               checked
-              />
+            />
             <label for="user_update"><b>更新</b></label>
             <input
               type="radio"
               name="operation"
               id="user_delete"
               value="delete"
-              />
+            />
             <label for="user_delete"><b>削除</b></label>
-            <br />
+            <br /><br />
             <button type="submit" class="submitbtn">実行</button>
           </div>
         </div>
@@ -398,23 +426,26 @@
         name="form_book_list"
         action="/search/book"
         method="get"
-        enctype="application/x-www-form-urlencoded">
+        enctype="application/x-www-form-urlencoded"
+      >
         <label for="value"><b>図書ID</b></label>
         <input
           type="text"
           name="id"
           id="book_id_search"
           placeholder="半角数字"
-          />
+        />
         <input type="hidden" name="title" value="" />
         <input type="hidden" name="kana" value="" />
         <input type="hidden" name="author" value="" />
+        <input type="hidden" name="user_id" value="0" />
       </form>
       <form
         id="form_book_update"
         name="form_book_update"
         action="/edit/book"
-        method="post">
+        method="post"
+      >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>
           <table>
@@ -427,49 +458,49 @@
                   id="book_id"
                   placeholder="半角数字"
                   required
-                  />
+                />
               </td>
-              <td>
-                <label for="book_char"><b>分類マーク</b></label>
-                <input
-                  type="text"
-                  name="book_char"
-                  id="book_char"
-                  placeholder=""
-                  />
-              </td>
-            </tr>
-            <tr>
               <td>
                 <label for="book_title"><b>タイトル*</b></label>
                 <input
                   type="text"
                   name="book_title"
                   id="book_title"
-                  placeholder="すべて全角 / ＤＶＤはタイトル前に入れる"
-                  required
-                  />
-              </td>
-              <td>
-                <label for="book_series"><b>シリーズ</b></label>
-                <input
-                  type="text"
-                  name="book_series"
-                  id="book_series"
                   placeholder=""
-                  />
+                  required
+                />
               </td>
             </tr>
             <tr>
               <td>
-                <label for="book_kana"><b>タイトルヨミ*</b></label>
+                <label for="book_location"><b>保管場所</b></label>
                 <input
                   type="text"
-                  name="book_kana"
-                  id="book_kana"
-                  placeholder="全角カナ"
-                  required
-                  />
+                  name="book_location"
+                  id="book_location"
+                  placeholder=""
+                />
+              </td>
+
+              <td>
+                <label for="book_category"><b>図書分類</b></label>
+                <input
+                  type="text"
+                  name="book_category"
+                  id="book_category"
+                  placeholder=""
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_status"><b>破損状況</b></label>
+                <input
+                  type="text"
+                  name="book_status"
+                  id="book_status"
+                  placeholder=""
+                />
               </td>
               <td>
                 <label for="book_author"><b>著者</b></label>
@@ -478,7 +509,7 @@
                   name="book_author"
                   id="book_author"
                   placeholder=""
-                  />
+                />
               </td>
             </tr>
             <tr>
@@ -489,39 +520,97 @@
                   name="book_publisher"
                   id="book_publisher"
                   placeholder=""
-                  />
+                />
               </td>
               <td>
-                <label for="book_recommendation"><b>推薦</b></label>
+                <label for="book_recommendation"><b>シリーズ</b></label>
                 <input
                   type="text"
-                  name="book_recommendation"
-                  id="book_recommendation"
-                  placeholder="【〇〇推薦】を記入する"
-                  />
+                  name="book_series"
+                  id="book_series"
+                  placeholder=""
+                />
               </td>
             </tr>
             <tr>
               <td>
-                <label for="book_remark"><b>注記</b></label>
+                <label for="book_volume"><b>巻数</b></label>
+                <input
+                  type="text"
+                  name="book_volume"
+                  id="book_volume"
+                  placeholder=""
+                />
+              </td>
+              <td>
+                <label for="book_kana"><b>タイトルヨミ</b></label>
+                <input
+                  type="text"
+                  name="book_kana"
+                  id="book_kana"
+                  placeholder=""
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_category_symbol"><b>分類記号</b></label>
+                <input
+                  type="text"
+                  name="book_category_symbol"
+                  id="book_category_symbol"
+                  placeholder=""
+                />
+              </td>
+              <td>
+                <label for="book_library_symbol"><b>図書記号</b></label>
+                <input
+                  type="text"
+                  name="book_library_symbol"
+                  id="book_library_symbol"
+                  placeholder=""
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_volume_symbol"><b>巻冊記号</b></label>
+                <input
+                  type="text"
+                  name="book_volume_symbol"
+                  id="book_volume_symbol"
+                  placeholder=""
+                />
+              </td>
+              <td>
+                <b>禁帯出</b>
+                <input
+                  type="radio"
+                  name="book_forbidden"
+                  id="book_forbidden_false"
+                  value="貸出可"
+                  checked
+                />
+                <label for="book_forbidden_false">貸出可</label>
+                <input
+                  type="radio"
+                  name="book_forbidden"
+                  id="book_forbidden_true"
+                  value="禁帯出"
+                />
+                <label for="book_forbidden_true">禁帯出</label>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_remark"><b>備考</b></label>
                 <input
                   type="text"
                   name="book_remark"
                   id="book_remark"
                   placeholder=""
-                  />
+                />
               </td>
-              <td>
-                <label for="book_status"><b>破損状況</b></label>
-                <input
-                  type="text"
-                  name="book_status"
-                  id="book_status"
-                  placeholder=""
-                  />
-              </td>
-            </tr>
-            <tr>
               <td>
                 <label for="book_register_date"><b>登録日</b></label>
                 <input
@@ -529,8 +618,10 @@
                   name="book_register_date"
                   id="book_register_date"
                   placeholder="半角 yyyy/mm/dd"
-                  />
+                />
               </td>
+            </tr>
+            <tr>
               <td>
                 <b>登録区分</b>
                 <input
@@ -539,23 +630,31 @@
                   id="book_bought"
                   value="購入"
                   checked
-                  />
+                />
                 <label for="book_bought">購入</label>
                 <input
                   type="radio"
                   name="book_register_type"
                   id="book_ippan"
-                  value="寄贈"
-                  />
-                <label for="book_ippan">寄贈</label>
+                  value="一般寄贈"
+                />
+                <label for="book_ippan">一般寄贈</label>
                 <input
                   type="radio"
                   name="book_register_type"
                   id="book_zaidan"
-                  value="財団"
-                  />
-                <label for="book_zaidan">財団</label>
+                  value="財団寄贈"
+                />
+                <label for="book_zaidan"></label>
+                <input
+                  type="radio"
+                  name="book_register_type"
+                  id="book_other"
+                  value="財団寄贈"
+                />
+                <label for="book_other">その他</label>
               </td>
+              <td></td>
             </tr>
           </table>
 
@@ -566,16 +665,16 @@
               id="book_update"
               value="update"
               checked
-              />
+            />
             <label for="book_update"><b>更新</b></label>
             <input
               type="radio"
               name="operation"
               id="book_delete"
               value="delete"
-              />
+            />
             <label for="book_delete"><b>削除</b></label>
-            <br />
+            <br /><br />
             <button type="submit" class="submitbtn">実行</button>
           </div>
         </div>
@@ -589,13 +688,14 @@
         name="form_user_register"
         action="/setting/import_user"
         method="post"
-        enctype="multipart/form-data">
+        enctype="multipart/form-data"
+      >
         <input
           type="file"
           id="user_file_attached"
           accept=".csv,.tsv"
           name="file_attached"
-          />
+        />
         <button type="submit" class="submitbtn" onClick="move()">
           利用者登録
         </button>
@@ -606,13 +706,14 @@
         name="form_book_register"
         action="/setting/import_book"
         method="post"
-        enctype="multipart/form-data">
+        enctype="multipart/form-data"
+      >
         <input
           type="file"
           id="book_file_attached"
           accept=".csv,.tsv"
           name="file_attached"
-          />
+        />
         <button type="submit" class="submitbtn" onClick="move()">
           図書登録
         </button>

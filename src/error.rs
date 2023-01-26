@@ -30,6 +30,7 @@ pub enum BibErrorResponse {
     NotPossibleToDelete,
     ExceedLimitInParallel(u32),
     UserExists,
+    NotAllowedToBorrow,
 }
 
 impl Display for BibErrorResponse {
@@ -166,6 +167,14 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     success: false,
                     errcode: 115,
                     message: String::from("このユーザ名は既に存在します"),
+                    reason: String::new(),
+                })
+            }
+            BibErrorResponse::NotAllowedToBorrow => {
+                HttpResponse::build(self.status_code()).json(BibResponseBody {
+                    success: false,
+                    errcode: 116,
+                    message: String::from("この本は禁帯出です"),
                     reason: String::new(),
                 })
             }

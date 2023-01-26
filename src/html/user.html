@@ -85,6 +85,9 @@
         if (user["category"] != "") {
           document.getElementById("user_category").innerHTML = user["category"];
         }
+        if (user["grade"] != "") {
+          document.getElementById("user_grade").innerHTML = user["grade"];
+        }
         document.getElementById("user_id2").innerHTML = user["id"];
         document.getElementById("user_kana").innerHTML = user["kana"];
         document.getElementById("user_register_date").innerHTML =
@@ -201,6 +204,7 @@
         <td><div id="user_id2">利用者ID未選択</div></td>
         <td><div id="user_kana"></div></td>
         <td><div id="user_category">利用者区分無し</div></td>
+        <td><div id="user_grade"></div></td>
         <td><div id="user_register_date"></div></td>
         <td><div id="user_remark"></div></td>
         <td>
