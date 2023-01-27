@@ -12,6 +12,7 @@ mod history;
 mod home;
 mod index;
 mod maintain;
+mod manual;
 mod member;
 mod notation;
 mod path;
@@ -93,4 +94,5 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     edit::edit_factory(app);
     maintain::maintain_factory(app);
     account::account_factory(app);
+    manual::manual_factory(app);
 }

@@ -17,10 +17,9 @@
     ></script>
 
     <script>
-      function updateUserIdText() {
-        var radioButtonUser = document.getElementById("user_user");
+      function updateUserIdText(enable) {
         var userIdText = document.getElementById("user_id");
-        if (radioButtonUser.checked) {
+        if (enable) {
           document.getElementById("user_id").disabled = false;
         } else {
           document.getElementById("user_id").disabled = true;
@@ -34,21 +33,13 @@
         };
         $("#form").ajaxForm(options);
 
-        var radioButtonOperator = document.getElementById("user_operator");
-        var radioButtonUser = document.getElementById("user_user");
-        var radioButtonAdmin = document.getElementById("user_admin");
+        var userCategorySelecter = document.getElementById("user_category");
         var userIdText = document.getElementById("user_id");
 
-        radioButtonOperator.addEventListener("change", function () {
-          updateUserIdText();
-        });
-
-        radioButtonUser.addEventListener("change", function () {
-          updateUserIdText();
-        });
-
-        radioButtonAdmin.addEventListener("change", function () {
-          updateUserIdText();
+        userCategorySelecter.addEventListener("change", function () {
+          var val = this.value;
+          var enable = (this.value == 'user');
+          updateUserIdText(enable);
         });
       });
 
@@ -64,7 +55,7 @@
   <body>
     <div class="topnav">
       <a class="active" href="/">製品ホーム</a>
-      <a href="/manual">マニュアル</a>
+      <a href="/manual/">マニュアル</a>
       <a
         href="https://twitter.com/messages/compose?recipient_id=1618571454580137984"
         >問い合わせ</a
@@ -93,30 +84,13 @@
           />
 
           <b>ユーザー区分</b>
-          <input
-            type="radio"
-            name="user_category"
-            id="user_operator"
-            value="operator"
-            checked="true"
-          />
-          <label for="user_operator">司書</label>
-
-          <input
-            type="radio"
-            name="user_category"
-            id="user_user"
-            value="user"
-          />
-          <label for="user_user">利用者</label>
-
-          <input
-            type="radio"
-            name="user_category"
-            id="user_admin"
-            value="admin"
-          />
-          <label for="user_admin">管理者</label>
+          <select name="user_category" id="user_category">
+            <option id="user_operator" value="operator" selected>
+              司書 (オペレーター)
+            </option>
+            <option id="user_admin" value="admin">管理者</option>
+            <option id="user_user" value="user">利用者</option>
+          </select>
           <br /><br />
 
           <label for="password"><b>パスワード</b></label>
@@ -141,7 +115,7 @@
             <button
               type="submit"
               class="submitbtn"
-              onclick="document.getElementById('user_id').removeAttribute('disabled');"
+              onclick="if(document.forms[0].checkValidity()){document.getElementById('user_id').removeAttribute('disabled');}"
             >
               ログイン
             </button>
@@ -154,7 +128,8 @@
 
     <br />
     <div class="footer">
-      <a href="/terms" target="_blank">利用規約</a> | <a href="/privacy" target="_blank">プライバシーポリシー</a> |
+      <a href="/terms" target="_blank">利用規約</a> |
+      <a href="/privacy" target="_blank">プライバシーポリシー</a> |
       <a href="/notation" target="_blank">特商法表記</a>
     </div>
   </body>

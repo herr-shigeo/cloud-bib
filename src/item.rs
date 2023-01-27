@@ -13,6 +13,8 @@ use serde::{Deserialize, Serialize};
 use std::error;
 use std::io::{Error, ErrorKind};
 
+const NUM_SEARCH_ITEMS_MAX: i64 = 100000;
+
 #[async_trait]
 pub trait Entity {
     async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>>;
@@ -717,7 +719,10 @@ where
     }
 
     async fn search(&self, query: Document) -> Result<Vec<T>, Box<dyn error::Error>> {
-        let find_options = FindOptions::builder().sort(doc! { "id": 1 }).build();
+        let find_options = FindOptions::builder()
+            .limit(NUM_SEARCH_ITEMS_MAX)
+            .sort(doc! { "id": 1 })
+            .build();
         let mut items: Vec<T> = vec![];
         let mut cursor = self.find(query, find_options).await?;
         while let Some(item) = cursor.try_next().await? {

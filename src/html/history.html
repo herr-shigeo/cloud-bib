@@ -134,7 +134,7 @@
             </td>
             <td>
               <label for="value"><b>タイトル</b></label>
-              <input type="text" placeholder="全角" name="book_title" />
+              <input type="text" placeholder="" name="book_title" />
             </td>
             <td>
               <label for="value"><b>利用者ID</b></label>
@@ -149,14 +149,15 @@
               <label for="value"><b>氏名</b></label>
               <input
                 type="text"
-                placeholder="全角"
+                placeholder=""
                 name="user_name"
                 id="user_name"
                 />
             </td>
           </tr>
         </table>
-        <button type="submit">検索</button> 何も入力せずに検索ボタンを押すと、全ての貸出履歴が表示されます。
+        <button type="submit">検索</button>
+            <font size="-1" style="color: gray">何も入力せずに検索ボタンを押すと、最新のすべての貸出履歴が表示されます。</font>
       </form>
       <h3>検索結果</h3>
       <table id="transaction_list_table" class="display compact nowrap">
