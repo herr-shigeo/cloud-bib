@@ -200,6 +200,11 @@ pub async fn delete(
     let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;
 
     let uname = get_uname(&session)?;
+
+    if uname == "demo" {
+        return Err(BibErrorResponse::InvalidArgument(uname));
+    }
+
     let mut system_user = SystemUser::default();
     system_user.uname = uname;
 
