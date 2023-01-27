@@ -121,8 +121,7 @@ fn write_book_list(books: Vec<Book>, time_zone: &str) -> Result<String, Box<dyn 
         "備考",
         "登録日",
         "登録区分",
-        "貸出数",
-        "",
+        "貸出回数",
         "",
         "",
     ])?;
