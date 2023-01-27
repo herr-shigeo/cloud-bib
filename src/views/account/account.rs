@@ -192,6 +192,9 @@ pub async fn update(
 pub async fn delete(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
+    cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
+    transaction_map: web::Data<Mutex<HashMap<String, Transaction>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let dbname = check_admin_session(&session)?;
     let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;
@@ -214,6 +217,21 @@ pub async fn delete(
     db.drop(None)
         .await
         .map_err(|e| BibErrorResponse::DataNotFound(e.to_string()))?;
+
+    // Delete the cache_map
+    let mut cache_map = cache_map.lock().unwrap();
+    cache_map.remove(&system_user.dbname);
+    drop(cache_map);
+
+    // Delete the transaction_map
+    let mut transaction_map = transaction_map.lock().unwrap();
+    transaction_map.remove(&system_user.dbname);
+    drop(transaction_map);
+
+    // Delete the setting_map
+    let mut setting_map = setting_map.lock().unwrap();
+    setting_map.remove(&system_user.dbname);
+    drop(setting_map);
 
     // delete the session
     session.purge();
