@@ -128,13 +128,14 @@
           book.library_symbol;
         document.getElementById("book_volume_symbol").value =
           book.volume_symbol;
+        document.getElementById("book_remark").value = book.remark;
+
         if (book.forbidden == "禁帯出") {
           document.getElementById("book_forbidden_true").checked = true;
         } else if (book.forbidden == "貸出可") {
           document.getElementById("book_forbidden_false").checked = true;
         }
-        document.getElementById("book_remark").value = book.remark;
-        book.recommendation;
+
         if (book.register_type == "購入")
           document.getElementById("book_bought").checked = true;
         else if (book.register_type == "一般寄贈")
@@ -145,6 +146,36 @@
           document.getElementById("book_other").checked = true;
         document.getElementById("book_register_date").value =
           book.register_date;
+
+        if (book.category == "総記")
+          document.getElementById("category_1").selected = true;
+        else if (book.category == "哲学")
+          document.getElementById("category_2").selected = true;
+        else if (book.category == "歴史")
+          document.getElementById("category_3").selected = true;
+        else if (book.category == "社会科学")
+          document.getElementById("category_4").selected = true;
+        else if (book.category == "自然科学")
+          document.getElementById("category_5").selected = true;
+        else if (book.category == "技術")
+          document.getElementById("category_6").selected = true;
+        else if (book.category == "産業")
+          document.getElementById("category_7").selected = true;
+        else if (book.category == "芸術")
+          document.getElementById("category_8").selected = true;
+        else if (book.category == "言語")
+          document.getElementById("category_9").selected = true;
+        else if (book.category == "文学")
+          document.getElementById("category_10").selected = true;
+        else if (book.category == "絵本")
+          document.getElementById("category_11").selected = true;
+        else if (book.category == "雑誌")
+          document.getElementById("category_12").selected = true;
+        else if (book.category == "その他")
+          document.getElementById("category_13").selected = true;
+                  else if (book.category == "")
+          document.getElementById("category_14").selected = true;
+
       }
 
       function processUserUpdate(data) {
@@ -481,15 +512,24 @@
                   placeholder=""
                 />
               </td>
-
               <td>
                 <label for="book_category"><b>図書分類</b></label>
-                <input
-                  type="text"
-                  name="book_category"
-                  id="book_category"
-                  placeholder=""
-                />
+                <select name="book_category" id="book_category">
+                  <option id="category_1" value="総記">総記</option>
+                  <option id="category_2" value="哲学">哲学</option>
+                  <option id="category_3" value="歴史">歴史</option>
+                  <option id="category_4" value="社会科学">社会科学</option>
+                  <option id="category_5" value="自然科学">自然科学</option>
+                  <option id="category_6" value="技術">技術</option>
+                  <option id="category_7" value="産業">産業</option>
+                  <option id="category_8" value="芸術">芸術</option>
+                  <option id="category_9" value="言語">言語</option>
+                  <option id="category_10" value="文学">文学</option>
+                  <option id="category_11" value="絵本">絵本</option>
+                  <option id="category_12" value="雑誌">雑誌</option>
+                  <option id="category_13" value="その他" selected>その他</option>
+                  <option id="category_14" value="" selected></option>
+                </select>
               </td>
             </tr>
             <tr>
