@@ -25,7 +25,11 @@ pub async fn load(_session: Session) -> HttpResponse {
         .body(html_data)
 }
 
-fn write_user_list(users: Vec<User>, time_zone: &str) -> Result<String, Box<dyn error::Error>> {
+fn write_user_list(
+    users: Vec<User>,
+    prefix: &str,
+    time_zone: &str,
+) -> Result<String, Box<dyn error::Error>> {
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(vec![]);
 
     wtr.write_record(&[
@@ -56,7 +60,7 @@ fn write_user_list(users: Vec<User>, time_zone: &str) -> Result<String, Box<dyn 
     }
 
     let dt = get_nowtime(time_zone);
-    let fname = format!("user_list_{}.csv", dt.format("%Y%m%d"));
+    let fname = format!("user_list_{}_{}.csv", dt.format("%Y%m%d"), prefix);
     let mut file = File::create(fname.clone())?;
     file.write_all(&wtr.into_inner()?)?;
 
@@ -88,7 +92,7 @@ pub async fn export_user_list(
         }
     };
 
-    match write_user_list(users, &setting.time_zone) {
+    match write_user_list(users, &dbname, &setting.time_zone) {
         Ok(fname) => {
             return Ok(
                 NamedFile::open(fname).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?
@@ -100,7 +104,11 @@ pub async fn export_user_list(
     };
 }
 
-fn write_book_list(books: Vec<Book>, time_zone: &str) -> Result<String, Box<dyn error::Error>> {
+fn write_book_list(
+    books: Vec<Book>,
+    prefix: &str,
+    time_zone: &str,
+) -> Result<String, Box<dyn error::Error>> {
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(vec![]);
 
     wtr.write_record(&[
@@ -152,7 +160,7 @@ fn write_book_list(books: Vec<Book>, time_zone: &str) -> Result<String, Box<dyn 
     }
 
     let dt = get_nowtime(time_zone);
-    let fname = format!("book_list_{}.csv", dt.format("%Y%m%d"));
+    let fname = format!("book_list_{}_{}.csv", dt.format("%Y%m%d"), prefix);
     let mut file = File::create(fname.clone())?;
     file.write_all(&wtr.into_inner()?)?;
 
@@ -185,7 +193,7 @@ pub async fn export_book_list(
         }
     };
 
-    match write_book_list(books, &setting.time_zone) {
+    match write_book_list(books, &dbname, &setting.time_zone) {
         Ok(fname) => {
             return Ok(
                 NamedFile::open(fname).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?
@@ -199,6 +207,7 @@ pub async fn export_book_list(
 
 fn write_transaction_list(
     items: Vec<TransactionItem>,
+    prefix: &str,
     time_zone: &str,
 ) -> Result<String, Box<dyn error::Error>> {
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(vec![]);
@@ -226,7 +235,7 @@ fn write_transaction_list(
     }
 
     let dt = get_nowtime(time_zone);
-    let fname = format!("transaction_list_{}.csv", dt.format("%Y%m%d"));
+    let fname = format!("transaction_list_{}_{}.csv", dt.format("%Y%m%d"), prefix);
     let mut file = File::create(fname.clone())?;
     file.write_all(&wtr.into_inner()?)?;
 
@@ -256,7 +265,7 @@ pub async fn export_history_list(
         return Err(BibErrorResponse::DataNotFound(String::new()));
     }
 
-    match write_transaction_list(transaction_items, &setting.time_zone) {
+    match write_transaction_list(transaction_items, &dbname, &setting.time_zone) {
         Ok(fname) => {
             return Ok(
                 NamedFile::open(fname).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?

@@ -1,5 +1,3 @@
-use crate::views::path::Path;
-use actix_files::Files;
 use actix_web::web;
 
 use actix_files::NamedFile;
