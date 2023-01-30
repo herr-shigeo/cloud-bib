@@ -13,10 +13,10 @@ use csv::WriterBuilder;
 use log::error;
 use shared_mongodb::{database, ClientHolder};
 use std::collections::HashMap;
-use std::error;
 use std::fs::File;
 use std::io::Write;
 use std::sync::Mutex;
+use std::{env, error};
 
 pub async fn load(_session: Session) -> HttpResponse {
     let html_data = read_file("src/html/export.html").unwrap();
@@ -60,11 +60,15 @@ fn write_user_list(
     }
 
     let dt = get_nowtime(time_zone);
+
     let fname = format!("user_list_{}_{}.csv", dt.format("%Y%m%d"), prefix);
-    let mut file = File::create(fname.clone())?;
+    let dir = env::temp_dir();
+    let mut temp_file_path = dir.as_path().to_owned();
+    temp_file_path.push(fname);
+    let mut file = File::create(temp_file_path.to_owned())?;
     file.write_all(&wtr.into_inner()?)?;
 
-    Ok(fname)
+    Ok(temp_file_path.to_str().unwrap().to_owned())
 }
 
 pub async fn export_user_list(
@@ -160,11 +164,15 @@ fn write_book_list(
     }
 
     let dt = get_nowtime(time_zone);
+
     let fname = format!("book_list_{}_{}.csv", dt.format("%Y%m%d"), prefix);
-    let mut file = File::create(fname.clone())?;
+    let dir = env::temp_dir();
+    let mut temp_file_path = dir.as_path().to_owned();
+    temp_file_path.push(fname);
+    let mut file = File::create(temp_file_path.to_owned())?;
     file.write_all(&wtr.into_inner()?)?;
 
-    Ok(fname)
+    Ok(temp_file_path.to_str().unwrap().to_owned())
 }
 
 pub async fn export_book_list(
@@ -235,11 +243,15 @@ fn write_transaction_list(
     }
 
     let dt = get_nowtime(time_zone);
+
     let fname = format!("transaction_list_{}_{}.csv", dt.format("%Y%m%d"), prefix);
-    let mut file = File::create(fname.clone())?;
+    let dir = env::temp_dir();
+    let mut temp_file_path = dir.as_path().to_owned();
+    temp_file_path.push(fname);
+    let mut file = File::create(temp_file_path.to_owned())?;
     file.write_all(&wtr.into_inner()?)?;
 
-    Ok(fname)
+    Ok(temp_file_path.to_str().unwrap().to_owned())
 }
 
 pub async fn export_history_list(
