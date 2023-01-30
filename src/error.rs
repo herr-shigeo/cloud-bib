@@ -31,6 +31,7 @@ pub enum BibErrorResponse {
     ExceedLimitInParallel(u32),
     UserExists,
     NotAllowedToBorrow,
+    InputLengthTooLong(),
 }
 
 impl Display for BibErrorResponse {
@@ -178,6 +179,15 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     reason: String::new(),
                 })
             }
+            BibErrorResponse::InputLengthTooLong() => {
+                HttpResponse::build(self.status_code()).json(BibResponseBody {
+                    success: false,
+                    errcode: 117,
+                    message: String::from("入力文字数が制限を超えています"),
+                    reason: String::new(),
+                })
+            }
+
             BibErrorResponse::SystemError(reason) => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,

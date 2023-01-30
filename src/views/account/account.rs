@@ -73,6 +73,10 @@ pub async fn add(
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;
 
+    validate_length(&form.uname)?;
+    validate_length(&form.email)?;
+    validate_length(&form.password)?;
+
     // Check if the uname already exists
     if get_setting(&db, &form.uname).await.is_ok() {
         return Err(BibErrorResponse::UserExists);
@@ -326,6 +330,8 @@ async fn update_password(
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db_with_name(data, &DB_COMMON_NAME.to_string()).await?;
 
+    validate_length(password)?;
+
     let mut setting = SystemUser::default();
 
     // Hash the new password
@@ -351,4 +357,12 @@ async fn update_password(
 
     let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
+}
+
+fn validate_length(input: &str) -> Result<&str, BibErrorResponse> {
+    if input.len() > 32 {
+        return Err(BibErrorResponse::InputLengthTooLong());
+    } else {
+        return Ok(input);
+    }
 }
