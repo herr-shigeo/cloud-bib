@@ -38,7 +38,7 @@
 
         userCategorySelecter.addEventListener("change", function () {
           var val = this.value;
-          var enable = (this.value == 'user');
+          var enable = this.value == "user";
           updateUserIdText(enable);
         });
       });
