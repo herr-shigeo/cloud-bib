@@ -8,11 +8,15 @@ use crate::views::constatns::*;
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db_with_name;
 use crate::views::reply::Reply;
+use crate::views::reset_token::ResetToken;
 use crate::views::session::{check_admin_session, create_session, get_uname};
 use crate::views::transaction::Transaction;
+use crate::views::utils::{generate_token, get_nowtime};
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use argon2::Config;
+use chrono::Duration;
+use log::debug;
 use mongodb::Database;
 use rand::Rng;
 use serde::Deserialize;
@@ -303,6 +307,29 @@ pub async fn user_password(
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
     update_password(&data, "user", &form.password).await
+}
+
+pub async fn reset(
+    form: web::Form<FormData2>,
+    token_map: web::Data<ResetToken>,
+    data: web::Data<Mutex<ClientHolder>>,
+) -> Result<HttpResponse, BibErrorResponse> {
+    let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;
+
+    let system_user = get_setting(&db, &form.uname).await?;
+
+    if system_user.email != form.email {
+        return Err(BibErrorResponse::InvalidArgument(form.email.to_owned()));
+    }
+
+    // Gnereate a token
+    let token = generate_token();
+    token_map.insert(token);
+
+    // Send an e-mail
+
+    let reply = Reply::default();
+    Ok(HttpResponse::Ok().json(reply))
 }
 
 async fn get_setting(db: &Database, uname: &str) -> Result<SystemUser, BibErrorResponse> {

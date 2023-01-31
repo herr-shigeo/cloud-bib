@@ -3,6 +3,7 @@ use crate::item::search_items;
 use crate::item::SystemSetting;
 use crate::item::TransactionItem;
 use crate::views::cache::Cache;
+use crate::views::reset_token::ResetToken;
 use crate::views::transaction::*;
 use actix_session::CookieSession;
 use actix_web::{web, App, HttpServer};
@@ -107,6 +108,7 @@ async fn main() -> std::io::Result<()> {
     let transaction_map = web::Data::new(Mutex::new(transaction_map));
     let cache_map = web::Data::new(Mutex::new(cache_map));
     let setting_map = web::Data::new(Mutex::new(setting_map));
+    let token_map = web::Data::new(ResetToken::new());
 
     HttpServer::new(move || {
         let app = App::new()
@@ -115,6 +117,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(transaction_map.clone())
             .app_data(cache_map.clone())
             .app_data(setting_map.clone())
+            .app_data(token_map.clone())
             .app_data(client_holder.clone());
         return app;
     })

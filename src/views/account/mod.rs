@@ -31,6 +31,10 @@ pub fn account_factory(app: &mut web::ServiceConfig) {
         web::post().to(account::delete),
     )
     .route(
+        &base_path.define(String::from("/reset")),
+        web::post().to(account::reset),
+    )
+    .route(
         &base_path.define(String::from("/admin_password")),
         web::post().to(account::admin_password),
     )

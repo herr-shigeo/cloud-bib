@@ -1,4 +1,4 @@
-use actix_web::web;
+use actix_web::{dev::Body, web, HttpResponse};
 mod account;
 mod auth;
 pub mod cache;
@@ -21,8 +21,10 @@ mod user;
 mod utils;
 mod work;
 use actix_files::NamedFile;
-use actix_web::{HttpRequest, Result};
-use std::path::PathBuf;
+use actix_web::{middleware, HttpRequest, Result};
+use futures::TryFutureExt;
+use std::{fs::File, io::Read, path::PathBuf};
+pub mod reset_token;
 
 async fn index(req: HttpRequest) -> Result<NamedFile> {
     let mut file_name: String = req.match_info().query("filename").parse()?;
@@ -32,9 +34,69 @@ async fn index(req: HttpRequest) -> Result<NamedFile> {
 
     let mut path = PathBuf::from("src/html");
     path.push(file_name);
-    log::debug!("{:?}", path);
 
     Ok(NamedFile::open(path)?)
+}
+
+#[cfg(not(local))]
+fn redirect_to_https(req: &actix_web::HttpRequest) -> Option<HttpResponse> {
+    let scheme = req
+        .headers()
+        .get("x-forwarded-proto")
+        .map(|s| s.to_str().unwrap())
+        .unwrap_or("");
+    if scheme != "https" {
+        let host = req
+            .headers()
+            .get("host")
+            .map(|s| s.to_str().unwrap())
+            .unwrap_or("");
+        return Some(
+            HttpResponse::PermanentRedirect()
+                .header("location", format!("https://{}{}", host, req.uri()))
+                .finish(),
+        );
+    }
+
+    None
+}
+
+#[cfg(local)]
+fn redirect_to_https(_req: &actix_web::HttpRequest) -> Option<HttpResponse> {
+    None
+}
+
+async fn index_and_redirect_to_https(req: actix_web::HttpRequest) -> HttpResponse {
+    let scheme = req
+        .headers()
+        .get("x-forwarded-proto")
+        .map(|s| s.to_str().unwrap())
+        .unwrap_or("");
+
+    match redirect_to_https(&req) {
+        Some(res) => return res,
+        None => {}
+    }
+
+    let mut file_name: String = req.match_info().query("filename").parse().unwrap();
+    if file_name == "" || file_name.ends_with("/") {
+        file_name += "index.html";
+    }
+
+    let mut path = PathBuf::from("src/html");
+    path.push(file_name);
+
+    let mut file = match File::open(path) {
+        Ok(file) => file,
+        Err(_) => return HttpResponse::Ok().body("Something went wrong!"),
+    };
+
+    let mut body = vec![];
+    if file.read_to_end(&mut body).is_err() {
+        return HttpResponse::Ok().body("Something went wrong!");
+    } else {
+        return HttpResponse::Ok().body(body);
+    }
 }
 
 pub fn views_factory(app: &mut web::ServiceConfig) {
@@ -51,5 +113,5 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     account::account_factory(app);
     manual::manual_factory(app);
 
-    app.route("/{filename:.*}", web::get().to(index));
+    app.route("/{filename:.*}", web::get().to(index_and_redirect_to_https));
 }

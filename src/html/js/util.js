@@ -7,14 +7,6 @@ function isAuthError(data) {
   }
 }
 
-function handleAuthError(data, href) {
-  if (isAuthError(data)) {
-    window.location.href = href;
-    return true;
-  }
-  return false;
-}
-
 function handleAuthError(data) {
   if (isAuthError(data)) {
     window.location.href = '/login/';
