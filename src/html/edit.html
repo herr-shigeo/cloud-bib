@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>図書管理システム CloudBib</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="https://www.cloudbib.net/css/default.css" />
@@ -97,8 +98,7 @@
           document.getElementById("user_seito").checked = true;
         else if (user.category == "教職員")
           document.getElementById("user_kyoshokuin").checked = true;
-        else
-          document.getElementById("user_other").checked = true;
+        else document.getElementById("user_other").checked = true;
       }
 
       function processBookList(data) {
@@ -132,8 +132,7 @@
 
         if (book.forbidden == "禁帯出")
           document.getElementById("book_forbidden_true").checked = true;
-		else 
-          document.getElementById("book_forbidden_false").checked = true;
+        else document.getElementById("book_forbidden_false").checked = true;
 
         if (book.register_type == "購入")
           document.getElementById("book_bought").checked = true;
@@ -141,8 +140,7 @@
           document.getElementById("book_ippan").checked = true;
         else if (book.register_type == "財団寄贈")
           document.getElementById("book_zaidan").checked = true;
-        else
-          document.getElementById("book_other").checked = true;
+        else document.getElementById("book_other").checked = true;
 
         document.getElementById("book_register_date").value =
           book.register_date;
@@ -173,9 +171,7 @@
           document.getElementById("category_12").selected = true;
         else if (book.category == "その他")
           document.getElementById("category_13").selected = true;
-		else
-          document.getElementById("category_14").selected = true;
-
+        else document.getElementById("category_14").selected = true;
       }
 
       function processUserUpdate(data) {
@@ -527,7 +523,9 @@
                   <option id="category_10" value="文学">文学</option>
                   <option id="category_11" value="絵本">絵本</option>
                   <option id="category_12" value="雑誌">雑誌</option>
-                  <option id="category_13" value="その他" selected>その他</option>
+                  <option id="category_13" value="その他" selected>
+                    その他
+                  </option>
                   <option id="category_14" value="" selected></option>
                 </select>
               </td>
