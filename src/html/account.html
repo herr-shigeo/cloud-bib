@@ -50,7 +50,7 @@
       });
 
       function processJson(data) {
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -60,7 +60,7 @@
       }
 
       function processGet(data) {
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -74,7 +74,7 @@
       function processDelete(data) {
         if (isAuthError(data)) {
           alert("アカウントを削除しました");
-          handleAuthError(data, "/login");
+          handleAuthError(data);
           return;
         }
 
@@ -108,7 +108,7 @@
 
     <h3 style="color: #666666">管理者メニュー</h3>
     <hr />
-    <a href="/login"><font size="-1">司書・利用者としてログインする</font></a>
+    <a href="/login/"><font size="-1">司書・利用者としてログインする</font></a>
 
     <div class="container">
       <div class="full-container">

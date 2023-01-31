@@ -15,6 +15,14 @@ function handleAuthError(data, href) {
   return false;
 }
 
+function handleAuthError(data) {
+  if (isAuthError(data)) {
+    window.location.href = '/login/';
+    return true;
+  }
+  return false;
+}
+
 function handleError(data) {
   if (data["success"] == true) {
     return false;

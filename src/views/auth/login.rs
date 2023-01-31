@@ -156,7 +156,7 @@ pub async fn login(
             reply.path_to_home = "/account/main".to_owned();
         }
         "operator" => {
-            reply.path_to_home = "/home".to_owned();
+            reply.path_to_home = "/home/".to_owned();
         }
         "user" => {
             reply.path_to_home = "/member/home".to_owned();

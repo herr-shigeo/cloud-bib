@@ -60,13 +60,13 @@
 
       function processJson(data) {
         document.getElementById("form").reset();
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
       }
 
       function processBorrowList(data) {
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -104,7 +104,7 @@
       }
 
       function processTransactionList(data) {
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -142,7 +142,7 @@
     </form>
 
     <div class="topnav">
-      <a class="active" href="/member/home">ホーム</a>
+      <a class="active" href="/member/home/">ホーム</a>
       <a href="/member/search/main">図書検索</a>
       <div class="topnav-right">
         <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>

@@ -1,5 +1,4 @@
 use actix_web::web;
-mod about;
 mod account;
 mod auth;
 pub mod cache;
@@ -9,83 +8,39 @@ mod db_helper;
 mod edit;
 mod export;
 mod history;
-mod home;
-mod index;
 mod maintain;
 mod manual;
 mod member;
-mod notation;
 mod path;
-mod privacy;
 mod reply;
 mod search;
 mod session;
 mod setting;
-mod terms;
 pub mod transaction;
 mod user;
 mod utils;
 mod work;
+use actix_files::NamedFile;
+use actix_web::{HttpRequest, Result};
+use std::path::PathBuf;
 
-use crate::views::path::Path;
+async fn index(req: HttpRequest) -> Result<NamedFile> {
+    let mut file_name: String = req.match_info().query("filename").parse()?;
+    if file_name == "" || file_name.ends_with("/") {
+        file_name += "index.html";
+    }
+
+    let mut path = PathBuf::from("src/html");
+    path.push(file_name);
+    log::debug!("{:?}", path);
+
+    Ok(NamedFile::open(path)?)
+}
 
 pub fn views_factory(app: &mut web::ServiceConfig) {
-    let base_path: Path = Path {
-        prefix: String::from(""),
-    };
-    app.route(
-        &base_path.define(String::from("/")),
-        web::get().to(about::load),
-    )
-    .route(
-        &base_path.define(String::from("/css/{filename:.*}")),
-        web::get().to(index::css_files),
-    )
-    .route(
-        &base_path.define(String::from("/image/{filename:.*}")),
-        web::get().to(index::image_files),
-    )
-    .route(
-        &base_path.define(String::from("/js/{filename:.*}")),
-        web::get().to(index::js_files),
-    )
-    .route(
-        &base_path.define(String::from("/login")),
-        web::get().to(index::load),
-    )
-    .route(
-        &base_path.define(String::from("/notation")),
-        web::get().to(notation::load),
-    )
-    .route(
-        &base_path.define(String::from("/terms")),
-        web::get().to(terms::load),
-    )
-    .route(
-        &base_path.define(String::from("/privacy")),
-        web::get().to(privacy::load),
-    )
-    .route(
-        &base_path.define(String::from("/home")),
-        web::get().to(home::load),
-    )
-    .route(
-        &base_path.define(String::from("/user")),
-        web::get().to(user::load),
-    )
-    .route(
-        &base_path.define(String::from("/work")),
-        web::post().to(work::process),
-    )
-    .route(
-        &base_path.define(String::from("/history")),
-        web::get().to(history::load),
-    )
-    .route(
-        &base_path.define(String::from("/history/search")),
-        web::get().to(history::search),
-    );
-
+    user::user_factory(app);
+    work::work_factory(app);
+    history::history_factory(app);
     search::search_factory(app);
     setting::setting_factory(app);
     auth::auth_factory(app);
@@ -95,4 +50,6 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     maintain::maintain_factory(app);
     account::account_factory(app);
     manual::manual_factory(app);
+
+    app.route("/{filename:.*}", web::get().to(index));
 }

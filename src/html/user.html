@@ -36,12 +36,12 @@
       function processJson(data) {
         document.getElementById("form1").reset();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
           if (data.errcode == 106) {
-            window.location.href = "/home";
+            window.location.href = "/home/";
           }
           return;
         }
@@ -123,12 +123,12 @@
     </form>
 
     <div class="topnav">
-      <a class="active" href="/home">ホーム</a>
+      <a class="active" href="/home/">ホーム</a>
       <a href="/search/main">図書検索</a>
       <a href="/edit/main">登録・編集</a>
       <a href="/export/main">出力</a>
       <a href="/setting/main">設定</a>
-      <a href="/history">貸出履歴</a>
+      <a href="/history/main">貸出履歴</a>
       <div class="topnav-right">
         <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
       </div>
@@ -138,7 +138,7 @@
       <form
         id="form1"
         name="form1"
-        action="/work"
+        action="/work/process"
         method="post"
         enctype="application/x-www-form-urlencoded"
       >
@@ -194,7 +194,7 @@
           </tr>
         </table>
       </form>
-      <form action="/home">
+      <form action="/home/">
         <button type="submit" class="nextbtn">新規貸出</button>
       </form>
     </div>

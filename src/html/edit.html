@@ -73,13 +73,13 @@
       });
 
       function processJson(data) {
-        handleAuthError(data, "/login");
+        handleAuthError(data);
       }
 
       function processUserList(data) {
         document.getElementById("form_user_list").reset();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -104,7 +104,7 @@
       function processBookList(data) {
         document.getElementById("form_book_list").reset();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -178,7 +178,7 @@
         document.getElementById("form_user_update").reset();
         document.getElementById("user_id_search").focus();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -193,7 +193,7 @@
         document.getElementById("form_book_update").reset();
         document.getElementById("book_id_search").focus();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -217,7 +217,7 @@
 
       function processRegister(data) {
         setProgressBar(false);
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -287,12 +287,12 @@
     </form>
 
     <div class="topnav">
-      <a class="active" href="/home">ホーム</a>
+      <a class="active" href="/home/">ホーム</a>
       <a href="/search/main">図書検索</a>
       <a href="/edit/main">登録・編集</a>
       <a href="/export/main">出力</a>
       <a href="/setting/main">設定</a>
-      <a href="/history">貸出履歴</a>
+      <a href="/history/main">貸出履歴</a>
       <div class="topnav-right">
         <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
       </div>

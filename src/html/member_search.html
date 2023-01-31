@@ -60,7 +60,7 @@
 
       function processJson(data) {
         document.getElementById("form").reset();
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
       }
@@ -68,7 +68,7 @@
       function processBookList(data) {
         document.getElementById("form_book").reset();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {

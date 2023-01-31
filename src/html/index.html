@@ -4,7 +4,11 @@
     <title>無料で利用できるクラウド型図書管理システム CloudBib</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="https://www.cloudbib.net/css/default.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"
+    />
+    <link rel="stylesheet" href="https://www.cloudbib.net/css/about.css" />
     <script src="https://www.cloudbib.net/js/util.js"></script>
     <script
       src="https://code.jquery.com/jquery-3.5.1.min.js"
@@ -16,122 +20,121 @@
       integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
       crossorigin="anonymous"
     ></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
 
     <script>
-      function updateUserIdText(enable) {
-        var userIdText = document.getElementById("user_id");
-        if (enable) {
-          document.getElementById("user_id").disabled = false;
-        } else {
-          document.getElementById("user_id").disabled = true;
-        }
-      }
-
       $(document).ready(function () {
         var options = {
           dataType: "json",
           success: processJson,
         };
         $("#form").ajaxForm(options);
-
-        var userCategorySelecter = document.getElementById("user_category");
-        var userIdText = document.getElementById("user_id");
-
-        userCategorySelecter.addEventListener("change", function () {
-          var val = this.value;
-          var enable = this.value == "user";
-          updateUserIdText(enable);
-        });
       });
 
       function processJson(data) {
-        updateUserIdText();
         if (!handleError(data)) {
           window.location.href = data.path_to_home;
         }
       }
     </script>
+    <meta
+      name="google-site-verification"
+      content="Rk-ZenxiNrfD9tw1Gsnx4VCJs98YiBaJ4gjb3P5l5OA"
+    />
   </head>
 
   <body>
     <div class="topnav">
-      <a class="active" href="/">製品ホーム</a>
+      <a class="active" href="/login/">ログイン</a>
+      <a href="/account/register">アカウント作成</a>
       <a href="/manual/">マニュアル</a>
       <a
         href="https://twitter.com/messages/compose?recipient_id=1618571454580137984"
         >問い合わせ</a
       >
-      >
     </div>
 
     <div style="padding-left: 6px">
       <h1>
-        <font size="+3" style="color: royalblue">CloudBib</font
-        ><font size="+2" style="color: royalblue"> - ログイン</font>
+        <font size="+3" style="color: royalblue"
+          >クラウド図書管理システム CloudBib</font
+        >
       </h1>
+
+      <img src="image/banner.jpg" width="512" />
+
+      <h2>製品の特徴</h2>
+      <p><big>CloudBibはクラウドで動作する図書管理システムです。</big></p>
+      <h3>
+        CloubBibは、図書管理業務に関わる職員が現場の課題を解決するために開発した製品です。
+      </h3>
+      <h3>
+        シンプルなインタフェースながら、図書管理業務の効率化に不可欠な機能が網羅されています。
+      </h3>
+      <ul>
+        <li>PCやスマートフォンなどのブラウザから利用できます</li>
+        <li>接続できるデバイス数に制限はありません</li>
+        <li>既存のシステムの図書管理番号を継続利用できます</li>
+      </ul>
+
+      <h2>製品デモ</h2>
+      以下のデモ画面にて、実際の機能を試すことができます。
+      <form id="form" name="form" action="/auth/login" method="post">
+        <input type="hidden" name="uname" value="demo" />
+        <input type="hidden" name="password" value="demo" />
+        <input type="hidden" name="user_category" value="operator" />
+        <input type="hidden" name="user_id" value="" />
+        <button type="submit" class="submitbtn">デモ画面へ</button>
+      </form>
+
+      <h2>機能一覧</h2>
+      <ul>
+        <li>貸出、返却処理</li>
+        <li>遅延図書検索</li>
+        <li>履歴表示、検索</li>
+        <li>利用者閲覧用の画面</li>
+        <li>利用者/図書登録、編集、削除</li>
+        <li>利用者/図書をCSVから一括登録</li>
+        <li>利用書/図書検索</li>
+        <li>利用書/図書登録情報のCSV出力</li>
+        <li>履歴のCSV出力</li>
+        <li>設定変更</li>
+      </ul>
+
+      <h2>料金プラン</h2>
+      <p>現在は、無料プランのみ提供しております。</p>
+      表示価格はすべて税込です。
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>フリー</th>
+          </tr>
+        </thead>
+        <tr>
+          <td>月額利用料</td>
+          <td>0円</td>
+        </tr>
+        <tr>
+          <td>初期費用等</td>
+          <td>0円</td>
+        </tr>
+        <tr>
+          <td>スペック</td>
+          <td>
+            登録できる利用者は100名まで<br />
+            登録できる図書は1000冊まで<br />
+            保存できる履歴は最新の10,000件まで<br />
+          </td>
+        </tr>
+      </table>
     </div>
-    <hr />
-
-    <form id="form" name="form" action="/auth/login" method="post">
-      <div class="container">
-        <div class="full-container">
-          <label for="uname"><b>ユーザー名</b></label>
-          <input
-            type="text"
-            name="uname"
-            id="uname"
-            pattern="[a-zA-Z0-9]+"
-            required
-          />
-
-          <b>ユーザー区分</b>
-          <select name="user_category" id="user_category">
-            <option id="user_operator" value="operator" selected>
-              司書 (オペレーター)
-            </option>
-            <option id="user_admin" value="admin">管理者</option>
-            <option id="user_user" value="user">利用者</option>
-          </select>
-          <br /><br />
-
-          <label for="password"><b>パスワード</b></label>
-          <input
-            type="password"
-            placeholder=""
-            name="password"
-            id="password"
-            required
-          /><br />
-          <font size="-1" style="color: gray"
-            >選択したユーザ区分に応じたパスワードを入力してください</font
-          ><br /><br />
-
-          <label for="user_id"><b>利用者ID</b></label>
-          <input type="text" name="user_id" id="user_id" disabled />
-          <font size="-1" style="color: gray"
-            >利用者としてログインする場合は、利用者IDを入力してください</font
-          ><br /><br />
-
-          <div class="btncontainer">
-            <button
-              type="submit"
-              class="submitbtn"
-              onclick="if(document.forms[0].checkValidity()){document.getElementById('user_id').removeAttribute('disabled');}"
-            >
-              ログイン
-            </button>
-          </div>
-          <br />
-          <a href="/reset"> <font size="-1">パスワードをお忘れの場合</font></a>
-        </div>
-      </div>
-    </form>
 
     <br />
     <div class="footer">
-      <a href="/terms" target="_blank">利用規約</a> |
-      <a href="/privacy" target="_blank">プライバシーポリシー</a> |
-      <a href="/notation" target="_blank">特商法表記</a>
+      <a href="/terms.html" target="_blank">利用規約</a> |
+      <a href="/privacy.html" target="_blank">プライバシーポリシー</a> |
+      <a href="/notation.html" target="_blank">特商法表記</a>
     </div>
   </body>
 </html>

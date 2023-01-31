@@ -87,7 +87,7 @@
 
       function processJson(data) {
         document.getElementById("form").reset();
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
       }
@@ -95,7 +95,7 @@
       function processDelayedList(data) {
         document.getElementById("form_delayed").reset();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -142,7 +142,7 @@
       function processBookList(data) {
         document.getElementById("form_book").reset();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -203,12 +203,12 @@
     </form>
 
     <div class="topnav">
-      <a class="active" href="/home">ホーム</a>
+      <a class="active" href="/home/">ホーム</a>
       <a href="/search/main">図書検索</a>
       <a href="/edit/main">登録・編集</a>
       <a href="/export/main">出力</a>
       <a href="/setting/main">設定</a>
-      <a href="/history">貸出履歴</a>
+      <a href="/history/main">貸出履歴</a>
       <div class="topnav-right">
         <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
       </div>

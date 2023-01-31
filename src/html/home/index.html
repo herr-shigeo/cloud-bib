@@ -46,7 +46,7 @@
       function processReturn(data) {
         document.getElementById("form").reset();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
 
@@ -80,7 +80,7 @@
       function processJson(data) {
         document.getElementById("form_user").reset();
 
-        if (handleAuthError(data, "/login")) {
+        if (handleAuthError(data)) {
           return;
         }
         if (handleError(data)) {
@@ -125,7 +125,7 @@
       <a href="/edit/main">登録・編集</a>
       <a href="/export/main">出力</a>
       <a href="/setting/main">設定</a>
-      <a href="/history">貸出履歴</a>
+      <a href="/history/main">貸出履歴</a>
       <div class="topnav-right">
         <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
       </div>
@@ -138,7 +138,7 @@
       <p>貸出処理をするには利用者IDを入力して下さい</p>
       <form
         name="user_select"
-        action="/user"
+        action="/user/main"
         method="get"
         enctype="application/x-www-form-urlencoded"
       >
@@ -222,7 +222,7 @@
       <form
         id="form_unborrow"
         name="form_unborrow"
-        action="/work"
+        action="/work/process"
         method="post"
         enctype="application/x-www-form-urlencoded"
       >
