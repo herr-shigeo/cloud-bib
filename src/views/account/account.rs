@@ -4,7 +4,6 @@ use crate::item::{
     SystemUser,
 };
 use crate::views::cache::Cache;
-use crate::views::constatns::*;
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db_with_name;
 use crate::views::reply::Reply;
@@ -12,6 +11,7 @@ use crate::views::reset_token::ResetToken;
 use crate::views::session::{check_admin_session, create_session, get_uname};
 use crate::views::transaction::Transaction;
 use crate::views::utils::{generate_token, get_nowtime};
+use crate::views::{constatns::*, utils};
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use argon2::Config;
@@ -327,6 +327,7 @@ pub async fn reset(
     token_map.insert(token);
 
     // Send an e-mail
+    utils::test();
 
     let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))

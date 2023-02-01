@@ -21,12 +21,12 @@ pub fn get_nowtime(time_zone: &str) -> DateTime<Tz> {
     }
 }
 
-fn test() -> Result<(), Box<dyn std::error::Error>> {
-    let smtp_address = "smtp.gmail.com";
-    let username = "j.halper@dunmiff.com";
-    let password = "Sup3rDup3rP@ssw0rd";
+pub fn test() -> Result<(), Box<dyn std::error::Error>> {
+    let smtp_address = "smtp-relay.sendinblue.com";
+    let username = "cloudbib.info@gmail.com";
+    let password = "HkdVn0phYm8Lg1bj";
     let email = EmailBuilder::new()
-        .to("d.schrute@dunmiff.com")
+        .to("cloudbib.info@gmail.com")
         .from(username)
         .subject("Which bear is best?")
         .text("Bears eat beets. Bears. Beets. Battlestar Galactica.")
