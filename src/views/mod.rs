@@ -1,4 +1,4 @@
-use actix_web::{dev::Body, web, HttpResponse};
+use actix_web::{web, HttpResponse};
 mod account;
 mod auth;
 pub mod cache;
@@ -20,23 +20,8 @@ pub mod transaction;
 mod user;
 mod utils;
 mod work;
-use actix_files::NamedFile;
-use actix_web::{middleware, HttpRequest, Result};
-use futures::TryFutureExt;
 use std::{fs::File, io::Read, path::PathBuf};
 pub mod reset_token;
-
-async fn index(req: HttpRequest) -> Result<NamedFile> {
-    let mut file_name: String = req.match_info().query("filename").parse()?;
-    if file_name == "" || file_name.ends_with("/") {
-        file_name += "index.html";
-    }
-
-    let mut path = PathBuf::from("src/html");
-    path.push(file_name);
-
-    Ok(NamedFile::open(path)?)
-}
 
 #[cfg(not(local))]
 fn redirect_to_https(req: &actix_web::HttpRequest) -> Option<HttpResponse> {
@@ -67,12 +52,6 @@ fn redirect_to_https(_req: &actix_web::HttpRequest) -> Option<HttpResponse> {
 }
 
 async fn index_and_redirect_to_https(req: actix_web::HttpRequest) -> HttpResponse {
-    let scheme = req
-        .headers()
-        .get("x-forwarded-proto")
-        .map(|s| s.to_str().unwrap())
-        .unwrap_or("");
-
     match redirect_to_https(&req) {
         Some(res) => return res,
         None => {}
