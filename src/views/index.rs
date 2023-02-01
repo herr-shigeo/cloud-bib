@@ -4,7 +4,23 @@ use actix_web::{HttpRequest, HttpResponse, Result};
 use log::debug;
 use std::path::PathBuf;
 
-pub async fn load() -> HttpResponse {
+pub async fn load(req: HttpRequest) -> HttpResponse {
+    let scheme = req
+        .headers()
+        .get("x-forwarded-proto")
+        .map(|s| s.to_str().unwrap())
+        .unwrap_or("");
+    if scheme != "https" {
+        let host = req
+            .headers()
+            .get("host")
+            .map(|s| s.to_str().unwrap())
+            .unwrap_or("");
+        return HttpResponse::PermanentRedirect()
+            .header("location", format!("https://{}{}", host, req.uri()))
+            .finish();
+    }
+
     let html_data = read_file("src/html/index.html").unwrap();
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
