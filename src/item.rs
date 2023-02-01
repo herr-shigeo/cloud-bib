@@ -26,6 +26,15 @@ pub trait Entity {
     where
         Self: std::marker::Sized;
 
+    async fn search_range(
+        &self,
+        db: &Database,
+        start_id: u32,
+        end_id: u32,
+    ) -> Result<Vec<Self>, Box<dyn error::Error>>
+    where
+        Self: std::marker::Sized;
+
     fn get_collection_name(&self) -> &str;
 
     fn get_collection(&self, db: &Database) -> Collection<Self>
@@ -79,6 +88,15 @@ pub async fn search_items<T: Entity>(
     item: &T,
 ) -> Result<Vec<T>, Box<dyn error::Error>> {
     item.search(db).await
+}
+
+pub async fn search_items_range<T: Entity>(
+    db: &Database,
+    item: &T,
+    start_id: u32,
+    end_id: u32,
+) -> Result<Vec<T>, Box<dyn error::Error>> {
+    item.search_range(db, start_id, end_id).await
 }
 
 pub async fn search_item<T: Entity>(db: &Database, item: &T) -> Result<T, Box<dyn error::Error>> {
@@ -463,6 +481,18 @@ impl Entity for User {
         collection.search(query).await
     }
 
+    async fn search_range(
+        &self,
+        db: &Database,
+        start_id: u32,
+        end_id: u32,
+    ) -> Result<Vec<Self>, Box<dyn error::Error>> {
+        let query = doc! { "$and": [ {"id": { "$gte": start_id }}, {"id": { "$lte": end_id }} ]};
+
+        let collection = self.get_collection(db);
+        collection.search(query).await
+    }
+
     fn get_collection_name(&self) -> &str {
         "users2"
     }
@@ -501,6 +531,15 @@ impl Entity for SystemUser {
         }
         let collection = self.get_collection(db);
         collection.search(query).await
+    }
+
+    async fn search_range(
+        &self,
+        _db: &Database,
+        _start_id: u32,
+        _end_id: u32,
+    ) -> Result<Vec<Self>, Box<dyn error::Error>> {
+        panic!("Not implemented")
     }
 
     fn get_collection_name(&self) -> &str {
@@ -551,6 +590,18 @@ impl Entity for Book {
         collection.search(query).await
     }
 
+    async fn search_range(
+        &self,
+        db: &Database,
+        start_id: u32,
+        end_id: u32,
+    ) -> Result<Vec<Self>, Box<dyn error::Error>> {
+        let query = doc! { "$and": [ {"id": { "$gte": start_id }}, {"id": { "$lte": end_id }} ]};
+
+        let collection = self.get_collection(db);
+        collection.search(query).await
+    }
+
     fn get_collection_name(&self) -> &str {
         "books"
     }
@@ -586,6 +637,15 @@ impl Entity for RentalSetting {
         collection.search(query).await
     }
 
+    async fn search_range(
+        &self,
+        _db: &Database,
+        _start_id: u32,
+        _end_id: u32,
+    ) -> Result<Vec<Self>, Box<dyn error::Error>> {
+        panic!("Not implemented")
+    }
+
     fn get_collection_name(&self) -> &str {
         "rental-setting"
     }
@@ -619,6 +679,15 @@ impl Entity for SystemSetting {
         let query = doc! { "$or" : [{"id": self.id}] };
         let collection = self.get_collection(db);
         collection.search(query).await
+    }
+
+    async fn search_range(
+        &self,
+        _db: &Database,
+        _start_id: u32,
+        _end_id: u32,
+    ) -> Result<Vec<Self>, Box<dyn error::Error>> {
+        panic!("Not implemented")
     }
 
     fn get_collection_name(&self) -> &str {
@@ -663,6 +732,15 @@ impl Entity for TransactionItem {
 
         let collection = self.get_collection(db);
         collection.search(query).await
+    }
+
+    async fn search_range(
+        &self,
+        _db: &Database,
+        _start_id: u32,
+        _end_id: u32,
+    ) -> Result<Vec<Self>, Box<dyn error::Error>> {
+        panic!("Not implemented")
     }
 
     fn get_collection_name(&self) -> &str {

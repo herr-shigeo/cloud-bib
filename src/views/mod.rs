@@ -1,6 +1,7 @@
 use actix_web::{web, HttpResponse};
 mod account;
 mod auth;
+mod barcode;
 pub mod cache;
 mod constatns;
 mod content_loader;
@@ -65,16 +66,18 @@ async fn index_and_redirect_to_https(req: actix_web::HttpRequest) -> HttpRespons
     let mut path = PathBuf::from("src/html");
     path.push(file_name);
 
-    let mut file = match File::open(path) {
-        Ok(file) => file,
-        Err(_) => return HttpResponse::Ok().body("Something went wrong!"),
-    };
-
-    let mut body = vec![];
-    if file.read_to_end(&mut body).is_err() {
-        return HttpResponse::Ok().body("Something went wrong!");
-    } else {
-        return HttpResponse::Ok().body(body);
+    let file = File::open(path);
+    match file {
+        Ok(mut f) => {
+            let mut body = Vec::new();
+            match f.read_to_end(&mut body) {
+                Ok(_) => HttpResponse::Ok().body(body),
+                Err(e) => {
+                    HttpResponse::InternalServerError().body(format!("Error reading file: {:?}", e))
+                }
+            }
+        }
+        Err(e) => HttpResponse::NotFound().body(format!("File not found: {:?}", e)),
     }
 }
 
@@ -91,6 +94,7 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     maintain::maintain_factory(app);
     account::account_factory(app);
     manual::manual_factory(app);
+    barcode::barcode_factory(app);
 
     app.route("/{filename:.*}", web::get().to(index_and_redirect_to_https));
 }

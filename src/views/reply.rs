@@ -18,6 +18,7 @@ pub struct Reply {
     pub num_days: u32,
     pub returned_book_title: String,
     pub returned_book_id: u32,
+    pub barcode_size: u32,
 }
 
 impl Reply {
@@ -37,6 +38,7 @@ impl Reply {
             num_days: 0,
             returned_book_title: String::new(),
             returned_book_id: 0,
+            barcode_size: 0,
         }
     }
 }
