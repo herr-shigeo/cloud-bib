@@ -4,19 +4,17 @@ use crate::item::{
     SystemUser,
 };
 use crate::views::cache::Cache;
+use crate::views::constatns::*;
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db_with_name;
 use crate::views::reply::Reply;
 use crate::views::reset_token::ResetToken;
 use crate::views::session::{check_admin_session, create_session, get_uname};
 use crate::views::transaction::Transaction;
-use crate::views::utils::{generate_token, get_nowtime};
-use crate::views::{constatns::*, utils};
+use crate::views::utils::{generate_token, send_email};
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use argon2::Config;
-use chrono::Duration;
-use log::debug;
 use mongodb::Database;
 use rand::Rng;
 use serde::Deserialize;
@@ -51,6 +49,11 @@ pub struct FormData3 {
     pub uname: String,
     pub password: String,
     pub confirm_password: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct FormData4 {
+    pub reset_token: String,
 }
 
 pub async fn load_main(_session: Session) -> HttpResponse {
@@ -287,8 +290,9 @@ pub async fn admin_password(
     form: web::Form<FormData3>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
+    log::debug!("{:?}", form);
     check_admin_session(&session)?;
-    update_password(&data, "admin", &form.password).await
+    update_password(&data, &form.uname, "admin", &form.password).await
 }
 
 pub async fn operator_password(
@@ -297,7 +301,7 @@ pub async fn operator_password(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
-    update_password(&data, "operator", &form.password).await
+    update_password(&data, &form.uname, "operator", &form.password).await
 }
 
 pub async fn user_password(
@@ -306,10 +310,10 @@ pub async fn user_password(
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
-    update_password(&data, "user", &form.password).await
+    update_password(&data, &form.uname, "user", &form.password).await
 }
 
-pub async fn reset(
+pub async fn request_reset(
     form: web::Form<FormData2>,
     token_map: web::Data<ResetToken>,
     data: web::Data<Mutex<ClientHolder>>,
@@ -324,13 +328,54 @@ pub async fn reset(
 
     // Gnereate a token
     let token = generate_token();
-    token_map.insert(token);
+    token_map.insert(token.to_owned(), system_user.uname);
 
     // Send an e-mail
-    utils::test();
+    send_email_to_reset(&system_user.email, &token)?;
 
     let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
+}
+
+pub async fn prepare_reset(
+    form: web::Query<FormData4>,
+    token_map: web::Data<ResetToken>,
+) -> HttpResponse {
+    // check the token
+    let token = token_map.remove(&form.reset_token);
+    if token.is_none() {
+        return HttpResponse::NotFound()
+            .content_type("text/html; charset=utf-8")
+            .body("ページの有効期限が切れています");
+    }
+
+    // load the page
+    let mut html_data = read_file("src/html/reset/reset_password.html").unwrap();
+    html_data = html_data.replace("{{UNAME}}", &token.unwrap().uname);
+
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body(html_data)
+}
+
+pub async fn do_reset(
+    form: web::Form<FormData3>,
+    data: web::Data<Mutex<ClientHolder>>,
+) -> Result<HttpResponse, BibErrorResponse> {
+    update_password(&data, &form.uname, "admin", &form.password).await?;
+    return Err(BibErrorResponse::NotAuthorized);
+}
+
+fn send_email_to_reset(to: &str, token: &str) -> Result<(), BibErrorResponse> {
+    let subject = "Reset password for Cloudbib";
+    let link = format!(
+        "https://www.cloudbib.net/account/prepare_reset?reset_token={}",
+        token
+    );
+    let text = format!("パスワードリセット用のリンクを送ります。\n こちらのリンク先からパスワードをリセットして下さい。 \n{}", link);
+
+    send_email(to, subject, &text).map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+    Ok(())
 }
 
 async fn get_setting(db: &Database, uname: &str) -> Result<SystemUser, BibErrorResponse> {
@@ -353,6 +398,7 @@ async fn get_setting(db: &Database, uname: &str) -> Result<SystemUser, BibErrorR
 
 async fn update_password(
     data: &web::Data<Mutex<ClientHolder>>,
+    uname: &str,
     category: &str,
     password: &str,
 ) -> Result<HttpResponse, BibErrorResponse> {
@@ -360,7 +406,7 @@ async fn update_password(
 
     validate_length(password)?;
 
-    let mut setting = SystemUser::default();
+    let mut setting = get_setting(&db, uname).await?;
 
     // Hash the new password
     let salt: [u8; 32] = rand::thread_rng().gen();

@@ -1,11 +1,25 @@
+use std::env;
+
 use chrono::{DateTime, TimeZone, Utc};
 use chrono_tz::{Asia::Tokyo, Europe::Berlin, Tz};
 extern crate lettre;
 extern crate lettre_email;
-use lettre::smtp::authentication::IntoCredentials;
-use lettre::{SmtpClient, Transport};
+use lettre::{smtp::authentication::IntoCredentials, SmtpClient, Transport};
 use lettre_email::EmailBuilder;
 use uuid::Uuid;
+
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref EMAIL_SMTP_RELAY: String =
+        env::var("EMAIL_SMTP_RELAY").expect("You must set the EMAIL_SMTP_RELAY environment var!");
+    static ref EMAIL_USER: String =
+        env::var("EMAIL_USER").expect("You must set the EMAIL_USER environment var!");
+    static ref EMAIL_FROM: String =
+        env::var("EMAIL_FROM").expect("You must set the EMAIL_EMAIL_FROM environment var!");
+    static ref EMAIL_PASSWORD: String =
+        env::var("EMAIL_PASSWORD").expect("You must set the EMAIL_PASSWORD environment var!");
+}
 
 pub fn generate_token() -> String {
     Uuid::new_v4().to_string()
@@ -21,15 +35,16 @@ pub fn get_nowtime(time_zone: &str) -> DateTime<Tz> {
     }
 }
 
-pub fn test() -> Result<(), Box<dyn std::error::Error>> {
-    let smtp_address = "smtp-relay.sendinblue.com";
-    let username = "cloudbib.info@gmail.com";
-    let password = "HkdVn0phYm8Lg1bj";
+pub fn send_email(to: &str, subject: &str, text: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let smtp_address: &str = &EMAIL_SMTP_RELAY;
+    let username: &str = &EMAIL_USER;
+    let email_from: &str = &EMAIL_FROM;
+    let password: &str = &EMAIL_PASSWORD;
     let email = EmailBuilder::new()
-        .to("cloudbib.info@gmail.com")
-        .from(username)
-        .subject("Which bear is best?")
-        .text("Bears eat beets. Bears. Beets. Battlestar Galactica.")
+        .from(email_from)
+        .to(to)
+        .subject(subject)
+        .text(text)
         .build()
         .unwrap()
         .into();

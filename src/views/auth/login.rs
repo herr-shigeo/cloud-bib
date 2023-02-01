@@ -49,18 +49,8 @@ pub async fn login(
             if form.user_category == "admin" {
                 // Verify the admin password
                 let res = argon2::verify_encoded(&system_user.password, form.password.as_bytes())
-                    .map_err(|e| BibErrorResponse::SystemError(e.to_string()));
-                if res.is_ok() {
-                    create_session(
-                        &session,
-                        &system_user.uname,
-                        &system_user.dbname,
-                        &form.user_category,
-                        None,
-                    )?;
-                    break;
-                }
-                if form.password.eq(&system_user.password) {
+                    .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+                if res {
                     create_session(
                         &session,
                         &system_user.uname,
@@ -76,18 +66,8 @@ pub async fn login(
                     &system_user.operator_password,
                     form.password.as_bytes(),
                 )
-                .map_err(|e| BibErrorResponse::SystemError(e.to_string()));
-                if res.is_ok() {
-                    create_session(
-                        &session,
-                        &system_user.uname,
-                        &system_user.dbname,
-                        &form.user_category,
-                        None,
-                    )?;
-                    break;
-                }
-                if form.password.eq(&system_user.operator_password) {
+                .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+                if res {
                     create_session(
                         &session,
                         &system_user.uname,
@@ -111,37 +91,33 @@ pub async fn login(
                 // Verify the user password
                 let res =
                     argon2::verify_encoded(&system_user.user_password, form.password.as_bytes())
-                        .map_err(|e| BibErrorResponse::SystemError(e.to_string()));
-                if res.is_err() {
-                    if form.password != system_user.user_password {
-                        return Err(BibErrorResponse::LoginFailed);
+                        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+                if res {
+                    // Verify the user name
+                    let db = get_db_with_name(&data, &system_user.dbname).await?;
+                    let user = User::new(&form.user_id, "", "", "", "", "", "")
+                        .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
+                    let mut users = match search_items(&db, &user).await {
+                        Ok(users) => users,
+                        Err(_) => {
+                            database::disconnect(&data);
+                            return Err(BibErrorResponse::UserNotFound(user.id));
+                        }
+                    };
+                    if users.len() != 1 {
+                        return Err(BibErrorResponse::DataDuplicated(0));
                     }
-                }
+                    let user = users.pop().unwrap();
 
-                // Verify the user name
-                let db = get_db_with_name(&data, &system_user.dbname).await?;
-                let user = User::new(&form.user_id, "", "", "", "", "", "")
-                    .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
-                let mut users = match search_items(&db, &user).await {
-                    Ok(users) => users,
-                    Err(_) => {
-                        database::disconnect(&data);
-                        return Err(BibErrorResponse::UserNotFound(user.id));
-                    }
-                };
-                if users.len() != 1 {
-                    return Err(BibErrorResponse::DataDuplicated(0));
+                    create_session(
+                        &session,
+                        &system_user.uname,
+                        &system_user.dbname,
+                        &form.user_category,
+                        Some(user.id),
+                    )?;
+                    break;
                 }
-                let user = users.pop().unwrap();
-
-                create_session(
-                    &session,
-                    &system_user.uname,
-                    &system_user.dbname,
-                    &form.user_category,
-                    Some(user.id),
-                )?;
-                break;
             }
             return Err(BibErrorResponse::LoginFailed);
         }

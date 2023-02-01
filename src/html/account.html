@@ -68,6 +68,9 @@
         }
 
         document.getElementById("uname").value = data["uname"];
+        document.getElementById("admin_uname").value = data["uname"];
+        document.getElementById("operator_uname").value = data["uname"];
+        document.getElementById("user_uname").value = data["uname"];
         document.getElementById("email").value = data["email"];
       }
 
@@ -172,7 +175,7 @@
             method="post"
             onsubmit="return postPasswordForm('form3', 'password', 'confirm_password', 8)"
           >
-            <input type="hidden" name="uname" id="uname" value="{{UNAME}}" />
+            <input type="hidden" name="uname" id="admin_uname"/>
             <label for="password"><b>管理者パスワード</b></label>
             <input type="password" name="password" id="password" required />
             <br />
@@ -203,7 +206,7 @@
             method="post"
             onsubmit="return postPasswordForm('form4', 'operator_password', 'confirm_operator_password', 8)"
           >
-            <input type="hidden" name="uname" id="uname" value="{{UNAME}}" />
+            <input type="hidden" name="uname" id="operator_uname"/>
             <label for="operator_password"><b>司書パスワード</b></label>
             <input
               type="password"
@@ -239,7 +242,7 @@
             method="post"
             onsubmit="return postPasswordForm('form5', 'user_password', 'confirm_user_password', 8)"
           >
-            <input type="hidden" name="uname" id="uname" value="{{UNAME}}" />
+            <input type="hidden" name="uname" id="user_uname"/>
             <label for="user_password"><b>利用者パスワード</b></label>
             <input
               type="password"
