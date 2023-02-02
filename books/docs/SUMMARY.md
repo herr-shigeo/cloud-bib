@@ -20,4 +20,6 @@
 
 * [一括登録](import/README.md)
 
+* [バーコード作成](barcode/README.md)
+
 * [CSV出力](export/README.md)
