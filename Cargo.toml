@@ -30,7 +30,7 @@ rand_chacha = "0.2"
 time = "0.3.7"
 circular-queue = "0.2.6"
 serde_derive = "1.0.136"
-shared_mongodb = "0.1.5"
+shared_mongodb = "0.1.6"
 lazy_static = "1.4.0"
 rust-argon2 = "1.0"
 
