@@ -12,10 +12,10 @@ use crate::views::transaction::*;
 use crate::views::utils::get_nowtime;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
-use log::info;
-use log::{debug, error};
+use log::{debug, error, info};
 use mongodb::Database;
 use serde::Deserialize;
+use shared_mongodb::database::{abort_transaction, commit_transaction, start_transaction};
 use shared_mongodb::{database, ClientHolder};
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -102,7 +102,12 @@ pub async fn process(
     let setting = setting.pop().unwrap();
 
     if form.borrowed_book_id != "" {
-        borrow_book(
+        // Create a DB session
+        let mut session = start_transaction(&data)
+            .await
+            .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+        let ret = borrow_book(
             &db,
             &cache,
             &transaction,
@@ -112,11 +117,33 @@ pub async fn process(
             setting.num_books,
             setting.num_days.into(),
         )
-        .await?;
+        .await;
+        if ret.is_err() {
+            // Role back the transaction
+            match abort_transaction(&mut session).await {
+                Ok(_) => {}
+                Err(e) => {
+                    error!("{}", e.to_string());
+                }
+            }
+            return Err(ret.unwrap_err());
+        }
+
+        // Commit the transaction
+        match commit_transaction(&mut session).await {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(BibErrorResponse::SystemError(e.to_string()));
+            }
+        }
     }
 
     if form.returned_book_id != "" {
-        unborrow_book(
+        // Create a DB session
+        let mut session = start_transaction(&data)
+            .await
+            .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+        let ret = unborrow_book(
             &db,
             &cache,
             &transaction,
@@ -124,7 +151,25 @@ pub async fn process(
             &form.returned_book_id,
             &system_setting.time_zone,
         )
-        .await?;
+        .await;
+        if ret.is_err() {
+            // Role back the transaction
+            match abort_transaction(&mut session).await {
+                Ok(_) => {}
+                Err(e) => {
+                    info!("{}", e.to_string());
+                }
+            }
+            return Err(ret.unwrap_err());
+        }
+
+        // Commit the transaction
+        match commit_transaction(&mut session).await {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(BibErrorResponse::SystemError(e.to_string()));
+            }
+        }
     }
 
     let mut reply = Reply::default();
@@ -152,9 +197,9 @@ async fn borrow_book(
         return Err(BibErrorResponse::OverBorrowingLimit);
     }
 
+    // Check if the book exists
     let mut book = Book::default();
     let book_id = atoi(book_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
-
     book.id = book_id;
     let mut books = match search_items(db, &book).await {
         Ok(books) => books,
@@ -165,6 +210,7 @@ async fn borrow_book(
     if books.len() != 1 {
         return Err(BibErrorResponse::DataDuplicated(book.id));
     }
+
     let mut book = books.pop().unwrap();
     let borrow_info = cache.get(book.id);
     if borrow_info.is_some() {
@@ -172,6 +218,7 @@ async fn borrow_book(
         return Err(BibErrorResponse::BookNotReturned);
     }
 
+    // Increment the transaction counter
     let mut counter = transaction.counter.lock().unwrap();
     *counter += 1;
     let mut transaction_id = *counter % (transaction.max_counter + 1);
@@ -192,41 +239,25 @@ async fn borrow_book(
     let return_deadline = borrowed_book.return_deadline.clone();
     user.borrowed_books.push(borrowed_book);
     user.borrowed_count += 1;
+
+    // Update the DB
     update_item(db, user)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
 
-    // Check the returned data
-    let mut done: bool = false;
-    *user = match search_item(db, user).await {
-        Ok(user) => user,
-        Err(_) => {
-            return Err(BibErrorResponse::UserNotFound(user.id));
-        }
-    };
-    for book in &user.borrowed_books {
-        if book_id == book.book_id {
-            debug!("Check passed, book_id = {}", book_id);
-            done = true;
-            break;
-        }
-    }
-    if !done {
-        return Err(BibErrorResponse::SystemError("Check failed".to_string()));
-    }
-
-    cache.borrow(book.id, user.id, return_deadline);
-
-    // Don't propagate error
     book.borrowed_count += 1;
-    if let Err(e) = update_item(db, &book).await {
-        error!("{:?}", e);
-    }
+    update_item(db, &book)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
 
-    debug!("transaction_id = {}", transaction_id);
     Transaction::borrow(db, transaction_id, user, &book, time_zone)
         .await
-        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    // Update the cache
+    cache.borrow(book.id, user.id, return_deadline);
+
+    Ok(())
 }
 
 async fn unborrow_book(
@@ -237,11 +268,9 @@ async fn unborrow_book(
     book_id: &str,
     time_zone: &str,
 ) -> Result<(String, u32), BibErrorResponse> {
-    debug!("unborrow_book,id = {}", book_id);
-
+    // Check if the book exists
     let mut book = Book::default();
     let book_id = atoi(book_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
-
     book.id = book_id;
     let mut books = match search_items(db, &book).await {
         Ok(books) => books,
@@ -254,6 +283,7 @@ async fn unborrow_book(
     }
     book = books.pop().unwrap();
 
+    // Read the user data and check if the book is borrowed
     if user.id == 0 {
         let borrow_info = cache.get(book.id);
         if borrow_info.is_none() {
@@ -285,35 +315,17 @@ async fn unborrow_book(
         return Err(BibErrorResponse::BookNotBorrowed);
     }
 
+    // Update the DB
     update_item(db, user)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
 
-    // Check the returned data
-    let mut done: bool = true;
-    *user = match search_item(db, user).await {
-        Ok(user) => user,
-        Err(_) => {
-            return Err(BibErrorResponse::UserNotFound(user.id));
-        }
-    };
-    for book in &user.borrowed_books {
-        if book_id == book.book_id {
-            error!("Check failed, book_id = {}", book_id);
-            done = false;
-            break;
-        }
-    }
-    if !done {
-        return Err(BibErrorResponse::SystemError("Check failed".to_string()));
-    }
-    debug!("Check passed, book_id = {}", book_id);
-
-    cache.unborrow(book.id);
-
-    debug!("transaction_id = {}", transaction_id);
     Transaction::unborrow(db, transaction_id, user, &book, borrowed_date, time_zone)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    // Update the cache
+    cache.unborrow(book.id);
+
     Ok((book.title, book.id))
 }
