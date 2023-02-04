@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-	<title>図書管理システム CloudBib</title>
+    <title>図書管理システム CloudBib</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
@@ -87,8 +87,12 @@
           return;
         }
 
-        var dataSet = data["user_list"];
-        var datatable = $("#user_list_table").DataTable();
+        const dataSet = data["user_list"];
+        const datatable = $("#user_list_table").DataTable();
+        dataSet.forEach((d) => {
+          const user_id = d.id;
+          d.id = `<a href="/user/main?user_id=${user_id}">${user_id}</a>`;
+        });
         datatable.clear();
         datatable.destroy();
         $("#user_list_table").DataTable({
@@ -197,8 +201,9 @@
             </tr>
           </table>
           <button type="submit">検索</button>
-            <font size="-1" style="color: gray">
-          何も入力せずに検索ボタンを押すと、全ての利用者が表示されます。</font>
+          <font size="-1" style="color: gray">
+            何も入力せずに検索ボタンを押すと、全ての利用者が表示されます。</font
+          >
         </form>
         <h3>検索結果</h3>
         <div style="overflow-x: auto">
