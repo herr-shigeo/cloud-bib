@@ -90,8 +90,12 @@
           return;
         }
 
-        var dataSet = data["user_list"];
-        var datatable = $("#user_list_table").DataTable();
+        const dataSet = data["user_list"];
+        const datatable = $("#user_list_table").DataTable();
+        dataSet.forEach((d) => {
+          const user_id = d.id;
+          d.id = `<a href="/user?user_id=${user_id}">${user_id}</a>`;
+        });
         datatable.clear();
         datatable.destroy();
         $("#user_list_table").DataTable({
