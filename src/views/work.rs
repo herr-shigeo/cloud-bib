@@ -20,6 +20,8 @@ use shared_mongodb::{database, ClientHolder};
 use std::collections::HashMap;
 use std::sync::Mutex;
 
+const BOOK_BARCODE_KETA: usize = 7;
+
 #[derive(Deserialize, Debug)]
 pub struct FormData {
     pub user_id: String,
@@ -197,6 +199,11 @@ async fn borrow_book(
         return Err(BibErrorResponse::OverBorrowingLimit);
     }
 
+    // Check the barcode size
+    if book_id.starts_with("0") && book_id.len() != BOOK_BARCODE_KETA {
+        return Err(BibErrorResponse::InvalidArgument(book_id.to_owned()));
+    }
+
     // Check if the book exists
     let mut book = Book::default();
     let book_id = atoi(book_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
@@ -268,6 +275,11 @@ async fn unborrow_book(
     book_id: &str,
     time_zone: &str,
 ) -> Result<(String, u32), BibErrorResponse> {
+    // Check the barcode size
+    if book_id.starts_with("0") && book_id.len() != BOOK_BARCODE_KETA {
+        return Err(BibErrorResponse::InvalidArgument(book_id.to_owned()));
+    }
+
     // Check if the book exists
     let mut book = Book::default();
     let book_id = atoi(book_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
