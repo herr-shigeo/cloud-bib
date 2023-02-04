@@ -149,11 +149,16 @@
 
         var dataSet = data["book_list"];
         $.each(dataSet, function (i, d) {
-          if (d.owner_id == null) {
+          const owner_id = d.owner_id;
+          if (owner_id == null) {
             d.owner_id = "貸出可能";
           } else {
             var dt = d.return_deadline.split(" ");
-            d.owner_id = "貸出中 (" + d.owner_id + ", 〜" + dt[0] + ")";
+            d.owner_id =
+              "貸出中 (" +
+              `<a href="/user?user_id=${owner_id}">${owner_id}</a>, 〜` +
+              dt[0] +
+              ")";
           }
         });
 
