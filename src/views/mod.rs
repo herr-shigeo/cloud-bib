@@ -5,6 +5,7 @@ mod barcode;
 pub mod cache;
 mod constatns;
 mod content_loader;
+mod csv;
 mod db_helper;
 mod edit;
 mod export;
@@ -95,6 +96,7 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     account::account_factory(app);
     manual::manual_factory(app);
     barcode::barcode_factory(app);
+    csv::csv_factory(app);
 
     app.route("/{filename:.*}", web::get().to(index_and_redirect_to_https));
 }
