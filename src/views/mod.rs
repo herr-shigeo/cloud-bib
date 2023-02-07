@@ -18,6 +18,7 @@ mod reply;
 mod search;
 mod session;
 mod setting;
+mod stripe;
 pub mod transaction;
 mod user;
 mod utils;
@@ -97,6 +98,7 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     manual::manual_factory(app);
     barcode::barcode_factory(app);
     csv::csv_factory(app);
+    stripe::stripe_factory(app);
 
     app.route("/{filename:.*}", web::get().to(index_and_redirect_to_https));
 }

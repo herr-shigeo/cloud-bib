@@ -154,6 +154,7 @@ pub struct SystemUser {
     pub user_password: String,
     pub dbname: String,
     pub plan: MonthlyPlan,
+    pub subscription_id: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -273,6 +274,7 @@ impl SystemUser {
             user_password: String::new(),
             dbname: String::new(),
             plan: MonthlyPlan::Free,
+            subscription_id: String::new(),
         }
     }
 }

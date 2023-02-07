@@ -1,7 +1,5 @@
 use crate::error::BibErrorResponse;
-use crate::views::content_loader::read_file;
 use actix_files::NamedFile;
-use actix_web::{web, HttpResponse};
 
 pub async fn user() -> Result<NamedFile, BibErrorResponse> {
     let fname = "src/html/csv/user_list_example.csv";
