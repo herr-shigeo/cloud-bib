@@ -124,8 +124,10 @@ pub struct Form2Data {
     pub book_status: String,
     pub book_author: String,
     pub book_publisher: String,
+    pub book_published_date: String,
     pub book_series: String,
     pub book_volume: String,
+    pub book_page: String,
     pub book_kana: String,
     pub book_category_symbol: String,
     pub book_library_symbol: String,
@@ -168,8 +170,10 @@ pub async fn book(
             book.status = form.book_status.clone();
             book.author = form.book_author.clone();
             book.publisher = form.book_publisher.clone();
+            book.published_date = form.book_published_date.clone();
             book.series = form.book_series.clone();
             book.volume = form.book_volume.clone();
+            book.page = form.book_page.clone();
             book.kana = form.book_kana.clone();
             book.category_symbol = form.book_category_symbol.clone();
             book.library_symbol = form.book_library_symbol.clone();
@@ -200,8 +204,10 @@ pub async fn book(
                 &form.book_status,
                 &form.book_author,
                 &form.book_publisher,
+                &form.book_published_date,
                 &form.book_series,
                 &form.book_volume,
+                &form.book_page,
                 &form.book_kana,
                 &form.book_category_symbol,
                 &form.book_library_symbol,

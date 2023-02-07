@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-	<title>図書管理システム CloudBib</title>
+    <title>図書管理システム CloudBib</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
@@ -72,8 +72,10 @@
             { data: "status" },
             { data: "author" },
             { data: "publisher" },
+            { data: "published_date" },
             { data: "series" },
             { data: "volume" },
+            { data: "page" },
             { data: "category_symbol" },
             { data: "library_symbol" },
             { data: "volume_symbol" },
@@ -181,8 +183,10 @@
             { data: "status" },
             { data: "author" },
             { data: "publisher" },
+            { data: "published_date" },
             { data: "series" },
             { data: "volume" },
+            { data: "page" },
             { data: "category_symbol" },
             { data: "library_symbol" },
             { data: "volume_symbol" },
@@ -264,8 +268,9 @@
         </table>
         <input type="hidden" name="user_id" id="user_id" value="0" />
         <button type="submit">検索</button>
-            <font size="-1" style="color: gray">
-        何も入力せずに検索ボタンを押すと、全図書が表示されます。</font>
+        <font size="-1" style="color: gray">
+          何も入力せずに検索ボタンを押すと、全図書が表示されます。</font
+        >
       </form>
       <h3>検索結果</h3>
       <div style="overflow-x: auto">
@@ -281,8 +286,10 @@
               <th>破損状況</th>
               <th>著者</th>
               <th>出版社</th>
+              <th>出版日</th>
               <th>シリーズ</th>
               <th>巻数</th>
+              <th>ページ</th>
               <th>分類記号</th>
               <th>図書記号</th>
               <th>巻冊記号</th>

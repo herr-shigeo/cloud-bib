@@ -119,8 +119,11 @@
         document.getElementById("book_status").value = book.status;
         document.getElementById("book_author").value = book.author;
         document.getElementById("book_publisher").value = book.publisher;
+        document.getElementById("book_published_date").value =
+          book.published_date;
         document.getElementById("book_series").value = book.series;
         document.getElementById("book_volume").value = book.volume;
+        document.getElementById("book_page").value = book.page;
         document.getElementById("book_kana").value = book.kana;
         document.getElementById("book_category_symbol").value =
           book.category_symbol;
@@ -562,6 +565,18 @@
                 />
               </td>
               <td>
+                <label for="book_published_date"><b>出版日</b></label>
+                <input
+                  type="text"
+                  name="book_published_date"
+                  id="book_published_date"
+                  placeholder=""
+                />
+              </td>
+            </tr>
+
+            <tr>
+              <td>
                 <label for="book_recommendation"><b>シリーズ</b></label>
                 <input
                   type="text"
@@ -570,14 +585,23 @@
                   placeholder=""
                 />
               </td>
-            </tr>
-            <tr>
               <td>
                 <label for="book_volume"><b>巻数</b></label>
                 <input
                   type="text"
                   name="book_volume"
                   id="book_volume"
+                  placeholder=""
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="book_page"><b>ページ</b></label>
+                <input
+                  type="text"
+                  name="book_page"
+                  id="book_page"
                   placeholder=""
                 />
               </td>
