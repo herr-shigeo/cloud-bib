@@ -120,10 +120,10 @@ pub async fn add(
             system_setting.max_registered_books = NUM_BOOKS_FOR_FREE;
             system_setting.max_num_transactions = NUM_TRANSACTIONS_FOR_FREE;
         }
-        MonthlyPlan::Small => {
-            system_setting.max_registered_users = NUM_USERS_FOR_SMALL;
-            system_setting.max_registered_books = NUM_BOOKS_FOR_SMALL;
-            system_setting.max_num_transactions = NUM_TRANSACTIONS_FOR_SMALL;
+        MonthlyPlan::Light => {
+            system_setting.max_registered_users = NUM_USERS_FOR_LIGHT;
+            system_setting.max_registered_books = NUM_BOOKS_FOR_LIGHT;
+            system_setting.max_num_transactions = NUM_TRANSACTIONS_FOR_LIGHT;
         }
         MonthlyPlan::Standard => {
             system_setting.max_registered_users = NUM_USERS_FOR_STANDARD;

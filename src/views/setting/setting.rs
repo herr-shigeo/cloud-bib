@@ -22,13 +22,6 @@ use futures::future::join_all;
 use std::io::{Error, ErrorKind};
 use std::{env, error};
 
-use lazy_static::lazy_static;
-
-lazy_static! {
-    static ref DB_COMMON_NAME: String =
-        env::var("BIB_DB_NAME").expect("You must set the BIB_DB_NAME environment var!");
-}
-
 pub async fn load() -> HttpResponse {
     let html_data = read_file("src/html/setting.html").unwrap();
     HttpResponse::Ok()

@@ -141,7 +141,7 @@ pub struct User {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum MonthlyPlan {
     Free,
-    Small,
+    Light,
     Standard,
 }
 
