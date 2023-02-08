@@ -72,6 +72,20 @@
         document.getElementById("operator_uname").value = data["uname"];
         document.getElementById("user_uname").value = data["uname"];
         document.getElementById("email").value = data["email"];
+
+        var select = document.getElementById("plan");
+        var option = document.createElement("option");
+        if (data["plan"] == "Free") {
+          option.text = "なし (無料)";
+          option.value = "Free";
+        } else if (data["plan"] == "Light") {
+          option.text = "ライト (月額4,000円)";
+          option.value = "Light";
+        } else if (data["plan"] == "Standard") {
+          option.text = "ライト (月額10,000円)";
+          option.value = "Standard";
+        }
+        select.appendChild(option);
       }
 
       function processDelete(data) {
@@ -84,6 +98,38 @@
         if (handleError(data)) {
           return;
         }
+      }
+
+      function submitNewPlan() {
+        const url_to_update =
+          "https://billing.stripe.com/p/login/test_00gaGFanbbmX75u9AA";
+        const url_for_light = "https://buy.stripe.com/test_4gwbM08gBdvf5gc28b";
+        const url_for_standard =
+          "https://buy.stripe.com/test_cN26rG2Wh9eZfUQ8wy";
+        const clientId = document.getElementById("uname").value;
+        const email = document.getElementById("email").value;
+        const old_plan = document.getElementById("plan").value;
+        const new_plan = document.getElementById("new_plan").value;
+        var url;
+
+        if (old_plan == "Free") {
+          if (new_plan == "Light") {
+            url = `${url_for_light}?locale=ja&client_reference_id=${clientId}&prefilled_email=${encodeURIComponent(
+              email
+            )}`;
+          } else if (new_plan == "Standard") {
+            url = `${url_for_standard}?locale=ja&client_reference_id=${clientId}&prefilled_email=${encodeURIComponent(
+              email
+            )}`;
+          } else {
+            alert("プランを選択して下さい");
+            return;
+          }
+        } else {
+          url = url_to_update;
+        }
+
+        window.location.assign(url);
       }
     </script>
   </head>
@@ -117,22 +163,29 @@
       <div class="full-container">
         <button class="accordion">利用プラン</button>
         <div class="panel">
-          <form id="form5" name="form5" action="/account/update" method="post">
-            <label for="uname"><b>契約中の利用プラン</b></label
-            ><input type="text" value="フリー (無料)" />
-
-            <label for="planList"><b>変更後の利用プラン</b></label>
-            <select id="planList" name="planlist">
-              <option value="red">フリー (無料)</option>
+          <form
+            id="form5"
+            name="form5"
+            onsubmit="submitNewPlan(); return false;"
+          >
+            <label for="plan"><b>契約中の利用プラン</b></label>
+            <select name="plan" id="plan"></select>
+            <label for="new_plan"><b>変更後の利用プラン</b></label>
+            <select name="new_plan" id="new_plan">
+              <option id="new_plan_free" value="Free">なし (無料)</option>
+              <option id="new_plan_light" value="Light">
+                ライト (月額4,000円)
+              </option>
+              <option id="new_plan_standard" value="Standard">
+                スタンダード (月額10,000円)
+              </option>
             </select>
             <br />
             <font size="-1" style="color: gray"
-              >現在は、無料プランのみ提供しております。</font
+              >プランをキャンセルもしくはダウングレードすると、登録データはすべて削除されます。</font
             ><br />
             <br />
-            <button type="submit" class="submitbtn" disabled>
-              利用プランを変更
-            </button>
+            <button type="submit" class="submitbtn">利用プランを変更</button>
           </form>
         </div>
 
@@ -175,7 +228,7 @@
             method="post"
             onsubmit="return postPasswordForm('form3', 'password', 'confirm_password', 8)"
           >
-            <input type="hidden" name="uname" id="admin_uname"/>
+            <input type="hidden" name="uname" id="admin_uname" />
             <label for="password"><b>管理者パスワード</b></label>
             <input type="password" name="password" id="password" required />
             <br />
@@ -206,7 +259,7 @@
             method="post"
             onsubmit="return postPasswordForm('form4', 'operator_password', 'confirm_operator_password', 8)"
           >
-            <input type="hidden" name="uname" id="operator_uname"/>
+            <input type="hidden" name="uname" id="operator_uname" />
             <label for="operator_password"><b>司書パスワード</b></label>
             <input
               type="password"
@@ -242,7 +295,7 @@
             method="post"
             onsubmit="return postPasswordForm('form5', 'user_password', 'confirm_user_password', 8)"
           >
-            <input type="hidden" name="uname" id="user_uname"/>
+            <input type="hidden" name="uname" id="user_uname" />
             <label for="user_password"><b>利用者パスワード</b></label>
             <input
               type="password"

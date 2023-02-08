@@ -170,6 +170,14 @@ impl MonthlyPlan {
             MonthlyPlan::Standard => false,
         }
     }
+
+    pub fn get_str(&self) -> String {
+        match self {
+            MonthlyPlan::Free => String::from("Free"),
+            MonthlyPlan::Light => String::from("Light"),
+            MonthlyPlan::Standard => String::from("Standard"),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

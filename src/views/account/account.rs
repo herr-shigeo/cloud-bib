@@ -261,6 +261,7 @@ pub async fn get(
     let mut reply = Reply::default();
     reply.uname = system_user.uname;
     reply.email = system_user.email;
+    reply.plan = system_user.plan.get_str();
 
     Ok(HttpResponse::Ok().json(reply))
 }
