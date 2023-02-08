@@ -4,18 +4,16 @@ use crate::item::{
     SystemUser,
 };
 use crate::views::cache::Cache;
-use crate::views::constatns::*;
 use crate::views::content_loader::read_file;
 use crate::views::db_helper::get_db_with_name;
 use crate::views::reply::Reply;
 use crate::views::reset_token::ResetToken;
 use crate::views::session::{check_admin_session, create_session, get_uname};
 use crate::views::transaction::Transaction;
-use crate::views::utils::{generate_token, send_email};
+use crate::views::utils::{generate_token, get_system_user, send_email, set_system_limits};
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use argon2::Config;
-use mongodb::Database;
 use rand::Rng;
 use serde::Deserialize;
 use shared_mongodb::{database, ClientHolder};
@@ -85,7 +83,10 @@ pub async fn add(
     validate_length(&form.password)?;
 
     // Check if the uname already exists
-    if get_setting(&db, &form.uname).await.is_ok() {
+    if get_system_user(&data, Some(form.uname.to_owned()), None)
+        .await
+        .is_ok()
+    {
         return Err(BibErrorResponse::UserExists);
     }
 
@@ -113,24 +114,7 @@ pub async fn add(
     let db = get_db_with_name(&data, &system_user.dbname).await?;
     let mut system_setting = SystemSetting::default();
     system_setting.id = 1;
-
-    match system_user.plan {
-        MonthlyPlan::Free => {
-            system_setting.max_registered_users = NUM_USERS_FOR_FREE;
-            system_setting.max_registered_books = NUM_BOOKS_FOR_FREE;
-            system_setting.max_num_transactions = NUM_TRANSACTIONS_FOR_FREE;
-        }
-        MonthlyPlan::Light => {
-            system_setting.max_registered_users = NUM_USERS_FOR_LIGHT;
-            system_setting.max_registered_books = NUM_BOOKS_FOR_LIGHT;
-            system_setting.max_num_transactions = NUM_TRANSACTIONS_FOR_LIGHT;
-        }
-        MonthlyPlan::Standard => {
-            system_setting.max_registered_users = NUM_USERS_FOR_STANDARD;
-            system_setting.max_registered_books = NUM_BOOKS_FOR_STANDARD;
-            system_setting.max_num_transactions = NUM_TRANSACTIONS_FOR_STANDARD;
-        }
-    }
+    set_system_limits(&mut system_setting, &system_user.plan);
 
     insert_item(&db, &system_setting)
         .await
@@ -185,7 +169,7 @@ pub async fn update(
 
     let uname = get_uname(&session)?;
 
-    let mut system_user = get_setting(&db, &uname).await?;
+    let mut system_user = get_system_user(&data, Some(uname), None).await?;
     system_user.email = form.email.to_owned();
 
     match update_item(&db, &system_user).await {
@@ -211,10 +195,6 @@ pub async fn delete(
     let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;
 
     let uname = get_uname(&session)?;
-
-    if uname == "demo" {
-        return Err(BibErrorResponse::InvalidArgument(uname));
-    }
 
     let mut system_user = SystemUser::default();
     system_user.uname = uname;
@@ -263,7 +243,7 @@ pub async fn get(
     let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;
 
     let uname = get_uname(&session)?;
-    let system_user = get_setting(&db, &uname).await?;
+    let system_user = get_system_user(&data, Some(uname), None).await?;
 
     let mut system_user = match search_items(&db, &system_user).await {
         Ok(system_user) => system_user,
@@ -318,9 +298,7 @@ pub async fn request_reset(
     token_map: web::Data<ResetToken>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;
-
-    let system_user = get_setting(&db, &form.uname).await?;
+    let system_user = get_system_user(&data, Some(form.uname.to_owned()), None).await?;
 
     if system_user.email != form.email {
         return Err(BibErrorResponse::InvalidArgument(form.email.to_owned()));
@@ -378,24 +356,6 @@ fn send_email_to_reset(to: &str, token: &str) -> Result<(), BibErrorResponse> {
     Ok(())
 }
 
-async fn get_setting(db: &Database, uname: &str) -> Result<SystemUser, BibErrorResponse> {
-    let mut system_user = SystemUser::default();
-    system_user.uname = uname.to_owned();
-
-    let mut system_user = match search_items(&db, &system_user).await {
-        Ok(system_user) => system_user,
-        Err(e) => {
-            return Err(BibErrorResponse::DataNotFound(e.to_string()));
-        }
-    };
-
-    if system_user.len() == 1 {
-        return Ok(system_user.pop().unwrap());
-    } else {
-        return Err(BibErrorResponse::DataNotFound(uname.to_owned()));
-    }
-}
-
 async fn update_password(
     data: &web::Data<Mutex<ClientHolder>>,
     uname: &str,
@@ -406,7 +366,7 @@ async fn update_password(
 
     validate_length(password)?;
 
-    let mut setting = get_setting(&db, uname).await?;
+    let mut setting = get_system_user(&data, Some(uname.to_owned()), None).await?;
 
     // Hash the new password
     let salt: [u8; 32] = rand::thread_rng().gen();

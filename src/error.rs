@@ -187,7 +187,6 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     reason: String::new(),
                 })
             }
-
             BibErrorResponse::SystemError(reason) => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,

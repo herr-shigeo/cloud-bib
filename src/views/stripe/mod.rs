@@ -7,15 +7,7 @@ pub fn stripe_factory(app: &mut web::ServiceConfig) {
         prefix: String::from("/stripe"),
     };
     app.route(
-        &base_path.define(String::from("/subscription/deleted")),
-        web::post().to(stripe::subscription_deleted),
-    )
-    .route(
-        &base_path.define(String::from("/subscription/updated")),
-        web::post().to(stripe::subscription_updated),
-    )
-    .route(
-        &base_path.define(String::from("/checkout/completed")),
-        web::post().to(stripe::checkout_completed),
+        &base_path.define(String::from("/webhook")),
+        web::post().to(stripe::webhook),
     );
 }

@@ -1,16 +1,29 @@
-use std::env;
+use std::{env, sync::Mutex};
 
+use actix_web::web;
 use chrono::{DateTime, TimeZone, Utc};
 use chrono_tz::{Asia::Tokyo, Europe::Berlin, Tz};
 extern crate lettre;
 extern crate lettre_email;
 use lettre::{smtp::authentication::IntoCredentials, SmtpClient, Transport};
 use lettre_email::EmailBuilder;
+use log::debug;
+use mongodb::Database;
+use shared_mongodb::ClientHolder;
 use uuid::Uuid;
 
 use lazy_static::lazy_static;
 
+use crate::{
+    error::BibErrorResponse,
+    item::{search_items, update_item, MonthlyPlan, SystemSetting, SystemUser},
+};
+
+use super::{constatns::*, db_helper::get_db_with_name};
+
 lazy_static! {
+    static ref DB_COMMON_NAME: String =
+        env::var("BIB_DB_NAME").expect("You must set the BIB_DB_NAME environment var!");
     static ref EMAIL_SMTP_RELAY: String =
         env::var("EMAIL_SMTP_RELAY").expect("You must set the EMAIL_SMTP_RELAY environment var!");
     static ref EMAIL_USER: String =
@@ -55,4 +68,123 @@ pub fn send_email(to: &str, subject: &str, text: &str) -> Result<(), Box<dyn std
         .transport();
     let _result = client.send(email);
     Ok(())
+}
+
+pub fn set_system_limits(system_setting: &mut SystemSetting, plan: &MonthlyPlan) -> () {
+    match plan {
+        MonthlyPlan::Free => {
+            system_setting.max_registered_users = NUM_USERS_FOR_FREE;
+            system_setting.max_registered_books = NUM_BOOKS_FOR_FREE;
+            system_setting.max_num_transactions = NUM_TRANSACTIONS_FOR_FREE;
+        }
+        MonthlyPlan::Light => {
+            system_setting.max_registered_users = NUM_USERS_FOR_LIGHT;
+            system_setting.max_registered_books = NUM_BOOKS_FOR_LIGHT;
+            system_setting.max_num_transactions = NUM_TRANSACTIONS_FOR_LIGHT;
+        }
+        MonthlyPlan::Standard => {
+            system_setting.max_registered_users = NUM_USERS_FOR_STANDARD;
+            system_setting.max_registered_books = NUM_BOOKS_FOR_STANDARD;
+            system_setting.max_num_transactions = NUM_TRANSACTIONS_FOR_STANDARD;
+        }
+    };
+}
+
+pub async fn update_subscription(
+    data: &web::Data<Mutex<ClientHolder>>,
+    uname: &str,
+    plan: &MonthlyPlan,
+    subscription_id: String,
+) -> Result<SystemSetting, BibErrorResponse> {
+    // Update the plan and subscription id
+    let mut system_user = get_system_user(data, Some(uname.to_owned()), None).await?;
+    system_user.plan = plan.to_owned();
+    match system_user.plan {
+        MonthlyPlan::Free => system_user.subscription_id = String::new(),
+        _ => {
+            if system_user.subscription_id != "" && system_user.subscription_id != subscription_id {
+                log::warn!(
+                    "The subscription id does not match, {} != {}",
+                    system_user.subscription_id,
+                    subscription_id
+                );
+            }
+            system_user.subscription_id = subscription_id;
+        }
+    }
+
+    debug!("update_subscription: {:?}", system_user);
+
+    let db = get_db_with_name(data, &DB_COMMON_NAME.to_string()).await?;
+    update_item(&db, &system_user)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    // Update the sytem setting
+    let db = get_db_with_name(&data, &system_user.dbname).await?;
+    update_system_setting(&db, plan).await
+}
+
+pub async fn get_system_user(
+    data: &web::Data<Mutex<ClientHolder>>,
+    uname: Option<String>,
+    subscription_id: Option<String>,
+) -> Result<SystemUser, BibErrorResponse> {
+    let db = get_db_with_name(data, &DB_COMMON_NAME.to_string()).await?;
+    let mut system_user = SystemUser::default();
+    if uname.is_some() {
+        system_user.uname = uname.unwrap();
+    } else if subscription_id.is_some() {
+        system_user.subscription_id = subscription_id.unwrap();
+    }
+
+    let mut system_user = match search_items(&db, &system_user).await {
+        Ok(system_user) => system_user,
+        Err(e) => {
+            debug!(
+                "get_system-user(uname={}, subscription_id={}) returns {:?}",
+                system_user.uname, system_user.subscription_id, e
+            );
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    };
+
+    if system_user.len() == 1 {
+        return Ok(system_user.pop().unwrap());
+    } else {
+        return Err(BibErrorResponse::DataDuplicated(
+            system_user.len().try_into().unwrap(),
+        ));
+    }
+}
+
+async fn update_system_setting(
+    db: &Database,
+    plan: &MonthlyPlan,
+) -> Result<SystemSetting, BibErrorResponse> {
+    // Read the system setting
+    let mut system_setting = SystemSetting::default();
+    system_setting.id = 1;
+    let mut system_setting = match search_items(&db, &system_setting).await {
+        Ok(system_setting) => system_setting,
+        Err(e) => {
+            debug!("update_system_setting returns {:?}", e);
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    };
+    if system_setting.len() != 1 {
+        return Err(BibErrorResponse::DataDuplicated(
+            system_setting.len().try_into().unwrap(),
+        ));
+    }
+    let mut system_setting = system_setting.pop().unwrap();
+
+    set_system_limits(&mut system_setting, plan);
+
+    // Write back
+    update_item(&db, &system_setting)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    Ok(system_setting)
 }

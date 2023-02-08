@@ -12,6 +12,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::error;
 use std::io::{Error, ErrorKind};
+use std::str::FromStr;
 
 const NUM_SEARCH_ITEMS_MAX: i64 = 100000;
 
@@ -143,6 +144,32 @@ pub enum MonthlyPlan {
     Free,
     Light,
     Standard,
+}
+
+impl FromStr for MonthlyPlan {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Free" => Ok(MonthlyPlan::Free),
+            "Light" => Ok(MonthlyPlan::Light),
+            "Standard" => Ok(MonthlyPlan::Standard),
+            _ => Err(()),
+        }
+    }
+}
+
+impl MonthlyPlan {
+    pub fn is_downgraded(&self, old: &MonthlyPlan) -> bool {
+        match self {
+            MonthlyPlan::Free => true,
+            MonthlyPlan::Light => match old {
+                MonthlyPlan::Standard => true,
+                _ => false,
+            },
+            MonthlyPlan::Standard => false,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -470,8 +497,9 @@ impl Entity for User {
         collection.delete(query).await
     }
 
-    async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
-        panic!("Not implemented")
+    async fn delete_all(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let collection = self.get_collection(db);
+        collection.delete_all().await
     }
 
     async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
@@ -538,7 +566,10 @@ impl Entity for SystemUser {
         let mut query = doc! {};
         if self.uname != "" {
             query = doc! { "uname": &self.uname};
+        } else if self.subscription_id != "" {
+            query = doc! { "subscription_id": &self.subscription_id};
         }
+
         let collection = self.get_collection(db);
         collection.search(query).await
     }
@@ -579,8 +610,9 @@ impl Entity for Book {
         collection.delete(query).await
     }
 
-    async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
-        panic!("Not implemented")
+    async fn delete_all(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let collection = self.get_collection(db);
+        collection.delete_all().await
     }
 
     async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {

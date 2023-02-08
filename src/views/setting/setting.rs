@@ -19,8 +19,8 @@ use std::sync::Mutex;
 extern crate sanitize_filename;
 use crate::views::db_helper::get_db;
 use futures::future::join_all;
+use std::error;
 use std::io::{Error, ErrorKind};
-use std::{env, error};
 
 pub async fn load() -> HttpResponse {
     let html_data = read_file("src/html/setting.html").unwrap();
