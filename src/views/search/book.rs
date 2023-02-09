@@ -7,8 +7,10 @@ use crate::views::db_helper::get_db;
 use crate::views::reply::Reply;
 use crate::views::session::check_operator_session;
 use crate::views::session::check_user_session;
+use crate::views::utils::fetch_book_info;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
+use futures::TryFutureExt;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use shared_mongodb::ClientHolder;
@@ -24,9 +26,35 @@ pub struct FormData {
     pub user_id: String,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct Form2Data {
+    pub isbn: String,
+}
+
 #[derive(Serialize, Debug)]
 pub struct BookList {
     pub books: Vec<Book>,
+}
+
+pub async fn search_isbn(
+    _session: Session,
+    form: web::Query<Form2Data>,
+) -> Result<HttpResponse, BibErrorResponse> {
+    let isbn = form.isbn.clone();
+
+    let fut = async move {
+        fetch_book_info(&isbn)
+            .await
+            .map_err(|_| BibErrorResponse::DataNotFound("isbn".to_string()))
+    };
+
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let book = rt.block_on(fut)?;
+
+    let mut reply = Reply::default();
+    reply.book_list = vec![book];
+
+    Ok(HttpResponse::Ok().json(reply))
 }
 
 pub async fn search_book(

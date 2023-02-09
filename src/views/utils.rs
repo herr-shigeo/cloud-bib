@@ -9,14 +9,18 @@ use lettre::{smtp::authentication::IntoCredentials, SmtpClient, Transport};
 use lettre_email::EmailBuilder;
 use log::debug;
 use mongodb::Database;
+use reqwest::Error;
+use select::document::Document;
+use select::predicate::Name;
 use shared_mongodb::ClientHolder;
+use std::io::Read;
 use uuid::Uuid;
 
 use lazy_static::lazy_static;
 
 use crate::{
     error::BibErrorResponse,
-    item::{search_items, update_item, MonthlyPlan, SystemSetting, SystemUser},
+    item::{search_items, update_item, Book, MonthlyPlan, SystemSetting, SystemUser},
 };
 
 use super::{constatns::*, db_helper::get_db_with_name};
@@ -32,6 +36,70 @@ lazy_static! {
         env::var("EMAIL_FROM").expect("You must set the EMAIL_EMAIL_FROM environment var!");
     static ref EMAIL_PASSWORD: String =
         env::var("EMAIL_PASSWORD").expect("You must set the EMAIL_PASSWORD environment var!");
+}
+
+pub async fn fetch_book_info(isbn: &str) -> Result<Book, BibErrorResponse> {
+    let url = format!("https://iss.ndl.go.jp/api/opensearch?isbn={}", isbn);
+    let res = reqwest::get(&url)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    if !res.status().is_success() {
+        return Err(BibErrorResponse::SystemError(res.status().to_string()));
+    }
+
+    let dc = "http://purl.org/dc/elements/1.1/";
+    let dcndl = "http://ndl.go.jp/dcndl/terms/";
+
+    let body = res.text().await.unwrap();
+    let document = Document::from(body.as_str());
+
+    let title = document
+        .find(Name("title"))
+        .skip(1)
+        .next()
+        .map_or("".to_string(), |node| node.text());
+
+    let author = document
+        .find(Name("author"))
+        .next()
+        .map_or("".to_string(), |node| node.text());
+
+    let title_kana = document
+        .find(Name("dcndl:titletranscription"))
+        .next()
+        .map_or("".to_string(), |node| node.text());
+
+    let series = document
+        .find(Name("dcndl:seriestitle"))
+        .next()
+        .map_or("".to_string(), |node| node.text());
+
+    let publisher = document
+        .find(Name("dc:publisher"))
+        .next()
+        .map_or("".to_string(), |node| node.text());
+
+    let published_date = document
+        .find(Name("dc:date"))
+        .next()
+        .map_or("".to_string(), |node| node.text());
+
+    let page = document
+        .find(Name("dc:extent"))
+        .next()
+        .map_or("".to_string(), |node| node.text());
+
+    let mut book = Book::default();
+    book.title = title;
+    book.kana = title_kana;
+    book.author = author;
+    book.publisher = publisher;
+    book.published_date = published_date;
+    book.series = series;
+    book.page = page;
+
+    Ok(book)
 }
 
 pub fn generate_token() -> String {
