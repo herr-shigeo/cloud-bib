@@ -20,6 +20,7 @@ pub struct Reply {
     pub returned_book_title: String,
     pub returned_book_id: u32,
     pub barcode_size: u32,
+    pub operation: String,
 }
 
 impl Reply {
@@ -41,6 +42,7 @@ impl Reply {
             returned_book_title: String::new(),
             returned_book_id: 0,
             barcode_size: 0,
+            operation: String::new(),
         }
     }
 }

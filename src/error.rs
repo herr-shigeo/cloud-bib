@@ -32,6 +32,7 @@ pub enum BibErrorResponse {
     UserExists,
     NotAllowedToBorrow,
     InputLengthTooLong(),
+    ItemAlreadyExists(u32),
 }
 
 impl Display for BibErrorResponse {
@@ -187,6 +188,13 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     reason: String::new(),
                 })
             }
+            BibErrorResponse::ItemAlreadyExists(id) => HttpResponse::build(self.status_code())
+                .json(BibResponseBody {
+                    success: false,
+                    errcode: 118,
+                    message: format!("ID{}は既に登録されています", id),
+                    reason: String::new(),
+                }),
             BibErrorResponse::SystemError(reason) => {
                 HttpResponse::build(self.status_code()).json(BibResponseBody {
                     success: false,

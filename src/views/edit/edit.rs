@@ -1,5 +1,5 @@
 use crate::error::BibErrorResponse;
-use crate::item::{atoi, search_items, SystemSetting};
+use crate::item::{atoi, insert_item, search_items, SystemSetting};
 use crate::item::{delete_item, search_item, update_item};
 use crate::item::{Book, User};
 use crate::views::cache::Cache;
@@ -54,10 +54,14 @@ pub async fn user(
     drop(setting_map);
 
     // Read the User from DB first
+    let operation: &str = &form.operation;
     let mut user = User::default();
     user.id = atoi(&form.user_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
     user = match search_item(&db, &user).await {
         Ok(mut user) => {
+            if operation == "insert" {
+                return Err(BibErrorResponse::ItemAlreadyExists(user.id));
+            }
             user.name = form.user_name.clone();
             user.kana = form.user_kana.clone();
             user.category = form.user_category.clone();
@@ -91,8 +95,12 @@ pub async fn user(
         }
     };
 
-    let operation: &str = &form.operation;
     match operation {
+        "insert" => {
+            insert_item(&db, &user)
+                .await
+                .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+        }
         "update" => {
             update_item(&db, &user)
                 .await
@@ -111,7 +119,8 @@ pub async fn user(
         }
     }
 
-    let reply = Reply::default();
+    let mut reply = Reply::default();
+    reply.operation = operation.to_owned();
     Ok(HttpResponse::Ok().json(reply))
 }
 
@@ -160,10 +169,14 @@ pub async fn book(
     drop(setting_map);
 
     // Read the Book from DB first
+    let operation: &str = &form.operation;
     let mut book = Book::default();
     book.id = atoi(&form.book_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
     book = match search_item(&db, &book).await {
         Ok(mut book) => {
+            if operation == "insert" {
+                return Err(BibErrorResponse::ItemAlreadyExists(book.id));
+            }
             book.title = form.book_title.clone();
             book.location = form.book_location.clone();
             book.category = form.book_category.clone();
@@ -221,8 +234,12 @@ pub async fn book(
         }
     };
 
-    let operation: &str = &form.operation;
     match operation {
+        "insert" => {
+            insert_item(&db, &book)
+                .await
+                .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+        }
         "update" => {
             update_item(&db, &book)
                 .await
@@ -248,6 +265,7 @@ pub async fn book(
         }
     }
 
-    let reply = Reply::default();
+    let mut reply = Reply::default();
+    reply.operation = operation.to_owned();
     Ok(HttpResponse::Ok().json(reply))
 }
