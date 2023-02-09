@@ -49,6 +49,7 @@
           success: processBookList,
         };
         $("#form_book_list").ajaxForm(options3);
+        $("#form_isbn").ajaxForm(options3);
 
         var options4 = {
           dataType: "json",
@@ -109,6 +110,7 @@
 
       function processBookList(data) {
         document.getElementById("form_book_list").reset();
+        document.getElementById("form_isbn").reset();
 
         if (handleAuthError(data, "/")) {
           return;
@@ -117,28 +119,34 @@
           return;
         }
 
-        document.getElementById("book_update").checked = true;
-
         var book = data["book_list"][0];
-        document.getElementById("book_id").value = book.id;
-        document.getElementById("book_title").value = book.title;
-        document.getElementById("book_kana").value = book.kana;
-        document.getElementById("book_series").value = book.series;
-        document.getElementById("book_author").value = book.author;
-        document.getElementById("book_publisher").value = book.publisher;
-        document.getElementById("book_char").value = book.char;
-        document.getElementById("book_remark").value = book.remark;
-        document.getElementById("book_status").value = book.status;
-        document.getElementById("book_recommendation").value =
-          book.recommendation;
-        if (book.register_type == "購入")
-          document.getElementById("book_bought").checked = true;
-        else if (book.register_type == "寄贈")
-          document.getElementById("book_ippan").checked = true;
-        else if (book.register_type == "財団")
-          document.getElementById("book_zaidan").checked = true;
-        document.getElementById("book_register_date").value =
-          book.register_date;
+        if (book.id == 0) {
+          document.getElementById("book_title").value = book.title;
+          document.getElementById("book_kana").value = book.kana;
+          document.getElementById("book_author").value = book.author;
+          document.getElementById("book_publisher").value = book.publisher;
+        } else {
+          document.getElementById("book_id").value = book.id;
+          document.getElementById("book_title").value = book.title;
+          document.getElementById("book_kana").value = book.kana;
+          document.getElementById("book_series").value = book.series;
+          document.getElementById("book_author").value = book.author;
+          document.getElementById("book_publisher").value = book.publisher;
+          document.getElementById("book_char").value = book.char;
+          document.getElementById("book_remark").value = book.remark;
+          document.getElementById("book_status").value = book.status;
+          document.getElementById("book_recommendation").value =
+            book.recommendation;
+          if (book.register_type == "購入")
+            document.getElementById("book_bought").checked = true;
+          else if (book.register_type == "寄贈")
+            document.getElementById("book_ippan").checked = true;
+          else if (book.register_type == "財団")
+            document.getElementById("book_zaidan").checked = true;
+          document.getElementById("book_register_date").value =
+            book.register_date;
+          document.getElementById("book_update").checked = true;
+        }
       }
 
       function processUserUpdate(data) {
@@ -183,7 +191,7 @@
         } else if (operation == "delete") {
           alert("データを削除しました");
         }
-        
+
         setCurrentDate();
       }
 
@@ -285,9 +293,7 @@
     <hr />
     <button class="accordion">利用者</button>
     <div class="panel">
-      <p>
-        既存データを修正する場合は、利用者IDを入力後にEnterを押してデータを読み出す
-      </p>
+      <p>既存データを修正する場合は、利用者IDを入力後にEnter</p>
       <form
         id="form_user_list"
         name="form_user_list"
@@ -438,27 +444,51 @@
 
     <button class="accordion">図書</button>
     <div class="panel">
-      <p>
-        既存データを修正する場合は、図書IDを入力後にEnterを押してデータを読み出す
-      </p>
-      <form
-        id="form_book_list"
-        name="form_book_list"
-        action="/search/book"
-        method="get"
-        enctype="application/x-www-form-urlencoded"
-      >
-        <label for="value"><b>図書ID</b></label>
-        <input
-          type="text"
-          name="id"
-          id="book_id_search"
-          placeholder="半角数字"
-        />
-        <input type="hidden" name="title" value="" />
-        <input type="hidden" name="kana" value="" />
-        <input type="hidden" name="author" value="" />
-      </form>
+      <table class="noborder-table">
+        <tr>
+          <td>
+            <p>既存データを修正する場合は、図書IDを入力後にEnter</p>
+            <form
+              id="form_book_list"
+              name="form_book_list"
+              action="/search/book"
+              method="get"
+              enctype="application/x-www-form-urlencoded"
+            >
+              <label for="value"><b>図書ID</b></label>
+              <input
+                type="text"
+                name="id"
+                id="book_id_search"
+                placeholder="半角数字"
+              />
+              <input type="hidden" name="title" value="" />
+              <input type="hidden" name="kana" value="" />
+              <input type="hidden" name="author" value="" />
+            </form>
+          </td>
+          <td>　</td>
+          <td>
+            <p>ISBNコードからデータを取得する場合は、ISBNを入力後にEnter</p>
+            <form
+              id="form_isbn"
+              name="form_isbn"
+              action="/search/isbn"
+              method="get"
+              enctype="application/x-www-form-urlencoded"
+            >
+              <label for="value"><b>ISBN</b></label>
+              <input
+                type="text"
+                name="isbn"
+                id="isbn_id_search"
+                placeholder="978から始まるコード"
+              />
+            </form>
+          </td>
+        </tr>
+      </table>
+
       <form
         id="form_book_update"
         name="form_book_update"

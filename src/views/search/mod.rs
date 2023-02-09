@@ -23,5 +23,9 @@ pub fn search_factory(app: &mut web::ServiceConfig) {
     .route(
         &base_path.define(String::from("/book")),
         web::get().to(book::search_book),
+    )
+    .route(
+        &base_path.define(String::from("/isbn")),
+        web::get().to(book::search_isbn),
     );
 }
