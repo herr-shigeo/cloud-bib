@@ -29,6 +29,7 @@ pub enum BibErrorResponse {
     ExceedLimit(u32),
     NotPossibleToDelete,
     ExceedLimitInParallel(u32),
+    ItemAlreadyExists(u32),
 }
 
 impl Display for BibErrorResponse {
@@ -166,6 +167,13 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     success: false,
                     errcode: 115,
                     message: format!("一度に追加できる上限を超えています({})", id),
+                    reason: String::new(),
+                }),
+            BibErrorResponse::ItemAlreadyExists(id) => HttpResponse::build(self.status_code())
+                .json(BibResponseBody {
+                    success: false,
+                    errcode: 116,
+                    message: format!("ID{}は既に登録されています", id),
                     reason: String::new(),
                 }),
         }

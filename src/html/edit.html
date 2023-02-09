@@ -88,6 +88,8 @@
           return;
         }
 
+        document.getElementById("user_update").checked = true;
+
         var user = data["user_list"][0];
         document.getElementById("user_id").value = user.id;
         document.getElementById("user_name").value = user.name;
@@ -114,6 +116,8 @@
         if (handleError(data)) {
           return;
         }
+
+        document.getElementById("book_update").checked = true;
 
         var book = data["book_list"][0];
         document.getElementById("book_id").value = book.id;
@@ -148,7 +152,15 @@
           return;
         }
 
-        alert("データを更新しました");
+        const operation = data["operation"];
+        if (operation == "insert") {
+          alert("データを登録しました");
+        } else if (operation == "update") {
+          alert("データを更新しました");
+        } else if (operation == "delete") {
+          alert("データを削除しました");
+        }
+
         setCurrentDate();
       }
 
@@ -163,7 +175,15 @@
           return;
         }
 
-        alert("データを更新しました");
+        const operation = data["operation"];
+        if (operation == "insert") {
+          alert("データを登録しました");
+        } else if (operation == "update") {
+          alert("データを更新しました");
+        } else if (operation == "delete") {
+          alert("データを削除しました");
+        }
+        
         setCurrentDate();
       }
 
@@ -385,9 +405,16 @@
             <input
               type="radio"
               name="operation"
+              id="user_insert"
+              value="insert"
+              checked
+            />
+            <label for="user_insert"><b>新規登録</b></label>
+            <input
+              type="radio"
+              name="operation"
               id="user_update"
               value="update"
-              checked
             />
             <label for="user_update"><b>更新</b></label>
             <input
@@ -586,9 +613,16 @@
             <input
               type="radio"
               name="operation"
+              id="book_insert"
+              value="insert"
+              checked
+            />
+            <label for="book_insert"><b>新規登録</b></label>
+            <input
+              type="radio"
+              name="operation"
               id="book_update"
               value="update"
-              checked
             />
             <label for="book_update"><b>更新</b></label>
             <input
