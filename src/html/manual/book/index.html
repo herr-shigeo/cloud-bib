@@ -292,13 +292,13 @@
                                 <h3 id="図書登録">図書登録</h3>
 <p>登録編集画面の ”図書” タブをクリックします。</p>
 <p><img src="../img/book.png" alt="book"></p>
-<p>項目を入力後、”更新” がチェックされている状態で、”実行”ボタンを押します。</p>
+<p>項目を入力後、”新規登録” がチェックされている状態で、”実行”ボタンを押します。</p>
 <p><img src="../img/book_register.png" alt="book_register"></p>
-<p>入力した図書IDが未登録の場合は、新規に図書が登録されます。</p>
-<p>入力した図書IDが登録済みの場合は、入力内容で更新されます。</p>
 <h3 id="図書編集">図書編集</h3>
 <p>図書IDを入力後にEnterを押してデータを読み出した後、変更する項目を修正します。</p>
 <p><img src="../img/book_edit.png" alt="book_edit"></p>
+<p>ISBNコードからメタデータを取得する場合は、ISBNコードを入力後にEnterを押してデータを取得します。</p>
+<p><img src="../img/book_isbn.png" alt="book_isbn"></p>
 <p>項目を入力後、”更新” がチェックされている状態で、”実行”ボタンを押します。</p>
 <p><img src="../img/book_edit_2.png" alt="book_edit_2"></p>
 <h3 id="図書削除">図書削除</h3>
@@ -347,7 +347,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"図書管理","level":"1.8","depth":1,"next":{"title":"設定","level":"1.9","depth":1,"path":"setting/README.md","ref":"setting/README.md","articles":[]},"previous":{"title":"利用者管理","level":"1.7","depth":1,"path":"user/README.md","ref":"user/README.md","articles":[]},"dir":"ltr"},"config":{"plugins":[],"root":"./docs","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"book/README.md","mtime":"2023-02-01T10:08:35.148Z","type":"markdown"},"gitbook":{"version":"4.0.4","time":"2023-02-02T21:01:12.543Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"図書管理","level":"1.8","depth":1,"next":{"title":"設定","level":"1.9","depth":1,"path":"setting/README.md","ref":"setting/README.md","articles":[]},"previous":{"title":"利用者管理","level":"1.7","depth":1,"path":"user/README.md","ref":"user/README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["livereload"],"root":"./docs","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"book/README.md","mtime":"2023-02-10T07:38:27.637Z","type":"markdown"},"gitbook":{"version":"4.0.4","time":"2023-02-10T07:38:31.162Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
@@ -399,6 +399,10 @@
     </script>
     <script src="../gitbook/gitbook.js"></script>
     <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        
     
         
         <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>

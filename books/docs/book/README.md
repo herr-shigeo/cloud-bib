@@ -15,6 +15,10 @@
 
 ![book_edit](../img/book_edit.png)
 
+ISBNコードからメタデータを取得する場合は、ISBNコードを入力後にEnterを押してデータを取得します。
+
+![book_isbn](../img/book_isbn.png)
+
 項目を入力後、”更新” がチェックされている状態で、”実行”ボタンを押します。
 
 ![book_edit_2](../img/book_edit_2.png)
