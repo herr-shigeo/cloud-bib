@@ -38,7 +38,6 @@
         $("#form5").ajaxForm(options2);
 
         document.getElementById("invisible_submit").click();
-        document.getElementsByClassName("accordion")[0].click();
       });
 
       function processJson(data) {
@@ -59,8 +58,19 @@
           return;
         }
 
-        document.getElementById("num_books").value = data["num_books"];
-        document.getElementById("num_days").value = data["num_days"];
+        document.getElementById("num_books").value =
+          data["rental_setting"]["num_books"];
+        document.getElementById("num_days").value =
+          data["rental_setting"]["num_days"];
+
+        document.getElementById("user_keta_min").value =
+          data["barcode_setting"]["user_keta_min"];
+        document.getElementById("user_keta_max").value =
+          data["barcode_setting"]["user_keta_max"];
+        document.getElementById("book_keta_min").value =
+          data["barcode_setting"]["book_keta_min"];
+        document.getElementById("book_keta_max").value =
+          data["barcode_setting"]["book_keta_max"];
       }
     </script>
   </head>
@@ -87,7 +97,12 @@
     <hr />
     <button class="accordion">貸出設定</button>
     <div class="panel">
-      <form id="form1" name="form1" action="/setting/update" method="post">
+      <form
+        id="form1"
+        name="form1"
+        action="/setting/update/rental"
+        method="post"
+      >
         <table>
           <tr>
             <td>
@@ -97,6 +112,40 @@
             <td>
               <label for="num_days">最大貸出日数</label>
               <input type="text" id="num_days" name="num_days" />
+            </td>
+          </tr>
+        </table>
+        <button type="submit" class="submitbtn">変更</button>
+      </form>
+    </div>
+
+    <button class="accordion">バーコード読み取り設定</button>
+    <div class="panel">
+      <form
+        id="form2"
+        name="form2"
+        action="/setting/update/barcode"
+        method="post"
+      >
+        <table>
+          <tr>
+            <td>
+              <label for="user_keta_min">利用者バーコードの最小桁数</label>
+              <input type="text" id="user_keta_min" name="user_keta_min" />
+            </td>
+            <td>
+              <label for="user_keta_max">利用者バーコードの最大桁数</label>
+              <input type="text" id="user_keta_max" name="user_keta_max" />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="book_keta_min">図書バーコードの最小桁数</label>
+              <input type="text" id="book_keta_min" name="book_keta_min" />
+            </td>
+            <td>
+              <label for="book_keta_max">図書バーコードの最大桁数</label>
+              <input type="text" id="book_keta_max" name="book_keta_max" />
             </td>
           </tr>
         </table>

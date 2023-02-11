@@ -33,6 +33,7 @@ pub enum BibErrorResponse {
     NotAllowedToBorrow,
     InputLengthTooLong(),
     ItemAlreadyExists(u32),
+    BarcodeDigitsOutOfRange,
 }
 
 impl Display for BibErrorResponse {
@@ -193,6 +194,13 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     success: false,
                     errcode: 118,
                     message: format!("ID{}は既に登録されています", id),
+                    reason: String::new(),
+                }),
+            BibErrorResponse::BarcodeDigitsOutOfRange => HttpResponse::build(self.status_code())
+                .json(BibResponseBody {
+                    success: false,
+                    errcode: 119,
+                    message: String::from("バーコード桁数が設定範囲外です"),
                     reason: String::new(),
                 }),
             BibErrorResponse::SystemError(reason) => {

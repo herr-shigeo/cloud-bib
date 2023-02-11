@@ -236,6 +236,15 @@ pub struct RentalSetting {
     pub num_days: u32,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BarcodeSetting {
+    pub id: u32,
+    pub user_keta_min: u32,
+    pub user_keta_max: u32,
+    pub book_keta_min: u32,
+    pub book_keta_max: u32,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SystemSetting {
     pub id: u32,
@@ -428,7 +437,7 @@ impl Book {
 impl RentalSetting {
     pub fn default() -> Self {
         Self {
-            id: 0,
+            id: 1,
             num_books: 10,
             num_days: 14,
         }
@@ -436,9 +445,37 @@ impl RentalSetting {
 
     pub fn new(num_books: &str, num_days: &str) -> Result<Self, Box<dyn error::Error>> {
         let r = Self {
-            id: 0,
+            id: 1,
             num_books: atoi(num_books)?,
             num_days: atoi(num_days)?,
+        };
+        Ok(r)
+    }
+}
+
+impl BarcodeSetting {
+    pub fn default() -> Self {
+        Self {
+            id: 1,
+            user_keta_min: 0,
+            user_keta_max: 9999,
+            book_keta_min: 0,
+            book_keta_max: 9999,
+        }
+    }
+
+    pub fn new(
+        user_keta_min: &str,
+        user_keta_max: &str,
+        book_keta_min: &str,
+        book_keta_max: &str,
+    ) -> Result<Self, Box<dyn error::Error>> {
+        let r = Self {
+            id: 1,
+            user_keta_min: atoi(user_keta_min)?,
+            user_keta_max: atoi(user_keta_max)?,
+            book_keta_min: atoi(book_keta_min)?,
+            book_keta_max: atoi(book_keta_max)?,
         };
         Ok(r)
     }
@@ -447,7 +484,7 @@ impl RentalSetting {
 impl SystemSetting {
     pub fn default() -> Self {
         Self {
-            id: 0,
+            id: 1,
             max_num_transactions: 0,
             max_registered_users: 0,
             max_registered_books: 0,
@@ -698,6 +735,50 @@ impl Entity for RentalSetting {
 
     fn get_collection_name(&self) -> &str {
         "rental-setting"
+    }
+}
+
+#[async_trait]
+impl Entity for BarcodeSetting {
+    async fn insert(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let collection = self.get_collection(db);
+        collection.insert_one(self, None).await?;
+        Ok(())
+    }
+
+    async fn update(&self, db: &Database) -> Result<(), Box<dyn error::Error>> {
+        let query = doc! { "id" : self.id };
+        let update = bson::to_bson(self).unwrap();
+        let update = doc! { "$set" : update };
+        let collection = self.get_collection(db);
+        collection.update(query, update, false).await
+    }
+
+    async fn delete(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
+        panic!("Not implemented")
+    }
+
+    async fn delete_all(&self, _db: &Database) -> Result<(), Box<dyn error::Error>> {
+        panic!("Not implemented")
+    }
+
+    async fn search(&self, db: &Database) -> Result<Vec<Self>, Box<dyn error::Error>> {
+        let query = doc! { "$or" : [{"id": self.id}] };
+        let collection = self.get_collection(db);
+        collection.search(query).await
+    }
+
+    async fn search_range(
+        &self,
+        _db: &Database,
+        _start_id: u32,
+        _end_id: u32,
+    ) -> Result<Vec<Self>, Box<dyn error::Error>> {
+        panic!("Not implemented")
+    }
+
+    fn get_collection_name(&self) -> &str {
+        "barcode-setting"
     }
 }
 

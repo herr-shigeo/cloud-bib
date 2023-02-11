@@ -9,11 +9,9 @@ use lettre::{smtp::authentication::IntoCredentials, SmtpClient, Transport};
 use lettre_email::EmailBuilder;
 use log::debug;
 use mongodb::Database;
-use reqwest::Error;
 use select::document::Document;
 use select::predicate::Name;
 use shared_mongodb::ClientHolder;
-use std::io::Read;
 use uuid::Uuid;
 
 use lazy_static::lazy_static;
@@ -47,9 +45,6 @@ pub async fn fetch_book_info(isbn: &str) -> Result<Book, BibErrorResponse> {
     if !res.status().is_success() {
         return Err(BibErrorResponse::SystemError(res.status().to_string()));
     }
-
-    let dc = "http://purl.org/dc/elements/1.1/";
-    let dcndl = "http://ndl.go.jp/dcndl/terms/";
 
     let body = res.text().await.unwrap();
     let document = Document::from(body.as_str());

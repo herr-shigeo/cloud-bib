@@ -1,5 +1,6 @@
 use crate::error::*;
 use crate::item::atoi;
+use crate::item::BarcodeSetting;
 use crate::item::RentalSetting;
 use crate::item::SystemSetting;
 use crate::item::{search_item, search_items, update_item};
@@ -48,6 +49,24 @@ pub async fn process(
     let system_setting = system_setting.unwrap().clone();
     drop(setting_map);
 
+    // Verify the digits of the barcodes
+    let barcode_setting = BarcodeSetting::default();
+    let mut barcode_setting = match search_items(&db, &barcode_setting).await {
+        Ok(barcode_setting) => barcode_setting,
+        Err(e) => {
+            database::disconnect(&data);
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    };
+    if barcode_setting.len() != 1 {
+        return Err(BibErrorResponse::DataDuplicated(0));
+    }
+    let barcode_setting = barcode_setting.pop().unwrap();
+
+    check_digits_of_user_barcodes(&barcode_setting, &form.user_id)?;
+    check_digits_of_book_barcodes(&barcode_setting, &form.borrowed_book_id)?;
+    check_digits_of_book_barcodes(&barcode_setting, &form.returned_book_id)?;
+
     let mut user = User::default();
     if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {
         let (book_title, book_id) = unborrow_book(
@@ -76,20 +95,18 @@ pub async fn process(
         }
     };
 
-    let mut setting = RentalSetting::default();
-    setting.id = 1;
-    let mut setting = match search_items(&db, &setting).await {
-        Ok(setting) => setting,
+    let rental_setting = RentalSetting::default();
+    let mut rental_setting = match search_items(&db, &rental_setting).await {
+        Ok(rental_setting) => rental_setting,
         Err(e) => {
             database::disconnect(&data);
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     };
-
-    if setting.len() != 1 {
+    if rental_setting.len() != 1 {
         return Err(BibErrorResponse::DataDuplicated(0));
     }
-    let setting = setting.pop().unwrap();
+    let rental_setting = rental_setting.pop().unwrap();
 
     if form.borrowed_book_id != "" {
         // Create a DB session
@@ -105,8 +122,8 @@ pub async fn process(
             &mut user,
             &form.borrowed_book_id,
             &system_setting.time_zone,
-            setting.num_books,
-            setting.num_days.into(),
+            rental_setting.num_books,
+            rental_setting.num_days.into(),
         )
         .await;
         if ret.is_err() {
@@ -363,4 +380,39 @@ async fn unborrow_book(
     cache.unwrap().unborrow(book.id);
 
     Ok((book.title, book.id))
+}
+
+fn check_digits_of_user_barcodes(
+    setting: &BarcodeSetting,
+    data: &str,
+) -> Result<(), BibErrorResponse> {
+    return check_digits_of_barcodes(setting.user_keta_min, setting.user_keta_max, data);
+}
+
+fn check_digits_of_book_barcodes(
+    setting: &BarcodeSetting,
+    data: &str,
+) -> Result<(), BibErrorResponse> {
+    return check_digits_of_barcodes(setting.book_keta_min, setting.book_keta_max, data);
+}
+
+fn check_digits_of_barcodes(
+    keta_min: u32,
+    keta_max: u32,
+    data: &str,
+) -> Result<(), BibErrorResponse> {
+    if data == "" {
+        return Ok(());
+    }
+
+    let len: u32 = data
+        .len()
+        .try_into()
+        .map_err(|_| BibErrorResponse::InvalidArgument(data.to_owned()))?;
+
+    if keta_min <= len && len <= keta_max {
+        return Ok(());
+    } else {
+        return Err(BibErrorResponse::BarcodeDigitsOutOfRange);
+    }
 }

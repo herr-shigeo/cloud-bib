@@ -12,11 +12,15 @@ pub fn setting_factory(app: &mut web::ServiceConfig) {
     )
     .route(
         &base_path.define(String::from("/get")),
-        web::get().to(setting::get_rental_setting),
+        web::get().to(setting::get_setting),
     )
     .route(
-        &base_path.define(String::from("/update")),
+        &base_path.define(String::from("/update/rental")),
         web::post().to(setting::update_rental_setting),
+    )
+    .route(
+        &base_path.define(String::from("/update/barcode")),
+        web::post().to(setting::update_barcode_setting),
     )
     .route(
         &base_path.define(String::from("/import_user")),

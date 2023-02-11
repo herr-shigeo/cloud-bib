@@ -10,7 +10,6 @@ use crate::views::session::check_user_session;
 use crate::views::utils::fetch_book_info;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
-use futures::TryFutureExt;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use shared_mongodb::ClientHolder;

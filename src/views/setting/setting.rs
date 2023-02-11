@@ -1,6 +1,6 @@
 use crate::error::*;
-use crate::item::RentalSetting;
 use crate::item::{insert_item, search_item, search_items, update_item, Book, SystemSetting, User};
+use crate::item::{BarcodeSetting, RentalSetting};
 use crate::views::content_loader::read_csv;
 use crate::views::content_loader::read_file;
 use crate::views::reply::Reply;
@@ -37,7 +37,10 @@ pub struct Form1Data {
 
 #[derive(Deserialize, Debug)]
 pub struct Form2Data {
-    pub password: String,
+    pub user_keta_min: String,
+    pub user_keta_max: String,
+    pub book_keta_min: String,
+    pub book_keta_max: String,
 }
 
 pub async fn update_rental_setting(
@@ -70,32 +73,79 @@ pub async fn update_rental_setting(
     Ok(HttpResponse::Ok().json(reply))
 }
 
-pub async fn get_rental_setting(
+pub async fn get_setting(
     session: Session,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
 
-    let mut setting = RentalSetting::default();
-    setting.id = 1;
-    let mut setting = match search_items(&db, &setting).await {
-        Ok(setting) => setting,
+    let mut rental_setting = RentalSetting::default();
+    rental_setting.id = 1;
+    let mut rental_setting = match search_items(&db, &rental_setting).await {
+        Ok(rental_setting) => rental_setting,
         Err(e) => {
             database::disconnect(&data);
             return Err(BibErrorResponse::DataNotFound(e.to_string()));
         }
     };
-
-    if setting.len() != 1 {
+    if rental_setting.len() != 1 {
         return Err(BibErrorResponse::DataDuplicated(0));
     }
-    let setting = setting.pop().unwrap();
+    let rental_setting = rental_setting.pop().unwrap();
+
+    let mut barcode_setting = BarcodeSetting::default();
+    barcode_setting.id = 1;
+    let mut barcode_setting = match search_items(&db, &barcode_setting).await {
+        Ok(barcode_setting) => barcode_setting,
+        Err(e) => {
+            database::disconnect(&data);
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    };
+    if barcode_setting.len() != 1 {
+        return Err(BibErrorResponse::DataDuplicated(0));
+    }
+    let barcode_setting = barcode_setting.pop().unwrap();
 
     let mut reply = Reply::default();
-    reply.num_books = setting.num_books;
-    reply.num_days = setting.num_days;
+    reply.rental_setting = rental_setting;
+    reply.barcode_setting = barcode_setting;
 
+    Ok(HttpResponse::Ok().json(reply))
+}
+
+pub async fn update_barcode_setting(
+    session: Session,
+    form: web::Form<Form2Data>,
+    data: web::Data<Mutex<ClientHolder>>,
+) -> Result<HttpResponse, BibErrorResponse> {
+    debug!("{:?}", form);
+
+    check_operator_session(&session)?;
+    let db = get_db(&data, &session).await?;
+
+    let setting = match BarcodeSetting::new(
+        &form.user_keta_min,
+        &form.user_keta_max,
+        &form.book_keta_min,
+        &form.book_keta_max,
+    ) {
+        Ok(setting) => setting,
+        Err(e) => {
+            return Err(BibErrorResponse::InvalidArgument(e.to_string()));
+        }
+    };
+
+    match update_item(&db, &setting).await {
+        Ok(setting) => setting,
+        Err(e) => {
+            database::disconnect(&data);
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    }
+
+    let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
 }
 

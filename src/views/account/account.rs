@@ -1,7 +1,7 @@
 use crate::error::BibErrorResponse;
 use crate::item::{
-    delete_item, insert_item, search_items, update_item, MonthlyPlan, RentalSetting, SystemSetting,
-    SystemUser,
+    delete_item, insert_item, search_items, update_item, BarcodeSetting, MonthlyPlan,
+    RentalSetting, SystemSetting, SystemUser,
 };
 use crate::views::cache::Cache;
 use crate::views::content_loader::read_file;
@@ -124,6 +124,13 @@ pub async fn add(
     let mut rental_setting = RentalSetting::default();
     rental_setting.id = 1;
     insert_item(&db, &rental_setting)
+        .await
+        .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    // Add a barcode setting to the DB
+    let mut barcode_setting = BarcodeSetting::default();
+    barcode_setting.id = 1;
+    insert_item(&db, &barcode_setting)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
 

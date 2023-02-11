@@ -1,4 +1,4 @@
-use crate::item::{Book, BorrowedBook, TransactionItem, User};
+use crate::item::{BarcodeSetting, Book, BorrowedBook, RentalSetting, TransactionItem, User};
 use crate::views::search::search::DelayedBook;
 use serde::Serialize;
 
@@ -15,8 +15,8 @@ pub struct Reply {
     pub uname: String,
     pub email: String,
     pub plan: String,
-    pub num_books: u32,
-    pub num_days: u32,
+    pub rental_setting: RentalSetting,
+    pub barcode_setting: BarcodeSetting,
     pub returned_book_title: String,
     pub returned_book_id: u32,
     pub barcode_size: u32,
@@ -37,8 +37,8 @@ impl Reply {
             uname: String::new(),
             email: String::new(),
             plan: String::new(),
-            num_books: 0,
-            num_days: 0,
+            rental_setting: RentalSetting::default(),
+            barcode_setting: BarcodeSetting::default(),
             returned_book_title: String::new(),
             returned_book_id: 0,
             barcode_size: 0,
