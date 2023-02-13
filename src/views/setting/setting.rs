@@ -357,7 +357,7 @@ pub async fn import_book_list(
             }
             let record = &records[num_processed];
             let num_field = record.len();
-            if num_field != 19 {
+            if num_field != 20 {
                 return Err(BibErrorResponse::InvalidArgument(format!(
                     "The number of fields is {}",
                     num_field
@@ -382,8 +382,9 @@ pub async fn import_book_list(
                 &record[14], // volume_symbol
                 &record[15], // forbidden
                 &record[16], // remark
-                &record[17], // register_date
-                &record[18], // register_type
+                &record[17], // isbn
+                &record[18], // register_date
+                &record[19], // register_type
             )
             .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
             if map.insert(book.id, true).is_some() {

@@ -143,6 +143,7 @@ pub struct Form2Data {
     pub book_volume_symbol: String,
     pub book_forbidden: String,
     pub book_remark: String,
+    pub book_isbn: String,
     pub book_register_date: String,
     pub book_register_type: String,
     pub operation: String,
@@ -227,6 +228,7 @@ pub async fn book(
                 &form.book_volume_symbol,
                 &form.book_forbidden,
                 &form.book_remark,
+                &form.book_isbn,
                 &form.book_register_date,
                 &form.book_register_type,
             )

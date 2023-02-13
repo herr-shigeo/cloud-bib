@@ -94,6 +94,8 @@ pub async fn fetch_book_info(isbn: &str) -> Result<Book, BibErrorResponse> {
     book.series = series;
     book.page = page;
 
+    book.isbn = isbn.to_owned();
+
     Ok(book)
 }
 

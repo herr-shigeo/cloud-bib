@@ -221,6 +221,7 @@ pub struct Book {
     pub volume_symbol: String,
     pub forbidden: String,
     pub remark: String,
+    pub isbn: String,
     pub register_type: String,
     pub register_date: String,
 
@@ -376,6 +377,7 @@ impl Book {
             volume_symbol: String::new(),
             forbidden: String::new(),
             remark: String::new(),
+            isbn: String::new(),
             register_type: String::new(),
             register_date: String::new(),
 
@@ -403,6 +405,7 @@ impl Book {
         volume_symbol: &str,
         forbidden: &str,
         remark: &str,
+        isbn: &str,
         register_date: &str,
         register_type: &str,
     ) -> Result<Self, Box<dyn error::Error>> {
@@ -424,6 +427,7 @@ impl Book {
             volume_symbol: volume_symbol.to_string(),
             forbidden: forbidden.to_string(),
             remark: remark.to_string(),
+            isbn: isbn.to_string(),
             register_type: register_type.to_string(),
             register_date: register_date.to_string(),
             borrowed_count: 0,

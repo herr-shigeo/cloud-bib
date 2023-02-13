@@ -124,6 +124,7 @@
           document.getElementById("book_published_date").value =
             book.published_date;
           document.getElementById("book_page").value = book.page;
+          document.getElementById("book_isbn").value = book.isbn;
         } else {
           document.getElementById("book_id").value = book.id;
           document.getElementById("book_title").value = book.title;
@@ -145,6 +146,7 @@
           document.getElementById("book_volume_symbol").value =
             book.volume_symbol;
           document.getElementById("book_remark").value = book.remark;
+          document.getElementById("book_isbn").value = book.isbn;
 
           if (book.forbidden == "禁帯出")
             document.getElementById("book_forbidden_true").checked = true;
@@ -189,7 +191,7 @@
             document.getElementById("category_13").selected = true;
           else document.getElementById("category_14").selected = true;
 
-                  document.getElementById("book_update").checked = true;
+          document.getElementById("book_update").checked = true;
         }
       }
 
@@ -736,6 +738,12 @@
                 />
               </td>
               <td>
+                <label for="book_isbn"><b>ISBN</b></label>
+                <input type="text" name="book_isbn" id="book_isbn" />
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <label for="book_register_date"><b>登録日</b></label>
                 <input
                   type="text"
@@ -744,8 +752,6 @@
                   placeholder="半角 yyyy/mm/dd"
                 />
               </td>
-            </tr>
-            <tr>
               <td>
                 <b>登録区分</b>
                 <input
@@ -778,7 +784,6 @@
                 />
                 <label for="book_other">その他</label>
               </td>
-              <td></td>
             </tr>
           </table>
 
