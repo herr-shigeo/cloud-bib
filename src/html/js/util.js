@@ -25,7 +25,7 @@ function handleError(data) {
   return true;
 }
 
-function postPasswordForm(formId, passwordId, configmPasswordId, minLength) {
+function postPasswordForm(e, formId, passwordId, configmPasswordId, minLength) {
   e.preventDefault();
 
   if (!jQuery || !jQuery.fn.ajaxForm) {

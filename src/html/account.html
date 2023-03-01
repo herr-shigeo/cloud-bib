@@ -32,6 +32,7 @@
         $("#form2").ajaxForm(options);
         $("#form3").ajaxForm(options);
         $("#form4").ajaxForm(options);
+        $("#form5").ajaxForm(options);
 
         var options2 = {
           dataType: "json",
@@ -163,8 +164,8 @@
         <button class="accordion">利用プラン</button>
         <div class="panel">
           <form
-            id="form5"
-            name="form5"
+            id="form2"
+            name="form2"
             onsubmit="submitNewPlan(); return false;"
           >
             <label for="plan"><b>契約中の利用プラン</b></label>
@@ -225,7 +226,7 @@
             name="form3"
             action="/account/admin_password"
             method="post"
-            onsubmit="return postPasswordForm('form3', 'password', 'confirm_password', 8)"
+            onsubmit="return postPasswordForm(event, 'form3', 'password', 'confirm_password', 8)"
           >
             <input type="hidden" name="uname" id="admin_uname" />
             <label for="password"><b>管理者パスワード</b></label>
@@ -256,13 +257,13 @@
             name="form4"
             action="/account/operator_password"
             method="post"
-            onsubmit="return postPasswordForm('form4', 'operator_password', 'confirm_operator_password', 8)"
+            onsubmit="return postPasswordForm(event, 'form4', 'operator_password', 'confirm_operator_password', 8)"
           >
             <input type="hidden" name="uname" id="operator_uname" />
             <label for="operator_password"><b>司書パスワード</b></label>
             <input
               type="password"
-              name="operator_password"
+              name="password"
               id="operator_password"
               required
             />
@@ -274,8 +275,8 @@
             <label for="password"><b>司書パスワード (確認用)</b></label>
             <input
               type="password"
+              name="confirm_password"
               id="confirm_operator_password"
-              name="confirm_operator_password"
               required
             />
             <button type="submit" class="submitbtn">
@@ -292,13 +293,13 @@
             name="form5"
             action="/account/user_password"
             method="post"
-            onsubmit="return postPasswordForm('form5', 'user_password', 'confirm_user_password', 8)"
+            onsubmit="return postPasswordForm(event, 'form5', 'user_password', 'confirm_user_password', 8)"
           >
             <input type="hidden" name="uname" id="user_uname" />
             <label for="user_password"><b>利用者パスワード</b></label>
             <input
               type="password"
-              name="user_password"
+              name="password"
               id="user_password"
               required
             />
@@ -313,7 +314,7 @@
             <input
               type="password"
               id="confirm_user_password"
-              name="confirm_user_password"
+              name="confirm_password"
               required
             />
             <button type="submit" class="submitbtn">
