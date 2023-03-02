@@ -12,9 +12,9 @@ use mongodb::Database;
 use select::document::Document;
 use select::predicate::Name;
 use shared_mongodb::ClientHolder;
-use uuid::Uuid;
 
 use lazy_static::lazy_static;
+use uuid::Uuid;
 
 use crate::{
     error::BibErrorResponse,
