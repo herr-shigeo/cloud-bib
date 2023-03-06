@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
-pub struct FormData {
+pub struct GetBookForm {
     pub id: String,
     pub title: String,
     pub kana: String,
@@ -26,7 +26,7 @@ pub struct FormData {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Form2Data {
+pub struct GetBookByISBNForm {
     pub isbn: String,
 }
 
@@ -37,7 +37,7 @@ pub struct BookList {
 
 pub async fn search_isbn(
     _session: Session,
-    form: web::Query<Form2Data>,
+    form: web::Query<GetBookByISBNForm>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let isbn = form.isbn.clone();
 
@@ -58,7 +58,7 @@ pub async fn search_isbn(
 
 pub async fn search_book(
     session: Session,
-    form: web::Query<FormData>,
+    form: web::Query<GetBookForm>,
     data: web::Data<Mutex<ClientHolder>>,
     cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {

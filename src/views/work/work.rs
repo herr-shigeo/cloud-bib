@@ -22,7 +22,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
-pub struct FormData {
+pub struct ProcessWorkForm {
     pub user_id: String,
     pub borrowed_book_id: String,
     pub returned_book_id: String,
@@ -30,7 +30,7 @@ pub struct FormData {
 
 pub async fn process(
     session: Session,
-    form: web::Form<FormData>,
+    form: web::Json<ProcessWorkForm>,
     data: web::Data<Mutex<ClientHolder>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
     cache_map: web::Data<Mutex<HashMap<String, Cache>>>,

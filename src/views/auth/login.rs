@@ -18,7 +18,7 @@ lazy_static! {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormData {
+pub struct LoginForm {
     pub uname: String,
     pub password: String,
     pub user_category: String,
@@ -27,7 +27,7 @@ pub struct FormData {
 
 pub async fn login(
     session: Session,
-    form: web::Form<FormData>,
+    form: web::Json<LoginForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;

@@ -18,7 +18,7 @@ pub async fn load(_session: Session) -> HttpResponse {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormUser {
+pub struct GenUserBarcodeGenPageForm {
     pub user_id_start: String,
     pub user_id_end: String,
     pub barcode_type: String,
@@ -29,14 +29,14 @@ pub struct FormUser {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormUser2 {
+pub struct GenUserBarcodeForm {
     pub user_id_start: String,
     pub user_id_end: String,
     pub barcode_size: String,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormBook {
+pub struct GenBookBarcodeGenPageForm {
     pub book_id_start: String,
     pub book_id_end: String,
     pub barcode_type: String,
@@ -47,13 +47,13 @@ pub struct FormBook {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormBook2 {
+pub struct GenBookBarcodeForm {
     pub book_id_start: String,
     pub book_id_end: String,
     pub barcode_size: String,
 }
 
-pub async fn get_user_page(form: web::Form<FormUser>) -> HttpResponse {
+pub async fn get_user_page(form: web::Query<GenUserBarcodeGenPageForm>) -> HttpResponse {
     let mut html_data = read_file("src/html/barcode/user.html").unwrap();
     html_data = html_data
         .replace("{{USER_ID_START}}", &form.user_id_start)
@@ -71,7 +71,7 @@ pub async fn get_user_page(form: web::Form<FormUser>) -> HttpResponse {
 
 pub async fn generate_user_barocde(
     session: Session,
-    form: web::Form<FormUser2>,
+    form: web::Json<GenUserBarcodeForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_operator_session(&session)?;
@@ -97,7 +97,7 @@ pub async fn generate_user_barocde(
     Ok(HttpResponse::Ok().json(reply))
 }
 
-pub async fn get_book_page(form: web::Form<FormBook>) -> HttpResponse {
+pub async fn get_book_page(form: web::Query<GenBookBarcodeGenPageForm>) -> HttpResponse {
     let mut html_data = read_file("src/html/barcode/book.html").unwrap();
     html_data = html_data
         .replace("{{BOOK_ID_START}}", &form.book_id_start)
@@ -115,7 +115,7 @@ pub async fn get_book_page(form: web::Form<FormBook>) -> HttpResponse {
 
 pub async fn generate_book_barcode(
     session: Session,
-    form: web::Form<FormBook2>,
+    form: web::Json<GenBookBarcodeForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_operator_session(&session)?;

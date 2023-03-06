@@ -7,16 +7,8 @@ use crate::views::reply::Reply;
 use crate::views::session::*;
 use actix_session::*;
 use actix_web::{web, HttpResponse, Result};
-use serde::Deserialize;
 use shared_mongodb::{database, ClientHolder};
 use std::sync::Mutex;
-
-#[derive(Deserialize, Debug)]
-pub struct FormData2 {
-    pub user_id: String,
-    pub borrowed_book_id: String,
-    pub returned_book_id: String,
-}
 
 pub async fn load_home(session: Session) -> HttpResponse {
     let user_id = get_user_id(&session).unwrap_or(0);

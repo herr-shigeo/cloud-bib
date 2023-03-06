@@ -13,7 +13,7 @@ use shared_mongodb::ClientHolder;
 use std::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
-pub struct FormData {
+pub struct GetUserForm {
     pub id: String,
     pub name: String,
     pub kana: String,
@@ -22,7 +22,7 @@ pub struct FormData {
 
 pub async fn search_user(
     session: Session,
-    form: web::Query<FormData>,
+    form: web::Query<GetUserForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);

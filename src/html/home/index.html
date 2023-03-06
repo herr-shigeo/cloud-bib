@@ -15,70 +15,27 @@
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
       crossorigin="anonymous"
     ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
-      integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"
-    ></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
-      function get_link(data) {
-        $("#form").submit();
+      function submitSearchUser() {
+        const url = constructUrlFromForm("search_user_form", "/search/user");
+        fetch(url, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            processSearchUser(data);
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
       }
 
-      $(document).ready(function () {
-        var options = {
-          dataType: "json",
-          success: processJson,
-        };
-        $("#form").ajaxForm(options);
-        $("#form_user").ajaxForm(options);
-
-        var options2 = {
-          dataType: "json",
-          success: processReturn,
-        };
-        $("#form_unborrow").ajaxForm(options2);
-
-        document.getElementById("user_id").focus();
-      });
-
-      function processReturn(data) {
-        document.getElementById("form").reset();
-
-        if (handleAuthError(data)) {
-          return;
-        }
-
-        var msg;
-        if (!data["success"]) {
-          msg =
-            '<b style="color:red"><font size="+2">返却できません</font></b><br><font size="-1">(' +
-            data["message"] +
-            ")</font>";
-        } else {
-          var user = data["user"];
-          var name = user["name"];
-          var id = user["id"];
-          var book_title = data["returned_book_title"];
-          var book_id = data["returned_book_id"];
-          msg =
-            '<font size="+2">' +
-            name +
-            "</font> (" +
-            id +
-            ') さんが <font size="+2" style="color:navy">' +
-            book_title +
-            "</font> (" +
-            book_id +
-            ") を返却しました";
-        }
-        setStatus(msg);
-        document.getElementById("form_unborrow").reset();
-      }
-
-      function processJson(data) {
-        document.getElementById("form_user").reset();
+      function processSearchUser(data) {
+        document.getElementById("search_user_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -112,6 +69,39 @@
         });
       }
 
+      function processReturnedBook(data) {
+        document.getElementById("process_work_form").reset();
+
+        if (handleAuthError(data)) {
+          return;
+        }
+
+        var msg;
+        if (!data["success"]) {
+          msg =
+            '<b style="color:red"><font size="+2">返却できません</font></b><br><font size="-1">(' +
+            data["message"] +
+            ")</font>";
+        } else {
+          var user = data["user"];
+          var name = user["name"];
+          var id = user["id"];
+          var book_title = data["returned_book_title"];
+          var book_id = data["returned_book_id"];
+          msg =
+            '<font size="+2">' +
+            name +
+            "</font> (" +
+            id +
+            ') さんが <font size="+2" style="color:navy">' +
+            book_title +
+            "</font> (" +
+            book_id +
+            ") を返却しました";
+        }
+        setStatus(msg);
+      }
+
       function setStatus(msg) {
         $(".status p").html(msg);
       }
@@ -119,10 +109,6 @@
   </head>
 
   <body>
-    <form id="form" name="form" action="/auth/logout" method="post">
-      <input type="submit" id="invisible_logout" style="display: none" />
-    </form>
-
     <div class="topnav">
       <a class="active" href="/home/">ホーム</a>
       <a href="/search/main">図書検索</a>
@@ -132,7 +118,7 @@
       <a href="/history/main">貸出履歴</a>
       <a href="/barcode/main">バーコード作成</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();">ログアウト</a>
       </div>
     </div>
 
@@ -142,7 +128,7 @@
     <div style="padding-left: 6px">
       <p>貸出処理をするには利用者IDを入力して下さい</p>
       <form
-        name="user_select"
+        name="select_user_form"
         action="/user/main"
         method="get"
         enctype="application/x-www-form-urlencoded"
@@ -163,11 +149,9 @@
       <div class="panel">
         <p>キーワードを入力後にEnterを押して検索</p>
         <form
-          id="form_user"
-          name="form_user"
-          action="/search/user"
-          method="get"
-          enctype="application/x-www-form-urlencoded"
+          id="search_user_form"
+          name="search_user_form"
+          onsubmit="submitSearchUser(); return false;"
         >
           <table>
             <tr>
@@ -226,11 +210,9 @@
       <hr />
       <p>返却処理をするには図書IDを入力して下さい</p>
       <form
-        id="form_unborrow"
-        name="form_unborrow"
-        action="/work/process"
-        method="post"
-        enctype="application/x-www-form-urlencoded"
+        id="process_work_form"
+        name="process_work_form"
+        onsubmit="fetchJsonData(event, 'process_work_form', 'POST', '/work/process', null, processReturnedBook); return false;"
       >
         <input type="hidden" name="user_id" value="" />
         <input type="hidden" name="borrowed_book_id" value="" />

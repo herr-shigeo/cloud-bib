@@ -16,11 +16,11 @@ pub fn setting_factory(app: &mut web::ServiceConfig) {
     )
     .route(
         &base_path.define(String::from("/update/rental")),
-        web::post().to(setting::update_rental_setting),
+        web::put().to(setting::update_rental_setting),
     )
     .route(
         &base_path.define(String::from("/update/barcode")),
-        web::post().to(setting::update_barcode_setting),
+        web::put().to(setting::update_barcode_setting),
     )
     .route(
         &base_path.define(String::from("/import_user")),

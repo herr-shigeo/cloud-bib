@@ -11,30 +11,14 @@
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
       crossorigin="anonymous"
     ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
-      integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"
-    ></script>
-
     <script>
-      function get_link(data) {
-        $("#form").submit();
-      }
-
-      $(document).ready(function () {
-        var options = {
-          dataType: "json",
-          success: processJson,
-        };
-        $("#form").ajaxForm(options);
-        $("#form1").ajaxForm(options);
+      document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("invisible_submit").click();
         document.getElementById("borrowed_book_id").focus();
       });
 
-      function processJson(data) {
-        document.getElementById("form1").reset();
+      function processWork(data) {
+        document.getElementById("process_work_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -118,10 +102,6 @@
   </head>
 
   <body>
-    <form id="form" name="form" action="/auth/logout" method="post">
-      <input type="submit" id="invisible_logout" style="display: none" />
-    </form>
-
     <div class="topnav">
       <a class="active" href="/home/">ホーム</a>
       <a href="/search/main">図書検索</a>
@@ -131,17 +111,15 @@
       <a href="/history/main">貸出履歴</a>
       <a href="/barcode/main">バーコード作成</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();">ログアウト</a>
       </div>
     </div>
 
     <div class="container">
       <form
-        id="form1"
-        name="form1"
-        action="/work/process"
-        method="post"
-        enctype="application/x-www-form-urlencoded"
+        id="process_work_form"
+        name="process_work_form"
+        onsubmit="fetchJsonData(event, 'process_work_form', 'POST', '/work/process', null, processWork); return false;"
       >
         <input type="hidden" name="user_id" id="user_id" value="{{USER_ID}}" />
         <table>

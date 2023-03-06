@@ -19,37 +19,10 @@
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
       crossorigin="anonymous"
     ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
-      integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"
-    ></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
-      function get_link(data) {
-        $("#form").submit();
-      }
-
-      $(document).ready(function () {
-        var options = {
-          dataType: "json",
-          success: processJson,
-        };
-        $("#form").ajaxForm(options);
-
-        var options1 = {
-          dataType: "json",
-          success: processDelayedList,
-        };
-        $("#form_delayed").ajaxForm(options1);
-
-        var options3 = {
-          dataType: "json",
-          success: processBookList,
-        };
-        $("#form_book").ajaxForm(options3);
-
-        $("#delayed_list_table").DataTable({
+      document.addEventListener("DOMContentLoaded", function () {
+        $("#delayedBookListTable").DataTable({
           columns: [
             { data: "user_id" },
             { data: "user_name" },
@@ -61,7 +34,7 @@
           ],
         });
 
-        $("#book_list_table").DataTable({
+        $("#bookListTable").DataTable({
           columns: [
             { data: "id" },
             { data: "title" },
@@ -88,15 +61,28 @@
         });
       });
 
-      function processJson(data) {
-        document.getElementById("form").reset();
-        if (handleAuthError(data)) {
-          return;
-        }
+      function submitSearchDelayedBook() {
+        const url = constructUrlFromForm(
+          "get_delayed_book_form",
+          "/search/delayed"
+        );
+        fetch(url, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            processDelayedBook(data);
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
       }
 
-      function processDelayedList(data) {
-        document.getElementById("form_delayed").reset();
+      function processDelayedBook(data) {
+        document.getElementById("get_delayed_book_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -106,7 +92,7 @@
         }
 
         var dataSet = data["delayed_list"];
-        var datatable = $("#delayed_list_table").DataTable();
+        var datatable = $("#delayedBookListTable").DataTable();
         $.each(dataSet, function (i, d) {
           var dt = d["book"].borrowed_date.split(" ");
           d["book"].borrowed_date =
@@ -126,7 +112,7 @@
 
         datatable.clear();
         datatable.destroy();
-        $("#delayed_list_table").DataTable({
+        $("#delayedBookListTable").DataTable({
           scrollX: false,
           autoWidth: false,
           data: dataSet,
@@ -142,8 +128,25 @@
         });
       }
 
-      function processBookList(data) {
-        document.getElementById("form_book").reset();
+      function submitSearchBook() {
+        const url = constructUrlFromForm("get_book_form", "/search/book");
+        fetch(url, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            processBook(data);
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
+      }
+
+      function processBook(data) {
+        document.getElementById("get_book_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -167,10 +170,10 @@
           }
         });
 
-        var datatable = $("#book_list_table").DataTable();
+        var datatable = $("#bookListTable").DataTable();
         datatable.clear();
         datatable.destroy();
-        $("#book_list_table").DataTable({
+        $("#bookListTable").DataTable({
           scrollX: false,
           autoWidth: false,
           data: dataSet,
@@ -209,10 +212,6 @@
   </head>
 
   <body>
-    <form id="form" name="form" action="/auth/logout" method="post">
-      <input type="submit" id="invisible_logout" style="display: none" />
-    </form>
-
     <div class="topnav">
       <a class="active" href="/home/">ホーム</a>
       <a href="/search/main">図書検索</a>
@@ -222,7 +221,9 @@
       <a href="/history/main">貸出履歴</a>
       <a href="/barcode/main">バーコード作成</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();"
+          >ログアウト</a
+        >
       </div>
     </div>
 
@@ -232,11 +233,9 @@
     <button class="accordion">図書</button>
     <div class="panel">
       <form
-        id="form_book"
-        name="form_book"
-        action="/search/book"
-        method="get"
-        enctype="application/x-www-form-urlencoded"
+        id="get_book_form"
+        name="get_book_form"
+        onsubmit="submitSearchBook(); return false;"
       >
         <table>
           <tr>
@@ -276,7 +275,7 @@
       </form>
       <h3>検索結果</h3>
       <div style="overflow-x: auto">
-        <table id="book_list_table" class="display compact nowrap">
+        <table id="bookListTable" class="display compact nowrap">
           <thead>
             <tr>
               <th>図書ID</th>
@@ -310,17 +309,15 @@
     <div class="panel">
       <p>返却期限が過ぎている図書を検索</p>
       <form
-        id="form_delayed"
-        name="form1"
-        action="/search/delayed"
-        method="get"
-        enctype="application/x-www-form-urlencoded"
+        id="get_delayed_book_form"
+        name="get_delayed_book_form"
+        onsubmit="submitSearchDelayedBook(); return false;"
       >
         <button type="submit">検索</button>
       </form>
       <h3>検索結果</h3>
       <div style="overflow-x: auto">
-        <table id="delayed_list_table" class="display compact nowrap">
+        <table id="delayedBookListTable" class="display compact nowrap">
           <thead>
             <tr>
               <th>利用者ID</th>

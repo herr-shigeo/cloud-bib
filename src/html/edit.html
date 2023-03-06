@@ -12,58 +12,26 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://www.cloudbib.net/js/jquery.autoKana.js"></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
-      integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"
-    ></script>
 
     <script>
-      function get_link(data) {
-        $("#form").submit();
+      function submitSearch(formId, url, callback) {
+        const newUrl = constructUrlFromForm(formId, url);
+        fetch(newUrl, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            callback(data);
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
       }
 
-      $(document).ready(function () {
-        var options = {
-          dataType: "json",
-          success: processJson,
-        };
-        $("#form").ajaxForm(options);
-
-        var options1 = {
-          dataType: "json",
-          success: processUserList,
-        };
-        $("#form_user_list").ajaxForm(options1);
-
-        var options2 = {
-          dataType: "json",
-          success: processUserUpdate,
-        };
-        $("#form_user_update").ajaxForm(options2);
-
-        var options3 = {
-          dataType: "json",
-          success: processBookList,
-        };
-        $("#form_book_list").ajaxForm(options3);
-        $("#form_isbn").ajaxForm(options3);
-
-        var options4 = {
-          dataType: "json",
-          success: processBookUpdate,
-        };
-        $("#form_book_update").ajaxForm(options4);
-
-        var options5 = {
-          dataType: "json",
-          success: processRegister,
-          error: processError,
-          timeout: 0,
-        };
-        $("#form_user_register").ajaxForm(options5);
-        $("#form_book_register").ajaxForm(options5);
-
+      document.addEventListener("DOMContentLoaded", function () {
         $(function () {
           $.fn.autoKana('input[name="book_title"]', 'input[name="book_kana"]', {
             katakana: true,
@@ -73,12 +41,8 @@
         setCurrentDate();
       });
 
-      function processJson(data) {
-        handleAuthError(data);
-      }
-
-      function processUserList(data) {
-        document.getElementById("form_user_list").reset();
+      function processUserInfo(data) {
+        document.getElementById("get_user_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -104,9 +68,9 @@
         else document.getElementById("user_other").checked = true;
       }
 
-      function processBookList(data) {
-        document.getElementById("form_book_list").reset();
-        document.getElementById("form_isbn").reset();
+      function processBookInfo(data) {
+        document.getElementById("get_book_form").reset();
+        document.getElementById("get_book_by_isbn_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -195,52 +159,6 @@
         }
       }
 
-      function processUserUpdate(data) {
-        document.getElementById("form_user_update").reset();
-        document.getElementById("user_id_search").focus();
-
-        if (handleAuthError(data)) {
-          return;
-        }
-        if (handleError(data)) {
-          return;
-        }
-
-        const operation = data["operation"];
-        if (operation == "insert") {
-          alert("データを登録しました");
-        } else if (operation == "update") {
-          alert("データを更新しました");
-        } else if (operation == "delete") {
-          alert("データを削除しました");
-        }
-
-        setCurrentDate();
-      }
-
-      function processBookUpdate(data) {
-        document.getElementById("form_book_update").reset();
-        document.getElementById("book_id_search").focus();
-
-        if (handleAuthError(data)) {
-          return;
-        }
-        if (handleError(data)) {
-          return;
-        }
-
-        const operation = data["operation"];
-        if (operation == "insert") {
-          alert("データを登録しました");
-        } else if (operation == "update") {
-          alert("データを更新しました");
-        } else if (operation == "delete") {
-          alert("データを削除しました");
-        }
-
-        setCurrentDate();
-      }
-
       function setCurrentDate() {
         const date = new Date();
         const str_date = date
@@ -252,34 +170,36 @@
         document.getElementById("book_register_date").value = str_date;
       }
 
-      function processRegister(data) {
-        setProgressBar(false);
-        if (handleAuthError(data)) {
-          return;
-        }
-        if (handleError(data)) {
-          return;
-        }
-        alert("登録しました");
-      }
+      function editData(event, formId, url) {
+        const form = document.getElementById(formId);
+        const method = form.elements["_method"].value;
+        var okMessage = "";
 
-      function processError(jqXHR, exception) {
-        setProgressBar(false);
-        if (jqXHR.status === 0) {
-          return "Not connected.\nPlease verify your network connection.";
-        } else if (jqXHR.status == 404) {
-          return "The requested page not found. [404]";
-        } else if (jqXHR.status == 500) {
-          return "Internal Server Error [500].";
-        } else if (exception === "parsererror") {
-          return "Requested JSON parse failed.";
-        } else if (exception === "timeout") {
-          return "Time out error.";
-        } else if (exception === "abort") {
-          return "Ajax request aborted.";
-        } else {
-          return "Uncaught Error.\n" + jqXHR.responseText;
+        switch (method) {
+          case "POST":
+            okMessage = "データを登録しました";
+            break;
+          case "PUT":
+            okMessage = "データを更新しました";
+            break;
+          case "DELETE":
+            okMessage = "データを削除しました";
+            break;
+          default:
+            console.error("Unsupported method");
+            return;
         }
+
+        fetchJsonData(event, formId, method, url, okMessage, null);
+
+        document.getElementById("update_user_form").reset();
+        document.getElementById("user_id_search").focus();
+        document.getElementById("update_book_form").reset();
+        document.getElementById("book_id_search").focus();
+
+        setCurrentDate();
+
+        return false;
       }
 
       var g_processing = false;
@@ -319,10 +239,6 @@
   </head>
 
   <body>
-    <form id="form" name="form" action="/auth/logout" method="post">
-      <input type="submit" id="invisible_logout" style="display: none" />
-    </form>
-
     <div class="topnav">
       <a class="active" href="/home/">ホーム</a>
       <a href="/search/main">図書検索</a>
@@ -332,7 +248,7 @@
       <a href="/history/main">貸出履歴</a>
       <a href="/barcode/main">バーコード作成</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();">ログアウト</a>
       </div>
     </div>
 
@@ -342,11 +258,9 @@
     <div class="panel">
       <p>既存データを修正する場合は、利用者IDを入力後にEnter</p>
       <form
-        id="form_user_list"
-        name="form_user_list"
-        action="/search/user"
-        method="get"
-        enctype="application/x-www-form-urlencoded"
+        id="get_user_form"
+        name="get_user_form"
+        onsubmit="submitSearch('get_user_form', '/search/user', processUserInfo); return false;"
       >
         <label for="value"><b>利用者ID</b></label>
         <input
@@ -360,10 +274,9 @@
         <input type="hidden" name="category" value="" />
       </form>
       <form
-        id="form_user_update"
-        name="form_user_update"
-        action="/edit/user"
-        method="post"
+        id="update_user_form"
+        name="update_user_form"
+        onsubmit="editData(event, 'update_user_form', '/edit/user'); return false;"
       >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>
@@ -459,24 +372,19 @@
           <div class="container">
             <input
               type="radio"
-              name="operation"
+              name="_method"
               id="user_insert"
-              value="insert"
+              value="POST"
               checked
             />
             <label for="user_insert"><b>新規登録</b></label>
-            <input
-              type="radio"
-              name="operation"
-              id="user_update"
-              value="update"
-            />
+            <input type="radio" name="_method" id="user_update" value="PUT" />
             <label for="user_update"><b>更新</b></label>
             <input
               type="radio"
-              name="operation"
+              name="_method"
               id="user_delete"
-              value="delete"
+              value="DELETE"
             />
             <label for="user_delete"><b>削除</b></label>
             <br /><br />
@@ -493,11 +401,9 @@
           <td>
             <p>既存データを修正する場合は、図書IDを入力後にEnter</p>
             <form
-              id="form_book_list"
-              name="form_book_list"
-              action="/search/book"
-              method="get"
-              enctype="application/x-www-form-urlencoded"
+              id="get_book_form"
+              name="get_book_form"
+              onsubmit="submitSearch('get_book_form', '/search/book', processBookInfo); return false;"
             >
               <label for="value"><b>図書ID</b></label>
               <input
@@ -516,11 +422,9 @@
           <td>
             <p>ISBNコードからデータを取得する場合は、ISBNを入力後にEnter</p>
             <form
-              id="form_isbn"
-              name="form_isbn"
-              action="/search/isbn"
-              method="get"
-              enctype="application/x-www-form-urlencoded"
+              id="get_book_by_isbn_form"
+              name="get_book_by_isbn_form"
+              onsubmit="submitSearch('get_book_by_isbn_form', '/search/isbn', processBookInfo); return false;"
             >
               <label for="value"><b>ISBN</b></label>
               <input
@@ -535,10 +439,9 @@
       </table>
 
       <form
-        id="form_book_update"
-        name="form_book_update"
-        action="/edit/book"
-        method="post"
+        id="update_book_form"
+        name="update_book_form"
+        onsubmit="editData(event, 'update_book_form', '/edit/book'); return false;"
       >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>
@@ -790,24 +693,19 @@
           <div class="container">
             <input
               type="radio"
-              name="operation"
+              name="_method"
               id="book_insert"
-              value="insert"
+              value="POST"
               checked
             />
             <label for="book_insert"><b>新規登録</b></label>
-            <input
-              type="radio"
-              name="operation"
-              id="book_update"
-              value="update"
-            />
+            <input type="radio" name="_method" id="book_update" value="PUT" />
             <label for="book_update"><b>更新</b></label>
             <input
               type="radio"
-              name="operation"
+              name="_method"
               id="book_delete"
-              value="delete"
+              value="DELETE"
             />
             <label for="book_delete"><b>削除</b></label>
             <br /><br />
@@ -820,11 +718,9 @@
     <button class="accordion">一括登録</button>
     <div class="panel">
       <form
-        id="form_user_register"
-        name="form_user_register"
-        action="/setting/import_user"
-        method="post"
-        enctype="multipart/form-data"
+        id="register_users_by_csv_form"
+        name="register_users_by_csv_form"
+        onsubmit="fetchJsonData(event, 'register_users_by_csv_form', 'POST', '/setting/import_user', '登録しました', null); return false;"
       >
         <input
           type="file"
@@ -839,11 +735,9 @@
       </form>
 
       <form
-        id="form_book_register"
-        name="form_book_register"
-        action="/setting/import_book"
-        method="post"
-        enctype="multipart/form-data"
+        id="register_books_by_csv_form"
+        name="register_books_by_csv_form"
+        onsubmit="fetchJsonData(event, 'register_books_by_csv_form', 'POST', '/setting/import_book', '登録しました', null); return false;"
       >
         <input
           type="file"
