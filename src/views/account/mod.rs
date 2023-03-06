@@ -40,18 +40,18 @@ pub fn account_factory(app: &mut web::ServiceConfig) {
     )
     .route(
         &base_path.define(String::from("/do_reset")),
-        web::post().to(account::do_reset),
+        web::put().to(account::do_reset),
     )
     .route(
         &base_path.define(String::from("/admin_password")),
-        web::post().to(account::admin_password),
+        web::put().to(account::admin_password),
     )
     .route(
         &base_path.define(String::from("/operator_password")),
-        web::post().to(account::operator_password),
+        web::put().to(account::operator_password),
     )
     .route(
         &base_path.define(String::from("/user_password")),
-        web::post().to(account::user_password),
+        web::put().to(account::user_password),
     );
 }

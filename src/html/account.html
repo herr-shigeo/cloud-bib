@@ -28,11 +28,7 @@
           success: processJson,
         };
         $("#logoutForm").ajaxForm(options);
-        $("#form1").ajaxForm(options);
         $("#form2").ajaxForm(options);
-        $("#form3").ajaxForm(options);
-        $("#form4").ajaxForm(options);
-        $("#form5").ajaxForm(options);
 
         var options2 = {
           dataType: "json",
@@ -191,7 +187,11 @@
 
         <button class="accordion">ユーザー名・メールアドレス</button>
         <div class="panel">
-          <form id="form1" name="form1" action="/account/update" method="post">
+          <form
+            id="form1"
+            name="form1"
+            onsubmit="return fetchFormData(event, 'form1', 'POST', '/account/update', '変更しました')"
+          >
             <label for="uname"><b>ユーザー名</b></label>
             <input type="text" readonly name="uname" id="uname" /><br />
             <font size="-1" style="color: gray">ユーザ名は変更できません。</font
@@ -224,9 +224,7 @@
           <form
             id="form3"
             name="form3"
-            action="/account/admin_password"
-            method="post"
-            onsubmit="return postPasswordForm(event, 'form3', 'password', 'confirm_password', 8)"
+            onsubmit="return updatePassword(event, '/account/admin_password', 'form3', 'admin_uname', 'password', 'confirm_password', 8)"
           >
             <input type="hidden" name="uname" id="admin_uname" />
             <label for="password"><b>管理者パスワード</b></label>
@@ -255,9 +253,7 @@
           <form
             id="form4"
             name="form4"
-            action="/account/operator_password"
-            method="post"
-            onsubmit="return postPasswordForm(event, 'form4', 'operator_password', 'confirm_operator_password', 8)"
+            onsubmit="return updatePassword(event, '/account/operator_password', 'form4', 'operator_uname', 'password', 'confirm_password', 8)"
           >
             <input type="hidden" name="uname" id="operator_uname" />
             <label for="operator_password"><b>司書パスワード</b></label>
@@ -291,9 +287,7 @@
           <form
             id="form5"
             name="form5"
-            action="/account/user_password"
-            method="post"
-            onsubmit="return postPasswordForm(event, 'form5', 'user_password', 'confirm_user_password', 8)"
+            onsubmit="return updatePassword(event, '/account/user_password', 'form5', 'user_uname', 'password', 'confirm_password', 8)"
           >
             <input type="hidden" name="uname" id="user_uname" />
             <label for="user_password"><b>利用者パスワード</b></label>

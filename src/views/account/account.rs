@@ -275,17 +275,16 @@ pub async fn get(
 
 pub async fn admin_password(
     session: Session,
-    form: web::Form<FormData3>,
+    form: web::Json<FormData3>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
-    log::debug!("{:?}", form);
     check_admin_session(&session)?;
     update_password(&data, &form.uname, "admin", &form.password).await
 }
 
 pub async fn operator_password(
     session: Session,
-    form: web::Form<FormData3>,
+    form: web::Json<FormData3>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
@@ -294,7 +293,7 @@ pub async fn operator_password(
 
 pub async fn user_password(
     session: Session,
-    form: web::Form<FormData3>,
+    form: web::Json<FormData3>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
@@ -345,11 +344,14 @@ pub async fn prepare_reset(
 }
 
 pub async fn do_reset(
-    form: web::Form<FormData3>,
+    form: web::Json<FormData3>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     update_password(&data, &form.uname, "admin", &form.password).await?;
-    return Err(BibErrorResponse::NotAuthorized);
+
+    let mut reply = Reply::default();
+    reply.path_to_home = "/login/".to_owned();
+    Ok(HttpResponse::Ok().json(reply))
 }
 
 fn send_email_to_reset(to: &str, token: &str) -> Result<(), BibErrorResponse> {
