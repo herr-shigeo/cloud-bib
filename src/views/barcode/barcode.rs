@@ -53,7 +53,7 @@ pub struct FormBook2 {
     pub barcode_size: String,
 }
 
-pub async fn get_user_page(form: web::Form<FormUser>) -> HttpResponse {
+pub async fn get_user_page(form: web::Query<FormUser>) -> HttpResponse {
     let mut html_data = read_file("src/html/barcode/user.html").unwrap();
     html_data = html_data
         .replace("{{USER_ID_START}}", &form.user_id_start)
@@ -97,7 +97,7 @@ pub async fn generate_user_barocde(
     Ok(HttpResponse::Ok().json(reply))
 }
 
-pub async fn get_book_page(form: web::Form<FormBook>) -> HttpResponse {
+pub async fn get_book_page(form: web::Query<FormBook>) -> HttpResponse {
     let mut html_data = read_file("src/html/barcode/book.html").unwrap();
     html_data = html_data
         .replace("{{BOOK_ID_START}}", &form.book_id_start)
