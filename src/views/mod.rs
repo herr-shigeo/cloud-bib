@@ -10,7 +10,6 @@ mod db_helper;
 mod edit;
 mod export;
 mod history;
-mod maintain;
 mod manual;
 mod member;
 mod path;
@@ -93,7 +92,6 @@ pub fn views_factory(app: &mut web::ServiceConfig) {
     export::export_factory(app);
     member::member_factory(app);
     edit::edit_factory(app);
-    maintain::maintain_factory(app);
     account::account_factory(app);
     manual::manual_factory(app);
     barcode::barcode_factory(app);
