@@ -19,15 +19,15 @@
 
     <script>
       $(document).ready(function () {
-        var options = {
+        var loginOptions = {
           dataType: "json",
-          success: processJson,
+          success: processLogin,
         };
-        $("#form").ajaxForm(options);
+        $("#loginForm").ajaxForm(loginOptions);
       });
 
-      function processJson(data) {
-        document.getElementById("form").reset();
+      function processLogin(data) {
+        document.getElementById("loginForm").reset();
         if (!handleError(data)) {
           window.location.href = "/member/home";
         }
@@ -37,7 +37,7 @@
 
   <body>
     <h3><font size="+2">会員専用</font></h3>
-    <form id="form" name="form" action="/member/login" method="post">
+    <form id="loginForm" name="loginForm" action="/member/login" method="post">
       <div class="full-container">
         <label for="user_id"><b>利用者ID</b></label>
         <input type="text" placeholder="" name="user_id" required />

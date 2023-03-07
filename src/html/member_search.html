@@ -27,11 +27,11 @@
       }
 
       $(document).ready(function () {
-        var options3 = {
+        var getBookInfoOptions = {
           dataType: "json",
           success: processBookList,
         };
-        $("#form_book").ajaxForm(options3);
+        $("#getBookInfoForm").ajaxForm(getBookInfoOptions);
 
         $("#book_list_table").DataTable({
           columns: [
@@ -52,15 +52,8 @@
         });
       });
 
-      function processJson(data) {
-        document.getElementById("form").reset();
-        if (handleAuthError(data)) {
-          return;
-        }
-      }
-
       function processBookList(data) {
-        document.getElementById("form_book").reset();
+        document.getElementById("getBookInfoForm").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -112,8 +105,8 @@
     <div class="full-container">
       <h3>図書検索</h3>
       <form
-        id="form_book"
-        name="form_book"
+        id="getBookInfoForm"
+        name="getBookInfoForm"
         action="/search/book"
         method="get"
         enctype="application/x-www-form-urlencoded"

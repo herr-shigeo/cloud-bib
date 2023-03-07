@@ -23,17 +23,17 @@
       }
 
       $(document).ready(function () {
-        var options = {
+        var processWorkOptions = {
           dataType: "json",
-          success: processJson,
+          success: processWork,
         };
-        $("#form1").ajaxForm(options);
+        $("#processWorkForm").ajaxForm(processWorkOptions);
         document.getElementById("invisible_submit").click();
         document.getElementById("borrowed_book_id").focus();
       });
 
-      function processJson(data) {
-        document.getElementById("form1").reset();
+      function processWork(data) {
+        document.getElementById("processWorkForm").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -132,8 +132,8 @@
 
     <div class="container">
       <form
-        id="form1"
-        name="form1"
+        id="processWorkForm"
+        name="processWorkForm"
         action="/work/process"
         method="post"
         enctype="application/x-www-form-urlencoded"

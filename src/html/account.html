@@ -23,31 +23,15 @@
       }
 
       $(document).ready(function () {
-        var options = {
-          dataType: "json",
-          success: processJson,
-        };
-        $("#form2").ajaxForm(options);
-
-        var options2 = {
+        var getUserInfoOption = {
           dataType: "json",
           success: processGet,
         };
-        $("#getForm").ajaxForm(options2);
+        $("#getUserInfoForm").ajaxForm(getUserInfoOption);
 
         document.getElementById("invisible_submit").click();
         document.getElementsByClassName("accordion")[0].click();
       });
-
-      function processJson(data) {
-        if (handleAuthError(data)) {
-          return;
-        }
-        if (handleError(data)) {
-          return;
-        }
-        alert("変更しました");
-      }
 
       function processGet(data) {
         if (handleAuthError(data)) {
@@ -112,7 +96,12 @@
   </head>
 
   <body>
-    <form id="getForm" name="getForm" action="/account/get" method="get">
+    <form
+      id="getUserInfoForm"
+      name="getUserInfoForm"
+      action="/account/get"
+      method="get"
+    >
       <input type="submit" id="invisible_submit" style="display: none" />
     </form>
 

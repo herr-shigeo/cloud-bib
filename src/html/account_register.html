@@ -19,14 +19,14 @@
 
     <script>
       $(document).ready(function () {
-        var options = {
+        var createAccountOptions = {
           dataType: "json",
-          success: processJson,
+          success: processAccountCreation,
         };
-        $("#form").ajaxForm(options);
+        $("#createAccountForm").ajaxForm(createAccountOptions);
       });
 
-      function processJson(data) {
+      function processAccountCreation(data) {
         if (!handleError(data)) {
           alert("アカウントを作成しました");
           window.location.href = data.path_to_home;
@@ -54,8 +54,8 @@
     <hr />
 
     <form
-      id="form"
-      name="form"
+      id="createAccountForm"
+      name="createAccountForm"
       action="/account/add"
       method="post"
       onsubmit="return postPasswordForm('form', 'password', 'confirm_password', 8)"

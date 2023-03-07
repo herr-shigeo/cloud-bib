@@ -29,16 +29,16 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <script>
       $(document).ready(function () {
-        var options = {
+        var generateBookBarcodeOptions = {
           dataType: "json",
-          success: processJson,
+          success: processGenerateBookBarcode,
         };
-        $("#form").ajaxForm(options);
+        $("#generateBookBarcodeForm").ajaxForm(generateBookBarcodeOptions);
 
         document.getElementById("invisible_submit").click();
       });
 
-      function processJson(data) {
+      function processGenerateBookBarcode(data) {
         if (handleError(data)) {
           window.close();
           return;
@@ -71,7 +71,12 @@
 
   <body>
     <div id="barcode-container"></div>
-    <form id="form" name="form" action="/barcode/book/generate" method="post">
+    <form
+      id="generateBookBarcodeForm"
+      name="generateBookBarcodeForm"
+      action="/barcode/book/generate"
+      method="post"
+    >
       <input
         type="hidden"
         name="book_id_start"

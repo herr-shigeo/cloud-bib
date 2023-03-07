@@ -4,7 +4,7 @@
     <title>無料で利用できるクラウド型図書管理システム CloudBib</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <link
       rel="stylesheet"
       href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"
@@ -17,7 +17,7 @@
       crossorigin="anonymous"
     ></script>
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.loginForm/4.3.0/jquery.loginForm.min.js"
       integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
       crossorigin="anonymous"
     ></script>
@@ -25,14 +25,14 @@
 
     <script>
       $(document).ready(function () {
-        var options = {
+        var loginOptions = {
           dataType: "json",
-          success: processJson,
+          success: processLogin,
         };
-        $("#form").ajaxForm(options);
+        $("#loginForm").ajaxloginForm(loginOptions);
       });
 
-      function processJson(data) {
+      function processLogin(data) {
         if (!handleError(data)) {
           window.location.href = data.path_to_home;
         }
@@ -80,13 +80,18 @@
 
       <h2>製品デモ</h2>
       デモ画面にログインして、実際の機能を試すことができます。
-      <form id="form" name="form" action="/auth/login" method="post">
+      <loginForm
+        id="loginForm"
+        name="loginForm"
+        action="/auth/login"
+        method="post"
+      >
         <input type="hidden" name="uname" value="demo" />
         <input type="hidden" name="password" value="demo" />
         <input type="hidden" name="user_category" value="operator" />
         <input type="hidden" name="user_id" value="" />
         <button type="submit" class="submitbtn">デモ画面へログイン</button>
-      </form>
+      </loginForm>
       <br />
       <iframe
         width="560"
@@ -114,8 +119,8 @@
       </ul>
 
       <h2>料金プラン</h2>
-      月額利用料のみで、初期費用等はありません。<br>
-      表示価格はすべて税込です。<br><br>
+      月額利用料のみで、初期費用等はありません。<br />
+      表示価格はすべて税込です。<br /><br />
       <table>
         <thead>
           <tr>

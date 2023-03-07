@@ -27,22 +27,22 @@
       }
 
       $(document).ready(function () {
-        var options = {
+        var searchUserOptions = {
           dataType: "json",
-          success: processJson,
+          success: processSearchUser,
         };
-        $("#form_user").ajaxForm(options);
+        $("#searchUserForm").ajaxForm(searchUserOptions);
 
-        var options2 = {
+        var returnBookOptions = {
           dataType: "json",
-          success: processReturn,
+          success: retuprocessReturnedBook,
         };
-        $("#form_unborrow").ajaxForm(options2);
+        $("#returnBookForm").ajaxForm(returnBookOptions);
 
         document.getElementById("user_id").focus();
       });
 
-      function processReturn(data) {
+      function retuprocessReturnedBook(data) {
         document.getElementById("form").reset();
 
         if (handleAuthError(data)) {
@@ -73,11 +73,11 @@
             ") を返却しました";
         }
         setStatus(msg);
-        document.getElementById("form_unborrow").reset();
+        document.getElementById("returnBookForm").reset();
       }
 
-      function processJson(data) {
-        document.getElementById("form_user").reset();
+      function processSearchUser(data) {
+        document.getElementById("searchUserForm").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -137,7 +137,7 @@
     <div style="padding-left: 6px">
       <p>貸出処理をするには利用者IDを入力して下さい</p>
       <form
-        name="user_select"
+        name="selectUserForm"
         action="/user/main"
         method="get"
         enctype="application/x-www-form-urlencoded"
@@ -158,8 +158,8 @@
       <div class="panel">
         <p>キーワードを入力後にEnterを押して検索</p>
         <form
-          id="form_user"
-          name="form_user"
+          id="searchUserForm"
+          name="searchUserForm"
           action="/search/user"
           method="get"
           enctype="application/x-www-form-urlencoded"
@@ -221,8 +221,8 @@
       <hr />
       <p>返却処理をするには図書IDを入力して下さい</p>
       <form
-        id="form_unborrow"
-        name="form_unborrow"
+        id="returnBookForm"
+        name="returnBookForm"
         action="/work/process"
         method="post"
         enctype="application/x-www-form-urlencoded"

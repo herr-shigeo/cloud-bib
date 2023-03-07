@@ -19,19 +19,19 @@
 
     <script>
       $(document).ready(function () {
-        var options = {
+        var requestResetOptions = {
           dataType: "json",
-          success: processJson,
+          success: processRequestReset,
         };
-        $("#form").ajaxForm(options);
+        $("#requestResetForm").ajaxForm(requestResetOptions);
       });
 
-      function processJson(data) {
+      function processRequestReset(data) {
         if (handleError(data)) {
           return;
         }
         alert("パスワードリセット用のリンクを登録メールアドレスに送信しました");
-        window.location.href = '/login/';
+        window.location.href = "/login/";
       }
     </script>
   </head>
@@ -55,7 +55,12 @@
     </div>
     <hr />
 
-    <form id="form" name="form" action="/account/request_reset" method="post">
+    <form
+      id="requestResetForm"
+      name="requestResetForm"
+      action="/account/request_reset"
+      method="post"
+    >
       <div class="container">
         <div class="full-container">
           パスワードをリセットするには、登録しているユーザー名とメールアドレスを入力し、「パスワードリセット」ボタンをクリックして下さい。<br /><br />

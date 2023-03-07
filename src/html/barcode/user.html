@@ -29,16 +29,16 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <script>
       $(document).ready(function () {
-        var options = {
+        var generateUserBarcodeOptions = {
           dataType: "json",
-          success: processJson,
+          success: processGenerateUserBarcode,
         };
-        $("#form").ajaxForm(options);
+        $("#generateUserBarcodeForm").ajaxForm(generateUserBarcodeOptions);
 
         document.getElementById("invisible_submit").click();
       });
 
-      function processJson(data) {
+      function processGenerateUserBarcode(data) {
         if (handleError(data)) {
           window.close();
           return;
@@ -71,7 +71,12 @@
 
   <body>
     <div id="barcode-container"></div>
-    <form id="form" name="form" action="/barcode/user/generate" method="post">
+    <form
+      id="generateUserBarcodeForm"
+      name="generateUserBarcodeForm"
+      action="/barcode/user/generate"
+      method="post"
+    >
       <input
         type="hidden"
         name="user_id_start"

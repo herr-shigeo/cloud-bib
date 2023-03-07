@@ -27,12 +27,11 @@
       }
 
       $(document).ready(function () {
-        var options = {
+        var getHistoryOptions = {
           dataType: "json",
-          success: processJson,
+          success: processHistory,
         };
-        $("#form").ajaxForm(options);
-        $("#form_transaction").ajaxForm(options);
+        $("#getHistoryForm").ajaxForm(getHistoryOptions);
 
         $("#transaction_list_table").DataTable({
           columns: [
@@ -47,9 +46,8 @@
         document.getElementById("book_id").focus();
       });
 
-      function processJson(data) {
-        document.getElementById("form").reset();
-        document.getElementById("form_transaction").reset();
+      function processHistory(data) {
+        document.getElementById("getHistoryForm").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -116,8 +114,8 @@
       <h3 style="color: #666666">貸出履歴</h3>
       <hr />
       <form
-        id="form_transaction"
-        name="form_transaction"
+        id="getHistoryForm"
+        name="getHistoryForm"
         action="/history/search"
         method="get"
         enctype="application/x-www-form-urlencoded"

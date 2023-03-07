@@ -31,19 +31,19 @@
       }
 
       $(document).ready(function () {
-        var options1 = {
+        var getDelayedBookListOptions = {
           dataType: "json",
-          success: processDelayedList,
+          success: processDelayedBookList,
         };
-        $("#form_delayed").ajaxForm(options1);
+        $("#getDelayedBookListForm").ajaxForm(getDelayedBookListOptions);
 
-        var options3 = {
+        var getBookListOptions = {
           dataType: "json",
           success: processBookList,
         };
-        $("#form_book").ajaxForm(options3);
+        $("#getBookListForm").ajaxForm(getBookListOptions);
 
-        $("#delayed_list_table").DataTable({
+        $("#delayedBookListTable").DataTable({
           columns: [
             { data: "user_id" },
             { data: "user_name" },
@@ -55,7 +55,7 @@
           ],
         });
 
-        $("#book_list_table").DataTable({
+        $("#bookListTable").DataTable({
           columns: [
             { data: "id" },
             { data: "title" },
@@ -82,15 +82,8 @@
         });
       });
 
-      function processJson(data) {
-        document.getElementById("form").reset();
-        if (handleAuthError(data)) {
-          return;
-        }
-      }
-
-      function processDelayedList(data) {
-        document.getElementById("form_delayed").reset();
+      function processDelayedBookList(data) {
+        document.getElementById("getDelayedBookListForm").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -100,7 +93,7 @@
         }
 
         var dataSet = data["delayed_list"];
-        var datatable = $("#delayed_list_table").DataTable();
+        var datatable = $("#delayedBookListTable").DataTable();
         $.each(dataSet, function (i, d) {
           var dt = d["book"].borrowed_date.split(" ");
           d["book"].borrowed_date =
@@ -120,7 +113,7 @@
 
         datatable.clear();
         datatable.destroy();
-        $("#delayed_list_table").DataTable({
+        $("#delayedBookListTable").DataTable({
           scrollX: false,
           autoWidth: false,
           data: dataSet,
@@ -137,7 +130,7 @@
       }
 
       function processBookList(data) {
-        document.getElementById("form_book").reset();
+        document.getElementById("getBookListForm").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -161,10 +154,10 @@
           }
         });
 
-        var datatable = $("#book_list_table").DataTable();
+        var datatable = $("#bookListTable").DataTable();
         datatable.clear();
         datatable.destroy();
-        $("#book_list_table").DataTable({
+        $("#bookListTable").DataTable({
           scrollX: false,
           autoWidth: false,
           data: dataSet,
@@ -222,8 +215,8 @@
     <button class="accordion">図書</button>
     <div class="panel">
       <form
-        id="form_book"
-        name="form_book"
+        id="getBookListForm"
+        name="getBookListForm"
         action="/search/book"
         method="get"
         enctype="application/x-www-form-urlencoded"
@@ -266,7 +259,7 @@
       </form>
       <h3>検索結果</h3>
       <div style="overflow-x: auto">
-        <table id="book_list_table" class="display compact nowrap">
+        <table id="bookListTable" class="display compact nowrap">
           <thead>
             <tr>
               <th>図書ID</th>
@@ -300,8 +293,8 @@
     <div class="panel">
       <p>返却期限が過ぎている図書を検索</p>
       <form
-        id="form_delayed"
-        name="form1"
+        id="getDelayedBookListForm"
+        name="getDelayedBookListForm"
         action="/search/delayed"
         method="get"
         enctype="application/x-www-form-urlencoded"
@@ -310,7 +303,7 @@
       </form>
       <h3>検索結果</h3>
       <div style="overflow-x: auto">
-        <table id="delayed_list_table" class="display compact nowrap">
+        <table id="delayedBookListTable" class="display compact nowrap">
           <thead>
             <tr>
               <th>利用者ID</th>

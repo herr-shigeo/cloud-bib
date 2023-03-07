@@ -27,17 +27,17 @@
       }
 
       $(document).ready(function () {
-        var options1 = {
+        var getBorrowListOptions = {
           dataType: "json",
           success: processBorrowList,
         };
-        $("#form1").ajaxForm(options1);
+        $("#getBorrowListForm").ajaxForm(getBorrowListOptions);
 
-        var options2 = {
+        var getHistoryOptions = {
           dataType: "json",
           success: processTransactionList,
         };
-        $("#form2").ajaxForm(options2);
+        $("#getHistoryForm").ajaxForm(getHistoryOptions);
 
         $("#transaction_list_table").DataTable({
           columns: [
@@ -140,8 +140,8 @@
     </div>
 
     <form
-      id="form1"
-      name="form1"
+      id="getBorrowListForm"
+      name="getBorrowListForm"
       action="/member/borrowed_books"
       method="get"
       enctype="application/x-www-form-urlencoded"
@@ -150,8 +150,8 @@
     </form>
 
     <form
-      id="form2"
-      name="form2"
+      id="getHistoryForm"
+      name="getHistoryForm"
       action="/history/search"
       method="get"
       enctype="application/x-www-form-urlencoded"

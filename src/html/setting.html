@@ -23,26 +23,16 @@
       }
 
       $(document).ready(function () {
-        var options2 = {
+        var getSettingOptions = {
           dataType: "json",
-          success: processUpdate,
+          success: processGetSetting,
         };
-        $("#form5").ajaxForm(options2);
+        $("#getSettingForm").ajaxForm(getSettingOptions);
 
         document.getElementById("invisible_submit").click();
       });
 
-      function processJson(data) {
-        if (handleAuthError(data)) {
-          return;
-        }
-        if (handleError(data)) {
-          return;
-        }
-        alert("変更しました");
-      }
-
-      function processUpdate(data) {
+      function processGetSetting(data) {
         if (handleAuthError(data)) {
           return;
         }
@@ -86,9 +76,9 @@
     <button class="accordion">貸出設定</button>
     <div class="panel">
       <form
-        id="form1"
-        name="form1"
-        onsubmit="return fetchJsonData(event, 'form1', 'PUT', '/setting/update/rental', '変更しました')"
+        id="updateRentalSettingForm"
+        name="updateRentalSettingForm"
+        onsubmit="return fetchJsonData(event, 'updateRentalSettingForm', 'PUT', '/setting/update/rental', '変更しました')"
       >
         <table>
           <tr>
@@ -109,9 +99,9 @@
     <button class="accordion">バーコード読み取り設定</button>
     <div class="panel">
       <form
-        id="form2"
-        name="form2"
-        onsubmit="return fetchJsonData(event, 'form2', 'PUT', '/setting/update/barcode', '変更しました')"
+        id="updateBarcodeSettingForm"
+        name="updateBarcodeSettingForm"
+        onsubmit="return fetchJsonData(event, 'updateBarcodeSettingForm', 'PUT', '/setting/update/barcode', '変更しました')"
       >
         <table>
           <tr>
@@ -139,7 +129,12 @@
       </form>
     </div>
 
-    <form id="form5" name="form5" action="/setting/get" method="get">
+    <form
+      id="getSettingForm"
+      name="getSettingForm"
+      action="/setting/get"
+      method="get"
+    >
       <input type="submit" id="invisible_submit" style="display: none" />
     </form>
 

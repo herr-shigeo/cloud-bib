@@ -24,45 +24,38 @@
       }
 
       $(document).ready(function () {
-        var options = {
+        var getUserInfoOption = {
           dataType: "json",
-          success: processJson,
+          success: processUserInfo,
         };
-        $("#form").ajaxForm(options);
+        $("#getUserInfoForm").ajaxForm(getUserInfoOption);
 
-        var options1 = {
-          dataType: "json",
-          success: processUserList,
-        };
-        $("#form_user_list").ajaxForm(options1);
-
-        var options2 = {
+        var updateUserInfoOption = {
           dataType: "json",
           success: processUserUpdate,
         };
-        $("#form_user_update").ajaxForm(options2);
+        $("#updateUserInfoForm").ajaxForm(updateUserInfoOption);
 
-        var options3 = {
+        var getBookInfoOption = {
           dataType: "json",
-          success: processBookList,
+          success: processBookInfo,
         };
-        $("#form_book_list").ajaxForm(options3);
-        $("#form_isbn").ajaxForm(options3);
+        $("#getBookInfoForm").ajaxForm(getBookInfoOption);
+        $("#getBookInfoByISBNForm").ajaxForm(getBookInfoOption);
 
-        var options4 = {
+        var updateBookInfoOption = {
           dataType: "json",
           success: processBookUpdate,
         };
-        $("#form_book_update").ajaxForm(options4);
+        $("#updateBookInfoForm").ajaxForm(updateBookInfoOption);
 
-        var options5 = {
+        var registerOption = {
           dataType: "json",
           success: processRegister,
-          error: processError,
           timeout: 0,
         };
-        $("#form_user_register").ajaxForm(options5);
-        $("#form_book_register").ajaxForm(options5);
+        $("#registerUserForm").ajaxForm(registerOption);
+        $("#registerBookForm").ajaxForm(registerOption);
 
         $(function () {
           $.fn.autoKana('input[name="book_title"]', 'input[name="book_kana"]', {
@@ -73,12 +66,8 @@
         setCurrentDate();
       });
 
-      function processJson(data) {
-        handleAuthError(data);
-      }
-
-      function processUserList(data) {
-        document.getElementById("form_user_list").reset();
+      function processUserInfo(data) {
+        document.getElementById("getUserInfoForm").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -104,9 +93,9 @@
         else document.getElementById("user_other").checked = true;
       }
 
-      function processBookList(data) {
-        document.getElementById("form_book_list").reset();
-        document.getElementById("form_isbn").reset();
+      function processBookInfo(data) {
+        document.getElementById("getBookInfoForm").reset();
+        document.getElementById("getBookInfoByISBNForm").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -196,7 +185,7 @@
       }
 
       function processUserUpdate(data) {
-        document.getElementById("form_user_update").reset();
+        document.getElementById("updateUserInfoForm").reset();
         document.getElementById("user_id_search").focus();
 
         if (handleAuthError(data)) {
@@ -219,7 +208,7 @@
       }
 
       function processBookUpdate(data) {
-        document.getElementById("form_book_update").reset();
+        document.getElementById("updateBookInfoForm").reset();
         document.getElementById("book_id_search").focus();
 
         if (handleAuthError(data)) {
@@ -261,25 +250,6 @@
           return;
         }
         alert("登録しました");
-      }
-
-      function processError(jqXHR, exception) {
-        setProgressBar(false);
-        if (jqXHR.status === 0) {
-          return "Not connected.\nPlease verify your network connection.";
-        } else if (jqXHR.status == 404) {
-          return "The requested page not found. [404]";
-        } else if (jqXHR.status == 500) {
-          return "Internal Server Error [500].";
-        } else if (exception === "parsererror") {
-          return "Requested JSON parse failed.";
-        } else if (exception === "timeout") {
-          return "Time out error.";
-        } else if (exception === "abort") {
-          return "Ajax request aborted.";
-        } else {
-          return "Uncaught Error.\n" + jqXHR.responseText;
-        }
       }
 
       var g_processing = false;
@@ -338,8 +308,8 @@
     <div class="panel">
       <p>既存データを修正する場合は、利用者IDを入力後にEnter</p>
       <form
-        id="form_user_list"
-        name="form_user_list"
+        id="getUserInfoForm"
+        name="getUserInfoForm"
         action="/search/user"
         method="get"
         enctype="application/x-www-form-urlencoded"
@@ -356,8 +326,8 @@
         <input type="hidden" name="category" value="" />
       </form>
       <form
-        id="form_user_update"
-        name="form_user_update"
+        id="updateUserInfoForm"
+        name="updateUserInfoForm"
         action="/edit/user"
         method="post"
       >
@@ -489,8 +459,8 @@
           <td>
             <p>既存データを修正する場合は、図書IDを入力後にEnter</p>
             <form
-              id="form_book_list"
-              name="form_book_list"
+              id="getBookInfoForm"
+              name="getBookInfoForm"
               action="/search/book"
               method="get"
               enctype="application/x-www-form-urlencoded"
@@ -512,8 +482,8 @@
           <td>
             <p>ISBNコードからデータを取得する場合は、ISBNを入力後にEnter</p>
             <form
-              id="form_isbn"
-              name="form_isbn"
+              id="getBookInfoByISBNForm"
+              name="getBookInfoByISBNForm"
               action="/search/isbn"
               method="get"
               enctype="application/x-www-form-urlencoded"
@@ -531,8 +501,8 @@
       </table>
 
       <form
-        id="form_book_update"
-        name="form_book_update"
+        id="updateBookInfoForm"
+        name="updateBookInfoForm"
         action="/edit/book"
         method="post"
       >
@@ -816,8 +786,8 @@
     <button class="accordion">一括登録</button>
     <div class="panel">
       <form
-        id="form_user_register"
-        name="form_user_register"
+        id="registerUserForm"
+        name="registerUserForm"
         action="/setting/import_user"
         method="post"
         enctype="multipart/form-data"
@@ -835,8 +805,8 @@
       </form>
 
       <form
-        id="form_book_register"
-        name="form_book_register"
+        id="registerBookForm"
+        name="registerBookForm"
         action="/setting/import_book"
         method="post"
         enctype="multipart/form-data"
