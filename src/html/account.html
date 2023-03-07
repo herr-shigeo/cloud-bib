@@ -141,7 +141,7 @@
           <form
             id="form1"
             name="form1"
-            onsubmit="return fetchJsonData(event, 'form1', 'PUT', '/account/update', '変更しました')"
+            onsubmit="return fetchJsonData(event, 'form1', 'PUT', '/account/update', '変更しました', null)"
           >
             <label for="uname"><b>ユーザー名</b></label>
             <input type="text" readonly name="uname" id="uname" /><br />
@@ -157,7 +157,7 @@
           <form
             id="deleteForm"
             name="deleteForm"
-            onsubmit="return fetchJsonData(event, 'deleteForm', 'DELETE', '/account/delete', 'アカウントを削除しました')"
+            onsubmit="return fetchJsonData(event, 'deleteForm', 'DELETE', '/account/delete', 'アカウントを削除しました', null)"
           >
             <button
               type="submit"

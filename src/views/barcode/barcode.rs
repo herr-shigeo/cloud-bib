@@ -71,7 +71,7 @@ pub async fn get_user_page(form: web::Query<GenUserBarcodeGenPageForm>) -> HttpR
 
 pub async fn generate_user_barocde(
     session: Session,
-    form: web::Form<GenUserBarcodeForm>,
+    form: web::Json<GenUserBarcodeForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_operator_session(&session)?;
@@ -115,7 +115,7 @@ pub async fn get_book_page(form: web::Query<GenBookBarcodeGenPageForm>) -> HttpR
 
 pub async fn generate_book_barcode(
     session: Session,
-    form: web::Form<GenBookBarcodeForm>,
+    form: web::Json<GenBookBarcodeForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_operator_session(&session)?;
