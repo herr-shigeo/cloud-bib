@@ -17,7 +17,7 @@
       crossorigin="anonymous"
     ></script>
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.loginForm/4.3.0/jquery.loginForm.min.js"
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
       integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
       crossorigin="anonymous"
     ></script>
@@ -29,7 +29,7 @@
           dataType: "json",
           success: processLogin,
         };
-        $("#loginForm").ajaxloginForm(loginOptions);
+        $("#loginForm").ajaxForm(loginOptions);
       });
 
       function processLogin(data) {
@@ -80,18 +80,13 @@
 
       <h2>製品デモ</h2>
       デモ画面にログインして、実際の機能を試すことができます。
-      <loginForm
-        id="loginForm"
-        name="loginForm"
-        action="/auth/login"
-        method="post"
-      >
+      <form id="loginForm" name="loginForm" action="/auth/login" method="post">
         <input type="hidden" name="uname" value="demo" />
         <input type="hidden" name="password" value="demo" />
         <input type="hidden" name="user_category" value="operator" />
         <input type="hidden" name="user_id" value="" />
         <button type="submit" class="submitbtn">デモ画面へログイン</button>
-      </loginForm>
+      </form>
       <br />
       <iframe
         width="560"
