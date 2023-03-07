@@ -29,7 +29,7 @@ lazy_static! {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormData1 {
+pub struct CreateAccountForm {
     pub uname: String,
     pub email: String,
     pub password: String,
@@ -37,20 +37,20 @@ pub struct FormData1 {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormData2 {
+pub struct UpdateProfileForm {
     pub uname: String,
     pub email: String,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormData3 {
+pub struct UpdatePasswordForm {
     pub uname: String,
     pub password: String,
     pub confirm_password: String,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormData4 {
+pub struct ResetPasswordForm {
     pub reset_token: String,
 }
 
@@ -70,7 +70,7 @@ pub async fn load_register(_session: Session) -> HttpResponse {
 
 pub async fn add(
     session: Session,
-    form: web::Form<FormData1>,
+    form: web::Form<CreateAccountForm>,
     data: web::Data<Mutex<ClientHolder>>,
     cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
@@ -168,7 +168,7 @@ pub async fn add(
 
 pub async fn update(
     session: Session,
-    form: web::Json<FormData2>,
+    form: web::Json<UpdateProfileForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
@@ -277,7 +277,7 @@ pub async fn get(
 
 pub async fn admin_password(
     session: Session,
-    form: web::Json<FormData3>,
+    form: web::Json<UpdatePasswordForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
@@ -286,7 +286,7 @@ pub async fn admin_password(
 
 pub async fn operator_password(
     session: Session,
-    form: web::Json<FormData3>,
+    form: web::Json<UpdatePasswordForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
@@ -295,7 +295,7 @@ pub async fn operator_password(
 
 pub async fn user_password(
     session: Session,
-    form: web::Json<FormData3>,
+    form: web::Json<UpdatePasswordForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
@@ -303,7 +303,7 @@ pub async fn user_password(
 }
 
 pub async fn request_reset(
-    form: web::Form<FormData2>,
+    form: web::Form<UpdateProfileForm>,
     token_map: web::Data<ResetToken>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
@@ -325,7 +325,7 @@ pub async fn request_reset(
 }
 
 pub async fn prepare_reset(
-    form: web::Query<FormData4>,
+    form: web::Query<ResetPasswordForm>,
     token_map: web::Data<ResetToken>,
 ) -> HttpResponse {
     // check the token
@@ -346,7 +346,7 @@ pub async fn prepare_reset(
 }
 
 pub async fn do_reset(
-    form: web::Json<FormData3>,
+    form: web::Json<UpdatePasswordForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     update_password(&data, &form.uname, "admin", &form.password).await?;

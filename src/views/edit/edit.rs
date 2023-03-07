@@ -23,7 +23,7 @@ pub async fn load(_session: Session) -> HttpResponse {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Form1Data {
+pub struct UpdateUserForm {
     pub user_id: String,
     pub user_name: String,
     pub user_kana: String,
@@ -35,7 +35,7 @@ pub struct Form1Data {
 
 pub async fn insert_user(
     session: Session,
-    form: web::Json<Form1Data>,
+    form: web::Json<UpdateUserForm>,
     data: web::Data<Mutex<ClientHolder>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
@@ -45,7 +45,7 @@ pub async fn insert_user(
 
 pub async fn update_user(
     session: Session,
-    form: web::Json<Form1Data>,
+    form: web::Json<UpdateUserForm>,
     data: web::Data<Mutex<ClientHolder>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
@@ -55,7 +55,7 @@ pub async fn update_user(
 
 pub async fn delete_user(
     session: Session,
-    form: web::Json<Form1Data>,
+    form: web::Json<UpdateUserForm>,
     data: web::Data<Mutex<ClientHolder>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
@@ -65,7 +65,7 @@ pub async fn delete_user(
 
 async fn user(
     session: &Session,
-    form: &web::Json<Form1Data>,
+    form: &web::Json<UpdateUserForm>,
     data: &web::Data<Mutex<ClientHolder>>,
     setting_map: &web::Data<Mutex<HashMap<String, SystemSetting>>>,
     operation: &str,
@@ -151,7 +151,7 @@ async fn user(
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Form2Data {
+pub struct UpdateBookForm {
     pub book_id: String,
     pub book_title: String,
     pub book_location: String,
@@ -176,7 +176,7 @@ pub struct Form2Data {
 
 pub async fn insert_book(
     session: Session,
-    form: web::Json<Form2Data>,
+    form: web::Json<UpdateBookForm>,
     data: web::Data<Mutex<ClientHolder>>,
     cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
@@ -187,7 +187,7 @@ pub async fn insert_book(
 
 pub async fn update_book(
     session: Session,
-    form: web::Json<Form2Data>,
+    form: web::Json<UpdateBookForm>,
     data: web::Data<Mutex<ClientHolder>>,
     cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
@@ -198,7 +198,7 @@ pub async fn update_book(
 
 pub async fn delete_book(
     session: Session,
-    form: web::Json<Form2Data>,
+    form: web::Json<UpdateBookForm>,
     data: web::Data<Mutex<ClientHolder>>,
     cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
@@ -209,7 +209,7 @@ pub async fn delete_book(
 
 async fn book(
     session: &Session,
-    form: &web::Json<Form2Data>,
+    form: &web::Json<UpdateBookForm>,
     data: &web::Data<Mutex<ClientHolder>>,
     cache_map: &web::Data<Mutex<HashMap<String, Cache>>>,
     setting_map: &web::Data<Mutex<HashMap<String, SystemSetting>>>,
