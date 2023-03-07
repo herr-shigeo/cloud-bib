@@ -45,7 +45,7 @@ pub struct Form2Data {
 
 pub async fn update_rental_setting(
     session: Session,
-    form: web::Form<Form1Data>,
+    form: web::Json<Form1Data>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
@@ -117,7 +117,7 @@ pub async fn get_setting(
 
 pub async fn update_barcode_setting(
     session: Session,
-    form: web::Form<Form2Data>,
+    form: web::Json<Form2Data>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);

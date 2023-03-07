@@ -28,8 +28,6 @@
           success: processJson,
         };
         $("#form").ajaxForm(options1);
-        $("#form1").ajaxForm(options1);
-        $("#form2").ajaxForm(options1);
 
         var options2 = {
           dataType: "json",
@@ -100,8 +98,7 @@
       <form
         id="form1"
         name="form1"
-        action="/setting/update/rental"
-        method="post"
+        onsubmit="return fetchJsonData(event, 'form1', 'PUT', '/setting/update/rental', '変更しました')"
       >
         <table>
           <tr>
@@ -124,8 +121,7 @@
       <form
         id="form2"
         name="form2"
-        action="/setting/update/barcode"
-        method="post"
+        onsubmit="return fetchJsonData(event, 'form2', 'PUT', '/setting/update/barcode', '変更しました')"
       >
         <table>
           <tr>
