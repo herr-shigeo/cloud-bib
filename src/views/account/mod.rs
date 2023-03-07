@@ -24,11 +24,11 @@ pub fn account_factory(app: &mut web::ServiceConfig) {
     )
     .route(
         &base_path.define(String::from("/update")),
-        web::post().to(account::update),
+        web::put().to(account::update),
     )
     .route(
         &base_path.define(String::from("/delete")),
-        web::post().to(account::delete),
+        web::delete().to(account::delete),
     )
     .route(
         &base_path.define(String::from("/request_reset")),

@@ -36,12 +36,6 @@
         };
         $("#getForm").ajaxForm(options2);
 
-        var options3 = {
-          dataType: "json",
-          success: processDelete,
-        };
-        $("#deleteForm").ajaxForm(options3);
-
         document.getElementById("invisible_submit").click();
         document.getElementsByClassName("accordion")[0].click();
       });
@@ -83,18 +77,6 @@
           option.value = "Standard";
         }
         select.appendChild(option);
-      }
-
-      function processDelete(data) {
-        if (isAuthError(data)) {
-          alert("アカウントを削除しました");
-          handleAuthError(data);
-          return;
-        }
-
-        if (handleError(data)) {
-          return;
-        }
       }
 
       function submitNewPlan() {
@@ -190,7 +172,7 @@
           <form
             id="form1"
             name="form1"
-            onsubmit="return fetchFormData(event, 'form1', 'POST', '/account/update', '変更しました')"
+            onsubmit="return fetchJsonData(event, 'form1', 'PUT', '/account/update', '変更しました')"
           >
             <label for="uname"><b>ユーザー名</b></label>
             <input type="text" readonly name="uname" id="uname" /><br />
@@ -206,8 +188,7 @@
           <form
             id="deleteForm"
             name="deleteForm"
-            action="/account/delete"
-            method="post"
+            onsubmit="return fetchJsonData(event, 'deleteForm', 'DELETE', '/account/delete', 'アカウントを削除しました')"
           >
             <button
               type="submit"

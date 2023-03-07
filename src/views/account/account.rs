@@ -168,7 +168,7 @@ pub async fn add(
 
 pub async fn update(
     session: Session,
-    form: web::Form<FormData2>,
+    form: web::Json<FormData2>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     check_admin_session(&session)?;
@@ -239,7 +239,9 @@ pub async fn delete(
     // delete the session
     session.purge();
 
-    return Err(BibErrorResponse::NotAuthorized);
+    let mut reply = Reply::default();
+    reply.path_to_home = "/login/".to_owned();
+    Ok(HttpResponse::Ok().json(reply))
 }
 
 pub async fn get(
