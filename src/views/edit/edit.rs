@@ -30,18 +30,46 @@ pub struct Form1Data {
     pub user_category: String,
     pub user_grade: String,
     pub user_remark: String,
-    pub operation: String,
     pub user_register_date: String,
 }
 
-pub async fn user(
+pub async fn insert_user(
     session: Session,
-    form: web::Form<Form1Data>,
+    form: web::Json<Form1Data>,
     data: web::Data<Mutex<ClientHolder>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
+    user(&session, &form, &data, &setting_map, "insert").await
+}
 
+pub async fn update_user(
+    session: Session,
+    form: web::Json<Form1Data>,
+    data: web::Data<Mutex<ClientHolder>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
+) -> Result<HttpResponse, BibErrorResponse> {
+    debug!("{:?}", form);
+    user(&session, &form, &data, &setting_map, "update").await
+}
+
+pub async fn delete_user(
+    session: Session,
+    form: web::Json<Form1Data>,
+    data: web::Data<Mutex<ClientHolder>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
+) -> Result<HttpResponse, BibErrorResponse> {
+    debug!("{:?}", form);
+    user(&session, &form, &data, &setting_map, "delete").await
+}
+
+async fn user(
+    session: &Session,
+    form: &web::Json<Form1Data>,
+    data: &web::Data<Mutex<ClientHolder>>,
+    setting_map: &web::Data<Mutex<HashMap<String, SystemSetting>>>,
+    operation: &str,
+) -> Result<HttpResponse, BibErrorResponse> {
     let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
 
@@ -54,7 +82,6 @@ pub async fn user(
     drop(setting_map);
 
     // Read the User from DB first
-    let operation: &str = &form.operation;
     let mut user = User::default();
     user.id = atoi(&form.user_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
     user = match search_item(&db, &user).await {
@@ -119,8 +146,7 @@ pub async fn user(
         }
     }
 
-    let mut reply = Reply::default();
-    reply.operation = operation.to_owned();
+    let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
 }
 
@@ -146,18 +172,49 @@ pub struct Form2Data {
     pub book_isbn: String,
     pub book_register_date: String,
     pub book_register_type: String,
-    pub operation: String,
 }
 
-pub async fn book(
+pub async fn insert_book(
     session: Session,
-    form: web::Form<Form2Data>,
+    form: web::Json<Form2Data>,
     data: web::Data<Mutex<ClientHolder>>,
     cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
+    book(&session, &form, &data, &cache_map, &setting_map, "insert").await
+}
 
+pub async fn update_book(
+    session: Session,
+    form: web::Json<Form2Data>,
+    data: web::Data<Mutex<ClientHolder>>,
+    cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
+) -> Result<HttpResponse, BibErrorResponse> {
+    debug!("{:?}", form);
+    book(&session, &form, &data, &cache_map, &setting_map, "update").await
+}
+
+pub async fn delete_book(
+    session: Session,
+    form: web::Json<Form2Data>,
+    data: web::Data<Mutex<ClientHolder>>,
+    cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
+    setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
+) -> Result<HttpResponse, BibErrorResponse> {
+    debug!("{:?}", form);
+    book(&session, &form, &data, &cache_map, &setting_map, "delete").await
+}
+
+async fn book(
+    session: &Session,
+    form: &web::Json<Form2Data>,
+    data: &web::Data<Mutex<ClientHolder>>,
+    cache_map: &web::Data<Mutex<HashMap<String, Cache>>>,
+    setting_map: &web::Data<Mutex<HashMap<String, SystemSetting>>>,
+    operation: &str,
+) -> Result<HttpResponse, BibErrorResponse> {
     let dbname = check_operator_session(&session)?;
     let db = get_db(&data, &session).await?;
 
@@ -170,7 +227,6 @@ pub async fn book(
     drop(setting_map);
 
     // Read the Book from DB first
-    let operation: &str = &form.operation;
     let mut book = Book::default();
     book.id = atoi(&form.book_id).map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
     book = match search_item(&db, &book).await {
@@ -267,7 +323,6 @@ pub async fn book(
         }
     }
 
-    let mut reply = Reply::default();
-    reply.operation = operation.to_owned();
+    let reply = Reply::default();
     Ok(HttpResponse::Ok().json(reply))
 }
