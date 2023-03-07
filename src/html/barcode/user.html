@@ -33,7 +33,7 @@
           dataType: "json",
           success: processGenerateUserBarcode,
         };
-        $("#generateUserBarcodeForm").ajaxForm(generateUserBarcodeOptions);
+        $("#gen_user_barcode_form").ajaxForm(generateUserBarcodeOptions);
 
         document.getElementById("invisible_submit").click();
       });
@@ -72,8 +72,8 @@
   <body>
     <div id="barcode-container"></div>
     <form
-      id="generateUserBarcodeForm"
-      name="generateUserBarcodeForm"
+      id="gen_user_barcode_form"
+      name="gen_user_barcode_form"
       action="/barcode/user/generate"
       method="post"
     >

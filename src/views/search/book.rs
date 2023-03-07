@@ -26,7 +26,7 @@ pub struct GetBookForm {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Form2Data {
+pub struct GetBookByISBNForm {
     pub isbn: String,
 }
 
@@ -37,7 +37,7 @@ pub struct BookList {
 
 pub async fn search_isbn(
     _session: Session,
-    form: web::Query<Form2Data>,
+    form: web::Query<GetBookByISBNForm>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let isbn = form.isbn.clone();
 

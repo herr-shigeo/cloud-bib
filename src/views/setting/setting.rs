@@ -30,13 +30,13 @@ pub async fn load() -> HttpResponse {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Form1Data {
+pub struct UpdateRentalSettingForm {
     pub num_books: String,
     pub num_days: String,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Form2Data {
+pub struct UpdateBarcodeSettingForm {
     pub user_keta_min: String,
     pub user_keta_max: String,
     pub book_keta_min: String,
@@ -45,7 +45,7 @@ pub struct Form2Data {
 
 pub async fn update_rental_setting(
     session: Session,
-    form: web::Json<Form1Data>,
+    form: web::Json<UpdateRentalSettingForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
@@ -117,7 +117,7 @@ pub async fn get_setting(
 
 pub async fn update_barcode_setting(
     session: Session,
-    form: web::Json<Form2Data>,
+    form: web::Json<UpdateBarcodeSettingForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);

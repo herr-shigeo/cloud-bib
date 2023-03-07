@@ -32,7 +32,7 @@
           dataType: "json",
           success: processLogin,
         };
-        $("#loginForm").ajaxForm(loginOptions);
+        $("#login_form").ajaxForm(loginOptions);
 
         var userCategorySelecter = document.getElementById("user_category");
         var userIdText = document.getElementById("user_id");
@@ -45,7 +45,7 @@
       });
 
       function processLogin(data) {
-        document.getElementById("loginForm").reset();
+        document.getElementById("login_form").reset();
         if (!handleError(data)) {
           window.location.href = data.path_to_home;
         }
@@ -72,7 +72,7 @@
     </div>
     <hr />
 
-    <form id="loginForm" name="loginForm" action="/auth/login" method="post">
+    <form id="login_form" name="login_form" action="/auth/login" method="post">
       <div class="container">
         <div class="full-container">
           <label for="uname"><b>ユーザー名</b></label>

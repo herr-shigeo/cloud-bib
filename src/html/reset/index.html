@@ -23,7 +23,7 @@
           dataType: "json",
           success: processRequestReset,
         };
-        $("#requestResetForm").ajaxForm(requestResetOptions);
+        $("#request_reset_form").ajaxForm(requestResetOptions);
       });
 
       function processRequestReset(data) {
@@ -56,8 +56,8 @@
     <hr />
 
     <form
-      id="requestResetForm"
-      name="requestResetForm"
+      id="request_reset_form"
+      name="request_reset_form"
       action="/account/request_reset"
       method="post"
     >

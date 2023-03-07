@@ -29,7 +29,7 @@
           dataType: "json",
           success: processLogin,
         };
-        $("#loginForm").ajaxForm(loginOptions);
+        $("#login_form").ajaxForm(loginOptions);
       });
 
       function processLogin(data) {
@@ -80,7 +80,7 @@
 
       <h2>製品デモ</h2>
       デモ画面にログインして、実際の機能を試すことができます。
-      <form id="loginForm" name="loginForm" action="/auth/login" method="post">
+      <form id="login_form" name="login_form" action="/auth/login" method="post">
         <input type="hidden" name="uname" value="demo" />
         <input type="hidden" name="password" value="demo" />
         <input type="hidden" name="user_category" value="operator" />

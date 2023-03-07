@@ -111,8 +111,8 @@
         <button class="accordion">利用プラン</button>
         <div class="panel">
           <form
-            id="form2"
-            name="form2"
+            id="update_plan_form"
+            name="update_plan_form"
             onsubmit="submitNewPlan(); return false;"
           >
             <label for="plan"><b>契約中の利用プラン</b></label>
@@ -139,9 +139,9 @@
         <button class="accordion">ユーザー名・メールアドレス</button>
         <div class="panel">
           <form
-            id="form1"
-            name="form1"
-            onsubmit="return fetchJsonData(event, 'form1', 'PUT', '/account/update', '変更しました', null)"
+            id="update_profile_form"
+            name="update_profile_form"
+            onsubmit="return fetchJsonData(event, 'update_profile_form', 'PUT', '/account/update', '変更しました', null)"
           >
             <label for="uname"><b>ユーザー名</b></label>
             <input type="text" readonly name="uname" id="uname" /><br />
@@ -172,9 +172,9 @@
         <button class="accordion">管理者パスワード</button>
         <div class="panel">
           <form
-            id="form3"
-            name="form3"
-            onsubmit="return updatePassword(event, '/account/admin_password', 'form3', 'admin_uname', 'password', 'confirm_password', 8)"
+            id="update_admin_password_form"
+            name="update_admin_password_form"
+            onsubmit="return updatePassword(event, '/account/admin_password', 'update_admin_password_form', 'admin_uname', 'password', 'confirm_password', 8)"
           >
             <input type="hidden" name="uname" id="admin_uname" />
             <label for="password"><b>管理者パスワード</b></label>
@@ -201,9 +201,9 @@
         <button class="accordion">司書パスワード</button>
         <div class="panel">
           <form
-            id="form4"
-            name="form4"
-            onsubmit="return updatePassword(event, '/account/operator_password', 'form4', 'operator_uname', 'password', 'confirm_password', 8)"
+            id="update_operator_password_form"
+            name="update_operator_password_form"
+            onsubmit="return updatePassword(event, '/account/operator_password', 'update_operator_password_form', 'operator_uname', 'password', 'confirm_password', 8)"
           >
             <input type="hidden" name="uname" id="operator_uname" />
             <label for="operator_password"><b>司書パスワード</b></label>
@@ -235,9 +235,9 @@
         <button class="accordion">利用者パスワード</button>
         <div class="panel">
           <form
-            id="form5"
-            name="form5"
-            onsubmit="return updatePassword(event, '/account/user_password', 'form5', 'user_uname', 'password', 'confirm_password', 8)"
+            id="update_user_password_form"
+            name="update_user_password_form"
+            onsubmit="return updatePassword(event, '/account/user_password', 'update_user_password_form', 'user_uname', 'password', 'confirm_password', 8)"
           >
             <input type="hidden" name="uname" id="user_uname" />
             <label for="user_password"><b>利用者パスワード</b></label>

@@ -20,7 +20,7 @@
     <script>
 
       document.addEventListener("DOMContentLoaded", function () {
-        fetchJsonData(event, "generateBookBarcodeForm", "POST", "/barcode/book/generate", null, processGenerateBookBarcode);
+        fetchJsonData(event, "gen_book_barcode_form", "POST", "/barcode/book/generate", null, processGenerateBookBarcode);
       });
 
       function processGenerateBookBarcode(data) {
@@ -57,8 +57,8 @@
   <body>
     <div id="barcode-container"></div>
     <form
-      id="generateBookBarcodeForm"
-      name="generateBookBarcodeForm"
+      id="gen_book_barcode_form"
+      name="gen_book_barcode_form"
     >
       <input
         type="hidden"

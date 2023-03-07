@@ -31,7 +31,7 @@
           dataType: "json",
           success: processHistory,
         };
-        $("#getHistoryForm").ajaxForm(getHistoryOptions);
+        $("#get_history_form").ajaxForm(getHistoryOptions);
 
         $("#transaction_list_table").DataTable({
           columns: [
@@ -47,7 +47,7 @@
       });
 
       function processHistory(data) {
-        document.getElementById("getHistoryForm").reset();
+        document.getElementById("get_history_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -114,8 +114,8 @@
       <h3 style="color: #666666">貸出履歴</h3>
       <hr />
       <form
-        id="getHistoryForm"
-        name="getHistoryForm"
+        id="get_history_form"
+        name="get_history_form"
         action="/history/search"
         method="get"
         enctype="application/x-www-form-urlencoded"

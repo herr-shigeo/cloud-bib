@@ -31,7 +31,7 @@
           dataType: "json",
           success: processBookList,
         };
-        $("#getBookInfoForm").ajaxForm(getBookInfoOptions);
+        $("#get_book_form").ajaxForm(getBookInfoOptions);
 
         $("#book_list_table").DataTable({
           columns: [
@@ -53,7 +53,7 @@
       });
 
       function processBookList(data) {
-        document.getElementById("getBookInfoForm").reset();
+        document.getElementById("get_book_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -105,8 +105,8 @@
     <div class="full-container">
       <h3>図書検索</h3>
       <form
-        id="getBookInfoForm"
-        name="getBookInfoForm"
+        id="get_book_form"
+        name="get_book_form"
         action="/search/book"
         method="get"
         enctype="application/x-www-form-urlencoded"

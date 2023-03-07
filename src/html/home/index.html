@@ -31,13 +31,13 @@
           dataType: "json",
           success: processSearchUser,
         };
-        $("#searchUserForm").ajaxForm(searchUserOptions);
+        $("#search_user_form").ajaxForm(searchUserOptions);
 
         var returnBookOptions = {
           dataType: "json",
           success: retuprocessReturnedBook,
         };
-        $("#returnBookForm").ajaxForm(returnBookOptions);
+        $("#process_work_form").ajaxForm(returnBookOptions);
 
         document.getElementById("user_id").focus();
       });
@@ -73,11 +73,11 @@
             ") を返却しました";
         }
         setStatus(msg);
-        document.getElementById("returnBookForm").reset();
+        document.getElementById("process_work_form").reset();
       }
 
       function processSearchUser(data) {
-        document.getElementById("searchUserForm").reset();
+        document.getElementById("search_user_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -137,7 +137,7 @@
     <div style="padding-left: 6px">
       <p>貸出処理をするには利用者IDを入力して下さい</p>
       <form
-        name="selectUserForm"
+        name="select_user_form"
         action="/user/main"
         method="get"
         enctype="application/x-www-form-urlencoded"
@@ -158,8 +158,8 @@
       <div class="panel">
         <p>キーワードを入力後にEnterを押して検索</p>
         <form
-          id="searchUserForm"
-          name="searchUserForm"
+          id="search_user_form"
+          name="search_user_form"
           action="/search/user"
           method="get"
           enctype="application/x-www-form-urlencoded"
@@ -221,8 +221,8 @@
       <hr />
       <p>返却処理をするには図書IDを入力して下さい</p>
       <form
-        id="returnBookForm"
-        name="returnBookForm"
+        id="process_work_form"
+        name="process_work_form"
         action="/work/process"
         method="post"
         enctype="application/x-www-form-urlencoded"

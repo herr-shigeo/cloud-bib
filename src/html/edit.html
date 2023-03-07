@@ -28,22 +28,22 @@
           dataType: "json",
           success: processUserInfo,
         };
-        $("#getUserInfoForm").ajaxForm(getUserInfoOption);
+        $("#get_user_form").ajaxForm(getUserInfoOption);
 
         var getBookInfoOption = {
           dataType: "json",
           success: processBookInfo,
         };
-        $("#getBookInfoForm").ajaxForm(getBookInfoOption);
-        $("#getBookInfoByISBNForm").ajaxForm(getBookInfoOption);
+        $("#get_book_form").ajaxForm(getBookInfoOption);
+        $("#get_book_by_isbn_form").ajaxForm(getBookInfoOption);
 
         var registerOption = {
           dataType: "json",
           success: processRegister,
           timeout: 0,
         };
-        $("#registerUserForm").ajaxForm(registerOption);
-        $("#registerBookForm").ajaxForm(registerOption);
+        $("#register_users_by_csv_form").ajaxForm(registerOption);
+        $("#register_books_by_csv_form").ajaxForm(registerOption);
 
         $(function () {
           $.fn.autoKana('input[name="book_title"]', 'input[name="book_kana"]', {
@@ -55,7 +55,7 @@
       });
 
       function processUserInfo(data) {
-        document.getElementById("getUserInfoForm").reset();
+        document.getElementById("get_user_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -82,8 +82,8 @@
       }
 
       function processBookInfo(data) {
-        document.getElementById("getBookInfoForm").reset();
-        document.getElementById("getBookInfoByISBNForm").reset();
+        document.getElementById("get_book_form").reset();
+        document.getElementById("get_book_by_isbn_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -205,9 +205,9 @@
 
         fetchJsonData(event, formId, method, url, okMessage, null);
 
-        document.getElementById("updateUserInfoForm").reset();
+        document.getElementById("update_user_form").reset();
         document.getElementById("user_id_search").focus();
-        document.getElementById("updateBookInfoForm").reset();
+        document.getElementById("update_book_form").reset();
         document.getElementById("book_id_search").focus();
 
         setCurrentDate();
@@ -282,8 +282,8 @@
     <div class="panel">
       <p>既存データを修正する場合は、利用者IDを入力後にEnter</p>
       <form
-        id="getUserInfoForm"
-        name="getUserInfoForm"
+        id="get_user_form"
+        name="get_user_form"
         action="/search/user"
         method="get"
         enctype="application/x-www-form-urlencoded"
@@ -300,9 +300,9 @@
         <input type="hidden" name="category" value="" />
       </form>
       <form
-        id="updateUserInfoForm"
-        name="updateUserInfoForm"
-        onsubmit="return editData(event, 'updateUserInfoForm', '/edit/user')"
+        id="update_user_form"
+        name="update_user_form"
+        onsubmit="return editData(event, 'update_user_form', '/edit/user')"
       >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>
@@ -427,8 +427,8 @@
           <td>
             <p>既存データを修正する場合は、図書IDを入力後にEnter</p>
             <form
-              id="getBookInfoForm"
-              name="getBookInfoForm"
+              id="get_book_form"
+              name="get_book_form"
               action="/search/book"
               method="get"
               enctype="application/x-www-form-urlencoded"
@@ -450,8 +450,8 @@
           <td>
             <p>ISBNコードからデータを取得する場合は、ISBNを入力後にEnter</p>
             <form
-              id="getBookInfoByISBNForm"
-              name="getBookInfoByISBNForm"
+              id="get_book_by_isbn_form"
+              name="get_book_by_isbn_form"
               action="/search/isbn"
               method="get"
               enctype="application/x-www-form-urlencoded"
@@ -469,9 +469,9 @@
       </table>
 
       <form
-        id="updateBookInfoForm"
-        name="updateBookInfoForm"
-        onsubmit="return editData(event, 'updateBookInfoForm', '/edit/book')"
+        id="update_book_form"
+        name="update_book_form"
+        onsubmit="return editData(event, 'update_book_form', '/edit/book')"
       >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>
@@ -748,8 +748,8 @@
     <button class="accordion">一括登録</button>
     <div class="panel">
       <form
-        id="registerUserForm"
-        name="registerUserForm"
+        id="register_users_by_csv_form"
+        name="register_users_by_csv_form"
         action="/setting/import_user"
         method="post"
         enctype="multipart/form-data"
@@ -767,8 +767,8 @@
       </form>
 
       <form
-        id="registerBookForm"
-        name="registerBookForm"
+        id="register_books_by_csv_form"
+        name="register_books_by_csv_form"
         action="/setting/import_book"
         method="post"
         enctype="multipart/form-data"

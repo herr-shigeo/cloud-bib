@@ -35,13 +35,13 @@
           dataType: "json",
           success: processDelayedBookList,
         };
-        $("#getDelayedBookListForm").ajaxForm(getDelayedBookListOptions);
+        $("#get_delayed_book_form").ajaxForm(getDelayedBookListOptions);
 
         var getBookListOptions = {
           dataType: "json",
           success: processBookList,
         };
-        $("#getBookListForm").ajaxForm(getBookListOptions);
+        $("#get_book_form").ajaxForm(getBookListOptions);
 
         $("#delayedBookListTable").DataTable({
           columns: [
@@ -83,7 +83,7 @@
       });
 
       function processDelayedBookList(data) {
-        document.getElementById("getDelayedBookListForm").reset();
+        document.getElementById("get_delayed_book_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -130,7 +130,7 @@
       }
 
       function processBookList(data) {
-        document.getElementById("getBookListForm").reset();
+        document.getElementById("get_book_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -215,8 +215,8 @@
     <button class="accordion">図書</button>
     <div class="panel">
       <form
-        id="getBookListForm"
-        name="getBookListForm"
+        id="get_book_form"
+        name="get_book_form"
         action="/search/book"
         method="get"
         enctype="application/x-www-form-urlencoded"
@@ -293,8 +293,8 @@
     <div class="panel">
       <p>返却期限が過ぎている図書を検索</p>
       <form
-        id="getDelayedBookListForm"
-        name="getDelayedBookListForm"
+        id="get_delayed_book_form"
+        name="get_delayed_book_form"
         action="/search/delayed"
         method="get"
         enctype="application/x-www-form-urlencoded"

@@ -23,7 +23,7 @@
           dataType: "json",
           success: processAccountCreation,
         };
-        $("#createAccountForm").ajaxForm(createAccountOptions);
+        $("#create_account_form").ajaxForm(createAccountOptions);
       });
 
       function processAccountCreation(data) {
@@ -54,8 +54,8 @@
     <hr />
 
     <form
-      id="createAccountForm"
-      name="createAccountForm"
+      id="create_account_form"
+      name="create_account_form"
       action="/account/add"
       method="post"
       onsubmit="return postPasswordForm('form', 'password', 'confirm_password', 8)"
@@ -103,8 +103,12 @@
           />
 
           <div class="container">
-            <input type="checkbox" id="terms_checkbox" name="terms_checkbox"
-            required />
+            <input
+              type="checkbox"
+              id="terms_checkbox"
+              name="terms_checkbox"
+              required
+            />
             <label for="terms_checkbox"
               ><a href="/terms">利用規約</a>と<a href="/privacy"
                 >プライバシーポリシー</a
