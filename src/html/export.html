@@ -19,33 +19,12 @@
 
     <script>
       function get_link(data) {
-        $("#form").submit();
-      }
-
-      $(document).ready(function () {
-        var options1 = {
-          dataType: "json",
-          success: processJson,
-        };
-        $("#form").ajaxForm(options1);
-      });
-
-      function processJson(data) {
-        if (handleAuthError(data)) {
-          return;
-        }
-        if (handleError(data)) {
-          return;
-        }
+        sendLogout();
       }
     </script>
   </head>
 
   <body>
-    <form id="form" name="form" action="/auth/logout" method="post">
-      <input type="submit" id="invisible_logout" style="display: none" />
-    </form>
-
     <div class="topnav">
       <a class="active" href="/home/">ホーム</a>
       <a href="/search/main">図書検索</a>

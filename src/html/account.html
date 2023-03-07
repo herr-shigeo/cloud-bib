@@ -19,7 +19,7 @@
 
     <script>
       function get_link(data) {
-        $("#logoutForm").submit();
+        sendLogout();
       }
 
       $(document).ready(function () {
@@ -27,7 +27,6 @@
           dataType: "json",
           success: processJson,
         };
-        $("#logoutForm").ajaxForm(options);
         $("#form2").ajaxForm(options);
 
         var options2 = {
@@ -113,10 +112,6 @@
   </head>
 
   <body>
-    <form id="logoutForm" name="logoutForm" action="/auth/logout" method="post">
-      <input type="submit" id="invisible_logout" style="display: none" />
-    </form>
-
     <form id="getForm" name="getForm" action="/account/get" method="get">
       <input type="submit" id="invisible_submit" style="display: none" />
     </form>

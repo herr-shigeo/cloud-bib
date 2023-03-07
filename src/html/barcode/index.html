@@ -27,7 +27,7 @@
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
       function get_link(data) {
-        $("#form").submit();
+        sendLogout();
       }
 
       function setRangeControl(control, display) {
@@ -39,33 +39,14 @@
       }
 
       $(document).ready(function () {
-        var options = {
-          dataType: "json",
-          success: processJson,
-        };
-        $("#form").ajaxForm(options);
-
         setRangeControl("#barcode_width_control", "#barcode_width_display");
         setRangeControl("#barcode_height_control", "#barcode_height_display");
         setRangeControl("#barcode_margin_control", "#barcode_margin_display");
       });
-
-      function processJson(data) {
-        if (handleAuthError(data)) {
-          return;
-        }
-        if (handleError(data)) {
-          return;
-        }
-      }
     </script>
   </head>
 
   <body>
-    <form id="form" name="form" action="/auth/logout" method="post">
-      <input type="submit" id="invisible_logout" style="display: none" />
-    </form>
-
     <div class="topnav">
       <a class="active" href="/home/">ホーム</a>
       <a href="/search/main">図書検索</a>
