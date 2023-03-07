@@ -20,7 +20,7 @@ pub async fn load(_session: Session) -> HttpResponse {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct FormData {
+pub struct GetHistoryForm {
     pub user_id: String,
     pub user_name: String,
     pub book_id: String,
@@ -29,7 +29,7 @@ pub struct FormData {
 
 pub async fn search(
     session: Session,
-    form: web::Query<FormData>,
+    form: web::Query<GetHistoryForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     debug!("{:?}", form);
