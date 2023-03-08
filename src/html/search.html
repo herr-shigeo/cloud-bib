@@ -19,26 +19,9 @@
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
       crossorigin="anonymous"
     ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
-      integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"
-    ></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
-      $(document).ready(function () {
-        var getDelayedBookListOptions = {
-          dataType: "json",
-          success: processDelayedBookList,
-        };
-        $("#get_delayed_book_form").ajaxForm(getDelayedBookListOptions);
-
-        var getBookListOptions = {
-          dataType: "json",
-          success: processBookList,
-        };
-        $("#get_book_form").ajaxForm(getBookListOptions);
-
+      document.addEventListener("DOMContentLoaded", function () {
         $("#delayedBookListTable").DataTable({
           columns: [
             { data: "user_id" },
@@ -78,7 +61,27 @@
         });
       });
 
-      function processDelayedBookList(data) {
+      function submitSearchDelayedBook() {
+        const url = constructUrlFromForm(
+          "get_delayed_book_form",
+          "/search/delayed"
+        );
+        fetch(url, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            processDelayedBook(data);
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
+      }
+
+      function processDelayedBook(data) {
         document.getElementById("get_delayed_book_form").reset();
 
         if (handleAuthError(data)) {
@@ -125,7 +128,24 @@
         });
       }
 
-      function processBookList(data) {
+      function submitSearchBook() {
+        const url = constructUrlFromForm("get_book_form", "/search/book");
+        fetch(url, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            processBook(data);
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
+      }
+
+      function processBook(data) {
         document.getElementById("get_book_form").reset();
 
         if (handleAuthError(data)) {
@@ -201,7 +221,9 @@
       <a href="/history/main">貸出履歴</a>
       <a href="/barcode/main">バーコード作成</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:sendLogout();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();"
+          >ログアウト</a
+        >
       </div>
     </div>
 
@@ -213,9 +235,7 @@
       <form
         id="get_book_form"
         name="get_book_form"
-        action="/search/book"
-        method="get"
-        enctype="application/x-www-form-urlencoded"
+        onsubmit="submitSearchBook(); return false;"
       >
         <table>
           <tr>
@@ -291,9 +311,7 @@
       <form
         id="get_delayed_book_form"
         name="get_delayed_book_form"
-        action="/search/delayed"
-        method="get"
-        enctype="application/x-www-form-urlencoded"
+        onsubmit="submitSearchDelayedBook(); return false;"
       >
         <button type="submit">検索</button>
       </form>
