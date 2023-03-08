@@ -22,12 +22,7 @@
         sendLogout();
       }
 
-      $(document).ready(function () {
-        var processWorkOptions = {
-          dataType: "json",
-          success: processWork,
-        };
-        $("#process_work_form").ajaxForm(processWorkOptions);
+      document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("invisible_submit").click();
         document.getElementById("borrowed_book_id").focus();
       });
@@ -134,9 +129,7 @@
       <form
         id="process_work_form"
         name="process_work_form"
-        action="/work/process"
-        method="post"
-        enctype="application/x-www-form-urlencoded"
+        onsubmit="fetchJsonData(event, 'process_work_form', 'POST', '/work/process', null, processWork); return false;"
       >
         <input type="hidden" name="user_id" id="user_id" value="{{USER_ID}}" />
         <table>

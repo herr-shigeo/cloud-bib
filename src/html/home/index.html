@@ -156,7 +156,6 @@
           id="search_user_form"
           name="search_user_form"
           onsubmit="submitSearchUser(); return false;"
-          enctype="application/x-www-form-urlencoded"
         >
           <table>
             <tr>
@@ -218,7 +217,6 @@
         id="process_work_form"
         name="process_work_form"
         onsubmit="fetchJsonData(event, 'process_work_form', 'POST', '/work/process', null, processReturnedBook); return false;"
-        enctype="application/x-www-form-urlencoded"
       >
         <input type="hidden" name="user_id" value="" />
         <input type="hidden" name="borrowed_book_id" value="" />
