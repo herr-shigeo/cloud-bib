@@ -303,7 +303,7 @@ pub async fn user_password(
 }
 
 pub async fn request_reset(
-    form: web::Form<UpdateProfileForm>,
+    form: web::Json<UpdateProfileForm>,
     token_map: web::Data<ResetToken>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {

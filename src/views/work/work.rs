@@ -30,7 +30,7 @@ pub struct ProcessWorkForm {
 
 pub async fn process(
     session: Session,
-    form: web::Form<ProcessWorkForm>,
+    form: web::Json<ProcessWorkForm>,
     data: web::Data<Mutex<ClientHolder>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
     cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
