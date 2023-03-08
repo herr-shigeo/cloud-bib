@@ -12,39 +12,30 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://www.cloudbib.net/js/jquery.autoKana.js"></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
-      integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"
-    ></script>
 
     <script>
       function get_link(data) {
         sendLogout();
       }
 
-      $(document).ready(function () {
-        var getUserInfoOption = {
-          dataType: "json",
-          success: processUserInfo,
-        };
-        $("#get_user_form").ajaxForm(getUserInfoOption);
+      function submitSearch(formId, url, callback) {
+        const newUrl = constructUrlFromForm(formId, url);
+        fetch(newUrl, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            callback(data);
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
+      }
 
-        var getBookInfoOption = {
-          dataType: "json",
-          success: processBookInfo,
-        };
-        $("#get_book_form").ajaxForm(getBookInfoOption);
-        $("#get_book_by_isbn_form").ajaxForm(getBookInfoOption);
-
-        var registerOption = {
-          dataType: "json",
-          success: processRegister,
-          timeout: 0,
-        };
-        $("#register_users_by_csv_form").ajaxForm(registerOption);
-        $("#register_books_by_csv_form").ajaxForm(registerOption);
-
+      document.addEventListener("DOMContentLoaded", function () {
         $(function () {
           $.fn.autoKana('input[name="book_title"]', 'input[name="book_kana"]', {
             katakana: true,
@@ -215,17 +206,6 @@
         return false;
       }
 
-      function processRegister(data) {
-        setProgressBar(false);
-        if (handleAuthError(data)) {
-          return;
-        }
-        if (handleError(data)) {
-          return;
-        }
-        alert("登録しました");
-      }
-
       var g_processing = false;
 
       function setProgressBar(processing) {
@@ -284,9 +264,7 @@
       <form
         id="get_user_form"
         name="get_user_form"
-        action="/search/user"
-        method="get"
-        enctype="application/x-www-form-urlencoded"
+        onsubmit="submitSearch('get_user_form', '/search/user', processUserInfo); return false;"
       >
         <label for="value"><b>利用者ID</b></label>
         <input
@@ -429,9 +407,7 @@
             <form
               id="get_book_form"
               name="get_book_form"
-              action="/search/book"
-              method="get"
-              enctype="application/x-www-form-urlencoded"
+              onsubmit="submitSearch('get_book_form', '/search/book', processBookInfo); return false;"
             >
               <label for="value"><b>図書ID</b></label>
               <input
@@ -452,9 +428,7 @@
             <form
               id="get_book_by_isbn_form"
               name="get_book_by_isbn_form"
-              action="/search/isbn"
-              method="get"
-              enctype="application/x-www-form-urlencoded"
+              onsubmit="submitSearch('get_book_by_isbn_form', '/search/isbn', processBookInfo); return false;"
             >
               <label for="value"><b>ISBN</b></label>
               <input
@@ -750,9 +724,7 @@
       <form
         id="register_users_by_csv_form"
         name="register_users_by_csv_form"
-        action="/setting/import_user"
-        method="post"
-        enctype="multipart/form-data"
+        onsubmit="fetchJsonData(event, 'register_users_by_csv_form', 'POST', '/setting/import_user', '登録しました', null); return false;"
       >
         <input
           type="file"
@@ -769,9 +741,7 @@
       <form
         id="register_books_by_csv_form"
         name="register_books_by_csv_form"
-        action="/setting/import_book"
-        method="post"
-        enctype="multipart/form-data"
+        onsubmit="fetchJsonData(event, 'register_books_by_csv_form', 'POST', '/setting/import_book', '登録しました', null); return false;"
       >
         <input
           type="file"
