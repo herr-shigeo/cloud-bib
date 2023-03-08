@@ -22,10 +22,6 @@
     ></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
-      function get_link(data) {
-        sendLogout();
-      }
-
       $(document).ready(function () {
         var getHistoryOptions = {
           dataType: "json",
@@ -106,7 +102,7 @@
       <a href="/history/main">貸出履歴</a>
       <a href="/barcode/main">バーコード作成</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();">ログアウト</a>
       </div>
     </div>
 

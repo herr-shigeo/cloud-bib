@@ -13,10 +13,6 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
-      function get_link(data) {
-        sendLogout();
-      }
-
       document.addEventListener("DOMContentLoaded", function () {
         const dataTable = new DataTable("#transaction_list_table", {
           columns: [
@@ -131,7 +127,7 @@
       <a class="active" href="/member/home/">ホーム</a>
       <a href="/member/search/main">図書検索</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();">ログアウト</a>
       </div>
     </div>
 

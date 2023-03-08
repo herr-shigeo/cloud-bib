@@ -22,10 +22,6 @@
     ></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
-      function get_link(data) {
-        sendLogout();
-      }
-
       $(document).ready(function () {
         var getBookInfoOptions = {
           dataType: "json",
@@ -98,7 +94,7 @@
       <a class="active" href="/member/home">ホーム</a>
       <a href="/member/search/main">図書検索</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();">ログアウト</a>
       </div>
     </div>
 

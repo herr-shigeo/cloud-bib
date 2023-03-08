@@ -7,10 +7,6 @@
     <link rel="stylesheet" href="https://www.cloudbib.net/css/default.css" />
     <script src="https://www.cloudbib.net/js/util.js"></script>
     <script>
-      function get_link(data) {
-        sendLogout();
-      }
-
       document.addEventListener("DOMContentLoaded", function () {
         fetch("/setting/get")
           .then((response) => response.json())
@@ -60,7 +56,7 @@
       <a href="/history/main">貸出履歴</a>
       <a href="/barcode/main">バーコード作成</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:get_link();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();">ログアウト</a>
       </div>
     </div>
 
