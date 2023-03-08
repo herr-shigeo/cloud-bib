@@ -64,7 +64,7 @@
       function submitSearchDelayedBook() {
         const url = constructUrlFromForm(
           "get_delayed_book_form",
-          "/search/delayed"
+          "/book/delayed/search"
         );
         fetch(url, {
           method: "GET",
@@ -129,7 +129,7 @@
       }
 
       function submitSearchBook() {
-        const url = constructUrlFromForm("get_book_form", "/search/book");
+        const url = constructUrlFromForm("get_book_form", "/book/search");
         fetch(url, {
           method: "GET",
         })

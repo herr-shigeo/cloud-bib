@@ -129,13 +129,13 @@ pub async fn login(
 
     match form.user_category.as_str() {
         "admin" => {
-            reply.path_to_home = "/account/main".to_owned();
+            reply.redirect_to = "/account/main".to_owned();
         }
         "operator" => {
-            reply.path_to_home = "/home/".to_owned();
+            reply.redirect_to = "/home/".to_owned();
         }
         "user" => {
-            reply.path_to_home = "/member/home".to_owned();
+            reply.redirect_to = "/member/home-page".to_owned();
         }
         &_ => {}
     }

@@ -38,7 +38,7 @@
       });
 
       function submitSearchBook() {
-        const url = constructUrlFromForm("get_book_form", "/search/book");
+        const url = constructUrlFromForm("get_book_form", "/book/search");
         fetch(url, {
           method: "GET",
         })
@@ -97,8 +97,8 @@
 
   <body>
     <div class="topnav">
-      <a class="active" href="/member/home">ホーム</a>
-      <a href="/member/search/main">図書検索</a>
+      <a class="active" href="/member/home-page">ホーム</a>
+      <a href="/member/search-page">図書検索</a>
       <div class="topnav-right">
         <a href="javascript:{}" onclick="javascript:sendLogout();"
           >ログアウト</a

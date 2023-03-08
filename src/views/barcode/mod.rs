@@ -11,7 +11,7 @@ pub fn barcode_factory(app: &mut web::ServiceConfig) {
         web::get().to(barcode::load),
     )
     .route(
-        &base_path.define(String::from("/user/get_page")),
+        &base_path.define(String::from("/user/page")),
         web::get().to(barcode::get_user_page),
     )
     .route(
@@ -19,7 +19,7 @@ pub fn barcode_factory(app: &mut web::ServiceConfig) {
         web::post().to(barcode::generate_user_barocde),
     )
     .route(
-        &base_path.define(String::from("/book/get_page")),
+        &base_path.define(String::from("/book/page")),
         web::get().to(barcode::get_book_page),
     )
     .route(

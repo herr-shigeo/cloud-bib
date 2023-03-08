@@ -29,11 +29,11 @@ function handleRedirect(data) {
   if (isAuthError(data)) {
     window.location.href = "/login/";
   } else if (
-    data.path_to_home !== undefined &&
-    data.path_to_home !== null &&
-    data.path_to_home !== ""
+    data.redirect_to !== undefined &&
+    data.redirect_to !== null &&
+    data.redirect_to !== ""
   ) {
-    window.location.href = data.path_to_home;
+    window.location.href = data.redirect_to;
   }
 }
 

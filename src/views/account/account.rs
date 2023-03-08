@@ -54,15 +54,8 @@ pub struct ResetPasswordForm {
     pub reset_token: String,
 }
 
-pub async fn load_main(_session: Session) -> HttpResponse {
+pub async fn load(_session: Session) -> HttpResponse {
     let html_data = read_file("src/html/account.html").unwrap();
-    HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
-        .body(html_data)
-}
-
-pub async fn load_register(_session: Session) -> HttpResponse {
-    let html_data = read_file("src/html/account_register.html").unwrap();
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(html_data)
@@ -161,7 +154,7 @@ pub async fn add(
     )?;
 
     let mut reply = Reply::default();
-    reply.path_to_home = "/account/main".to_owned();
+    reply.redirect_to = "/account/main".to_owned();
 
     Ok(HttpResponse::Ok().json(reply))
 }
@@ -240,7 +233,7 @@ pub async fn delete(
     session.purge();
 
     let mut reply = Reply::default();
-    reply.path_to_home = "/login/".to_owned();
+    reply.redirect_to = "/login/".to_owned();
     Ok(HttpResponse::Ok().json(reply))
 }
 
@@ -352,14 +345,14 @@ pub async fn do_reset(
     update_password(&data, &form.uname, "admin", &form.password).await?;
 
     let mut reply = Reply::default();
-    reply.path_to_home = "/login/".to_owned();
+    reply.redirect_to = "/login/".to_owned();
     Ok(HttpResponse::Ok().json(reply))
 }
 
 fn send_email_to_reset(to: &str, token: &str) -> Result<(), BibErrorResponse> {
     let subject = "Reset password for Cloudbib";
     let link = format!(
-        "https://www.cloudbib.net/account/prepare_reset?reset_token={}",
+        "https://www.cloudbib.net/account/reset/prepare?reset_token={}",
         token
     );
     let text = format!("パスワードリセット用のリンクを送ります。\n こちらのリンク先からパスワードをリセットして下さい。 \n{}", link);

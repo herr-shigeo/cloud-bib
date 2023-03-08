@@ -8,7 +8,7 @@
     <script src="https://www.cloudbib.net/js/util.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        fetch("/setting/get")
+        fetch("/setting/all")
           .then((response) => response.json())
           .then((data) => {
             processGetSetting(data);
@@ -67,7 +67,7 @@
       <form
         id="update_rental_setting_form"
         name="update_rental_setting_form"
-        onsubmit="fetchJsonData(event, 'update_rental_setting_form', 'PUT', '/setting/update/rental', '変更しました', null); return false;"
+        onsubmit="fetchJsonData(event, 'update_rental_setting_form', 'PUT', '/setting/rental', '変更しました', null); return false;"
       >
         <table>
           <tr>
@@ -90,7 +90,7 @@
       <form
         id="update_barcode_setting_form"
         name="update_barcode_setting_form"
-        onsubmit="fetchJsonData(event, 'update_barcode_setting_form', 'PUT', '/setting/update/barcode', '変更しました', null); return false;"
+        onsubmit="fetchJsonData(event, 'update_barcode_setting_form', 'PUT', '/setting/barcode', '変更しました', null); return false;"
       >
         <table>
           <tr>

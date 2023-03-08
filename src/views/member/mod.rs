@@ -7,15 +7,15 @@ pub fn member_factory(app: &mut web::ServiceConfig) {
         prefix: String::from("/member"),
     };
     app.route(
-        &base_path.define(String::from("/borrowed_books")),
+        &base_path.define(String::from("/borrowed-books")),
         web::get().to(member::borrowed_books),
     )
     .route(
-        &base_path.define(String::from("/search/main")),
+        &base_path.define(String::from("/search-page")),
         web::get().to(member::load_search),
     )
     .route(
-        &base_path.define(String::from("/home")),
+        &base_path.define(String::from("/home-page")),
         web::get().to(member::load_home),
     );
 }

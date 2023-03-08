@@ -18,7 +18,7 @@
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
       function submitSearchUser() {
-        const url = constructUrlFromForm("search_user_form", "/search/user");
+        const url = constructUrlFromForm("search_user_form", "/user/search");
         fetch(url, {
           method: "GET",
         })

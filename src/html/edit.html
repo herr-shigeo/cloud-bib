@@ -260,7 +260,7 @@
       <form
         id="get_user_form"
         name="get_user_form"
-        onsubmit="submitSearch('get_user_form', '/search/user', processUserInfo); return false;"
+        onsubmit="submitSearch('get_user_form', '/user/search', processUserInfo); return false;"
       >
         <label for="value"><b>利用者ID</b></label>
         <input
@@ -276,7 +276,7 @@
       <form
         id="update_user_form"
         name="update_user_form"
-        onsubmit="editData(event, 'update_user_form', '/edit/user'); return false;"
+        onsubmit="editData(event, 'update_user_form', '/user/profile'); return false;"
       >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>
@@ -403,7 +403,7 @@
             <form
               id="get_book_form"
               name="get_book_form"
-              onsubmit="submitSearch('get_book_form', '/search/book', processBookInfo); return false;"
+              onsubmit="submitSearch('get_book_form', '/book/search', processBookInfo); return false;"
             >
               <label for="value"><b>図書ID</b></label>
               <input
@@ -424,7 +424,7 @@
             <form
               id="get_book_by_isbn_form"
               name="get_book_by_isbn_form"
-              onsubmit="submitSearch('get_book_by_isbn_form', '/search/isbn', processBookInfo); return false;"
+              onsubmit="submitSearch('get_book_by_isbn_form', '/book/isbn/search', processBookInfo); return false;"
             >
               <label for="value"><b>ISBN</b></label>
               <input
@@ -441,7 +441,7 @@
       <form
         id="update_book_form"
         name="update_book_form"
-        onsubmit="editData(event, 'update_book_form', '/edit/book'); return false;"
+        onsubmit="editData(event, 'update_book_form', '/book/profile'); return false;"
       >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>
@@ -720,7 +720,7 @@
       <form
         id="register_users_by_csv_form"
         name="register_users_by_csv_form"
-        onsubmit="fetchJsonData(event, 'register_users_by_csv_form', 'POST', '/setting/import_user', '登録しました', null); return false;"
+        onsubmit="fetchJsonData(event, 'register_users_by_csv_form', 'POST', '/user/profile/csv', '登録しました', null); return false;"
       >
         <input
           type="file"
@@ -737,7 +737,7 @@
       <form
         id="register_books_by_csv_form"
         name="register_books_by_csv_form"
-        onsubmit="fetchJsonData(event, 'register_books_by_csv_form', 'POST', '/setting/import_book', '登録しました', null); return false;"
+        onsubmit="fetchJsonData(event, 'register_books_by_csv_form', 'POST', '/book/profile/csv', '登録しました', null); return false;"
       >
         <input
           type="file"

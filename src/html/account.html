@@ -8,7 +8,7 @@
     <script src="https://www.cloudbib.net/js/util.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        fetch("/account/get")
+        fetch("/account/profile")
           .then((response) => response.json())
           .then((data) => {
             processGetAccount(data);
@@ -137,7 +137,7 @@
           <form
             id="update_profile_form"
             name="update_profile_form"
-            onsubmit="fetchJsonData(event, 'update_profile_form', 'PUT', '/account/update', '変更しました', null); return false;"
+            onsubmit="fetchJsonData(event, 'update_profile_form', 'PUT', '/account/profile', '変更しました', null); return false;"
           >
             <label for="uname"><b>ユーザー名</b></label>
             <input type="text" readonly name="uname" id="uname" /><br />
@@ -153,7 +153,7 @@
           <form
             id="deleteForm"
             name="deleteForm"
-            onsubmit="fetchJsonData(event, 'deleteForm', 'DELETE', '/account/delete', 'アカウントを削除しました', null); return false;"
+            onsubmit="fetchJsonData(event, 'deleteForm', 'DELETE', '/account/profile', 'アカウントを削除しました', null); return false;"
           >
             <button
               type="submit"
@@ -170,7 +170,7 @@
           <form
             id="update_admin_password_form"
             name="update_admin_password_form"
-            onsubmit="updatePassword(event, '/account/admin_password', 'update_admin_password_form', 'admin_uname', 'password', 'confirm_password', 8); return false;"
+            onsubmit="updatePassword(event, '/account/admin/password', 'update_admin_password_form', 'admin_uname', 'password', 'confirm_password', 8); return false;"
           >
             <input type="hidden" name="uname" id="admin_uname" />
             <label for="password"><b>管理者パスワード</b></label>
@@ -199,7 +199,7 @@
           <form
             id="update_operator_password_form"
             name="update_operator_password_form"
-            onsubmit="updatePassword(event, '/account/operator_password', 'update_operator_password_form', 'operator_uname', 'password', 'confirm_password', 8); return false;"
+            onsubmit="updatePassword(event, '/account/operator/password', 'update_operator_password_form', 'operator_uname', 'password', 'confirm_password', 8); return false;"
           >
             <input type="hidden" name="uname" id="operator_uname" />
             <label for="operator_password"><b>司書パスワード</b></label>
@@ -233,7 +233,7 @@
           <form
             id="update_user_password_form"
             name="update_user_password_form"
-            onsubmit="updatePassword(event, '/account/user_password', 'update_user_password_form', 'user_uname', 'password', 'confirm_password', 8); return false;"
+            onsubmit="updatePassword(event, '/account/user/password', 'update_user_password_form', 'user_uname', 'password', 'confirm_password', 8); return false;"
           >
             <input type="hidden" name="uname" id="user_uname" />
             <label for="user_password"><b>利用者パスワード</b></label>
