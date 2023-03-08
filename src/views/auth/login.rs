@@ -27,7 +27,7 @@ pub struct LoginForm {
 
 pub async fn login(
     session: Session,
-    form: web::Form<LoginForm>,
+    form: web::Json<LoginForm>,
     data: web::Data<Mutex<ClientHolder>>,
 ) -> Result<HttpResponse, BibErrorResponse> {
     let db = get_db_with_name(&data, &DB_COMMON_NAME.to_string()).await?;
