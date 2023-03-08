@@ -70,7 +70,7 @@ pub async fn load_register(_session: Session) -> HttpResponse {
 
 pub async fn add(
     session: Session,
-    form: web::Form<CreateAccountForm>,
+    form: web::Json<CreateAccountForm>,
     data: web::Data<Mutex<ClientHolder>>,
     cache_map: web::Data<Mutex<HashMap<String, Cache>>>,
     setting_map: web::Data<Mutex<HashMap<String, SystemSetting>>>,
