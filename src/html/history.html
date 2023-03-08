@@ -15,20 +15,29 @@
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
       crossorigin="anonymous"
     ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
-      integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
-      crossorigin="anonymous"
-    ></script>
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script>
-      $(document).ready(function () {
-        var getHistoryOptions = {
-          dataType: "json",
-          success: processHistory,
-        };
-        $("#get_history_form").ajaxForm(getHistoryOptions);
+      function submitSearchHistory() {
+        const url = constructUrlFromForm(
+          "search_history_form",
+          "/history/search"
+        );
+        fetch(url, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            processHistory(data);
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
+      }
 
+      document.addEventListener("DOMContentLoaded", function () {
         $("#transaction_list_table").DataTable({
           columns: [
             { data: "user_id" },
@@ -43,7 +52,7 @@
       });
 
       function processHistory(data) {
-        document.getElementById("get_history_form").reset();
+        document.getElementById("search_history_form").reset();
 
         if (handleAuthError(data)) {
           return;
@@ -102,7 +111,9 @@
       <a href="/history/main">貸出履歴</a>
       <a href="/barcode/main">バーコード作成</a>
       <div class="topnav-right">
-        <a href="javascript:{}" onclick="javascript:sendLogout();">ログアウト</a>
+        <a href="javascript:{}" onclick="javascript:sendLogout();"
+          >ログアウト</a
+        >
       </div>
     </div>
 
@@ -110,11 +121,9 @@
       <h3 style="color: #666666">貸出履歴</h3>
       <hr />
       <form
-        id="get_history_form"
-        name="get_history_form"
-        action="/history/search"
-        method="get"
-        enctype="application/x-www-form-urlencoded"
+        id="search_history_form"
+        name="search_history_form"
+        onsubmit="submitSearchHistory(); return false;"
       >
         <table>
           <tr>
