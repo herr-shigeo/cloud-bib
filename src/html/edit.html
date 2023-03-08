@@ -302,7 +302,7 @@
       <form
         id="update_user_form"
         name="update_user_form"
-        onsubmit="return editData(event, 'update_user_form', '/edit/user')"
+        onsubmit="editData(event, 'update_user_form', '/edit/user'); return false;"
       >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>
@@ -471,7 +471,7 @@
       <form
         id="update_book_form"
         name="update_book_form"
-        onsubmit="return editData(event, 'update_book_form', '/edit/book')"
+        onsubmit="editData(event, 'update_book_form', '/edit/book'); return false;"
       >
         <div class="container">
           <p>項目を入力/修正後、実行ボタンを押して実行</p>

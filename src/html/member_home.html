@@ -27,7 +27,7 @@
           ],
         });
 
-        const url = constructUrlFromForm("get-history-form", "/history/search");
+        const url = constructUrlFromForm("get_history_form", "/history/search");
         fetch(url, {
           method: "GET",
         })
@@ -136,8 +136,8 @@
     </div>
 
     <form
-      id="get-history-form"
-      name="get-history-form"
+      id="get_history_form"
+      name="get_history_form"
       enctype="application/x-www-form-urlencoded"
     >
       <input type="hidden" name="user_id" id="user_id" value="{{USER_ID}}" />

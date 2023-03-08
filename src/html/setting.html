@@ -71,7 +71,7 @@
       <form
         id="update_rental_setting_form"
         name="update_rental_setting_form"
-        onsubmit="return fetchJsonData(event, 'update_rental_setting_form', 'PUT', '/setting/update/rental', '変更しました', null)"
+        onsubmit="fetchJsonData(event, 'update_rental_setting_form', 'PUT', '/setting/update/rental', '変更しました', null); return false;"
       >
         <table>
           <tr>
@@ -94,7 +94,7 @@
       <form
         id="update_barcode_setting_form"
         name="update_barcode_setting_form"
-        onsubmit="return fetchJsonData(event, 'update_barcode_setting_form', 'PUT', '/setting/update/barcode', '変更しました', null)"
+        onsubmit="fetchJsonData(event, 'update_barcode_setting_form', 'PUT', '/setting/update/barcode', '変更しました', null); return false;"
       >
         <table>
           <tr>
