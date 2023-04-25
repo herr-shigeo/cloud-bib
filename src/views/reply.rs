@@ -22,8 +22,8 @@ pub struct Reply {
     pub barcode_size: u32,
 }
 
-impl Reply {
-    pub fn default() -> Self {
+impl Default for Reply {
+    fn default() -> Self {
         Self {
             success: true,
             redirect_to: String::new(),

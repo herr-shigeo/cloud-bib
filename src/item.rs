@@ -125,7 +125,7 @@ pub fn atoi(a: &str) -> Result<u32, Box<dyn error::Error>> {
     Ok(i)
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct User {
     pub id: u32,
     pub name: String,
@@ -139,8 +139,9 @@ pub struct User {
     pub borrowed_books: Vec<BorrowedBook>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub enum MonthlyPlan {
+    #[default]
     Free,
     Light,
     Standard,
@@ -180,7 +181,7 @@ impl MonthlyPlan {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct SystemUser {
     pub uname: String,
     pub email: String,
@@ -192,7 +193,7 @@ pub struct SystemUser {
     pub subscription_id: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct BorrowedBook {
     pub book_id: u32,
     pub book_title: String,
@@ -202,7 +203,7 @@ pub struct BorrowedBook {
     pub location: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Book {
     pub id: u32,
     pub title: String,
@@ -257,7 +258,7 @@ pub struct SystemSetting {
     pub max_parallel_registrations: u32,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct TransactionItem {
     pub id: u32,
     pub user_id: u32,
@@ -269,21 +270,6 @@ pub struct TransactionItem {
 }
 
 impl User {
-    pub fn default() -> Self {
-        Self {
-            id: 0,
-            name: String::new(),
-            kana: String::new(),
-            category: String::new(),
-            grade: String::new(),
-            remark: String::new(),
-            register_date: String::new(),
-            borrowed_count: 0,
-            reserved: String::new(),
-            borrowed_books: vec![],
-        }
-    }
-
     pub fn new(
         id: &str,
         name: &str,
@@ -309,34 +295,8 @@ impl User {
     }
 }
 
-impl SystemUser {
-    pub fn default() -> Self {
-        Self {
-            uname: String::new(),
-            email: String::new(),
-            password: String::new(),
-            operator_password: String::new(),
-            user_password: String::new(),
-            dbname: String::new(),
-            plan: MonthlyPlan::Free,
-            subscription_id: String::new(),
-        }
-    }
-}
-
 #[allow(dead_code)]
 impl BorrowedBook {
-    pub fn default() -> Self {
-        Self {
-            book_id: 0,
-            book_title: String::new(),
-            borrowed_date: String::new(),
-            return_deadline: String::new(),
-            transaction_id: 0,
-            location: String::new(),
-        }
-    }
-
     pub fn new(
         id: u32,
         title: &str,
@@ -358,35 +318,6 @@ impl BorrowedBook {
 }
 
 impl Book {
-    pub fn default() -> Self {
-        Self {
-            id: 0,
-            title: String::new(),
-            location: String::new(),
-            category: String::new(),
-            status: String::new(),
-            author: String::new(),
-            publisher: String::new(),
-            published_date: String::new(),
-            series: String::new(),
-            page: String::new(),
-            volume: String::new(),
-            kana: String::new(),
-            category_symbol: String::new(),
-            library_symbol: String::new(),
-            volume_symbol: String::new(),
-            forbidden: String::new(),
-            remark: String::new(),
-            isbn: String::new(),
-            register_type: String::new(),
-            register_date: String::new(),
-
-            borrowed_count: 0,
-            owner_id: None,
-            return_deadline: None,
-        }
-    }
-
     pub fn new(
         id: &str,
         title: &str,
@@ -438,15 +369,17 @@ impl Book {
     }
 }
 
-impl RentalSetting {
-    pub fn default() -> Self {
+impl Default for RentalSetting {
+    fn default() -> Self {
         Self {
             id: 1,
             num_books: 10,
             num_days: 14,
         }
     }
+}
 
+impl RentalSetting {
     pub fn new(num_books: &str, num_days: &str) -> Result<Self, Box<dyn error::Error>> {
         let r = Self {
             id: 1,
@@ -457,8 +390,8 @@ impl RentalSetting {
     }
 }
 
-impl BarcodeSetting {
-    pub fn default() -> Self {
+impl Default for BarcodeSetting {
+    fn default() -> Self {
         Self {
             id: 1,
             user_keta_min: 0,
@@ -467,7 +400,9 @@ impl BarcodeSetting {
             book_keta_max: 9999,
         }
     }
+}
 
+impl BarcodeSetting {
     pub fn new(
         user_keta_min: &str,
         user_keta_max: &str,
@@ -485,8 +420,8 @@ impl BarcodeSetting {
     }
 }
 
-impl SystemSetting {
-    pub fn default() -> Self {
+impl Default for SystemSetting {
+    fn default() -> Self {
         Self {
             id: 1,
             max_num_transactions: 0,
@@ -500,17 +435,6 @@ impl SystemSetting {
 }
 
 impl TransactionItem {
-    pub fn default() -> Self {
-        Self {
-            id: 0,
-            user_id: 0,
-            user_name: String::new(),
-            book_id: 0,
-            book_title: String::new(),
-            borrowed_date: String::new(),
-            returned_date: String::new(),
-        }
-    }
     pub fn new(user_id: u32, user_name: &str, book_id: u32, book_title: &str) -> Self {
         Self {
             id: 0,
