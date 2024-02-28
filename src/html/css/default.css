@@ -1,6 +1,9 @@
-body {font-family: Arial, Helvetica, sans-serif;}
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
 
-input[type=text], input[type=password] {
+input[type=text],
+input[type=password] {
   width: 70%;
   padding: 12px 10px;
   margin: 14px 14px;
@@ -9,7 +12,8 @@ input[type=text], input[type=password] {
   box-sizing: border-box;
 }
 
-.full-container input[type=text], input[type=password] {
+.full-container input[type=text],
+input[type=password] {
   width: 100%;
   padding: 12px 10px;
   margin: 14px 0;
@@ -77,6 +81,17 @@ a {
   padding: 16px;
 }
 
+.flex-container {
+  display: flex;
+  align-items: center; /* 要素を垂直方向の中心に配置 */
+  justify-content: flex-start; /* 要素を水平方向の開始点に配置 */
+}
+
+.linkcontainer a {
+  margin-right: 16px;
+  display: inline-block;
+}
+
 span.password {
   float: right;
   padding-top: 16px;
@@ -110,10 +125,6 @@ span.password {
   float: right;
 }
 
-.divscroll {
-  <div style="padding-left:16px">
-}
-
 table {
   border-spacing: 2px;
   width: 100%;
@@ -126,7 +137,7 @@ table th {
   text-align: left;
   padding: 8px;
 }
- 
+
 
 table.user-info {
   width: 100%;
@@ -160,18 +171,22 @@ table.grid tr:hover {
 }
 
 table.grid thead {
-  display:table-header-group;
+  display: table-header-group;
   vertical-align: middle;
 }
- 
+
 table.grid tfoot {
-  display:table-footer-group;
+  display: table-footer-group;
   background-color: #2196F3;
   color: white;
   text-align: left;
   padding: 8px;
 }
- 
+
+.date-picker-container {
+  text-align: center;
+}
+
 .accordion {
   background-color: #eee;
   font-weight: bold;
@@ -186,8 +201,9 @@ table.grid tfoot {
   transition: 0.4s;
 }
 
-.active, .accordion:hover {
-  background-color: #ccc; 
+.active,
+.accordion:hover {
+  background-color: #ccc;
 }
 
 .panel {
@@ -216,7 +232,8 @@ form.search button {
   color: white;
   font-size: 17px;
   border: 1px solid grey;
-  border-left: none; /* Prevent double borders */
+  border-left: none;
+  /* Prevent double borders */
   cursor: pointer;
 }
 
@@ -240,4 +257,8 @@ form.search::after {
   width: 1%;
   height: 30px;
   background-color: LightGreen;
+}
+
+.small-text {
+  font-size: 0.8em;
 }
