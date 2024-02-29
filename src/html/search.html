@@ -34,6 +34,21 @@
       }
 
       $(document).ready(function () {
+        $('form.auto-submit-form').each(function () {
+        let form = $(this); // 現在のフォーム
+        let lastInputTime = Date.now();
+        form.find('input[type="text"]').on('input', function () { // textタイプのinputに対してイベントを設定
+          const currentTime = Date.now();
+          if (currentTime - lastInputTime < 100) { // 連続した入力が100ミリ秒未満の場合
+            clearTimeout(form.data('timer')); // 以前のタイマーをクリア
+            form.data('timer', setTimeout(function () { // 新しいタイマーを設定
+              form.submit(); // フォームを送信
+            }, 100)); // 100ミリ秒後に送信
+          }
+          lastInputTime = currentTime;
+        });
+      });
+
         var options = {
           dataType: "json",
           success: processJson,
@@ -220,6 +235,7 @@
       <form
         id="form_book"
         name="form_book"
+        class="auto-submit-form"
         action="/search/book"
         method="get"
         enctype="application/x-www-form-urlencoded"
@@ -303,6 +319,7 @@
       <form
         id="form_delayed"
         name="form1"
+        class="auto-submit-form"
         action="/search/delayed"
         method="get"
         enctype="application/x-www-form-urlencoded"
