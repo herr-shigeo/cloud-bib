@@ -224,7 +224,7 @@ pub async fn import_user_list(
             &record[0], &record[1], &record[2], &record[3], &record[4], &record[5]
         );
         let user = User::new(
-            &record[0], &record[1], &record[2], &record[3], &record[4], &record[5],
+            &record[3], &record[0], &record[1], &record[4], &record[5], &record[2],
         )
         .map_err(|e| BibErrorResponse::InvalidArgument(e.to_string()))?;
         if map.insert(user.id, true).is_some() {
