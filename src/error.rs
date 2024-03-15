@@ -30,6 +30,7 @@ pub enum BibErrorResponse {
     NotPossibleToDelete,
     ExceedLimitInParallel(u32),
     ItemAlreadyExists(u32),
+    ConcurrencyError(String),
 }
 
 impl Display for BibErrorResponse {
@@ -175,6 +176,13 @@ impl actix_web::error::ResponseError for BibErrorResponse {
                     errcode: 116,
                     message: format!("ID{}は既に登録されています", id),
                     reason: String::new(),
+                }),
+            BibErrorResponse::ConcurrencyError(reason) => HttpResponse::build(self.status_code())
+                .json(BibResponseBody {
+                    success: false,
+                    errcode: 117,
+                    message: String::from("データベース更新が競合しました。再度試してください。"),
+                    reason: reason.to_string(),
                 }),
         }
     }

@@ -235,6 +235,9 @@ async fn borrow_book(
     *counter = transaction_id;
     drop(counter);
 
+    // Record the length of borrowed_books before removing the book
+    let initial_borrowed_books_length = user.borrowed_books.len();
+
     let borrowed_book = BorrowedBook::new(
         book_id,
         &book.title,
@@ -251,6 +254,14 @@ async fn borrow_book(
     update_item(db, user)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    // Check if the length of borrowed_books has changed unexpectedly
+    if user.borrowed_books.len() != initial_borrowed_books_length + 1 {
+        info!("Unexpected change detected in borrowed_books, rolling back");
+        return Err(BibErrorResponse::ConcurrencyError(
+            "Unexpected change in borrowed_books".to_string(),
+        ));
+    }
 
     book.borrowed_count += 1;
     update_item(db, &book)
@@ -310,6 +321,10 @@ async fn unborrow_book(
             }
         };
     }
+
+    // Record the length of borrowed_books before removing the book
+    let initial_borrowed_books_length = user.borrowed_books.len();
+
     let mut transaction_id: u32 = 0;
     let mut done: bool = false;
     let mut borrowed_date: String = String::new();
@@ -322,7 +337,7 @@ async fn unborrow_book(
             break;
         }
     }
-    if done == false {
+    if !done {
         info!("book_id({}) is not hit in the User DB", book_id);
         return Err(BibErrorResponse::BookNotBorrowed);
     }
@@ -331,6 +346,14 @@ async fn unborrow_book(
     update_item(db, user)
         .await
         .map_err(|e| BibErrorResponse::SystemError(e.to_string()))?;
+
+    // Check if the length of borrowed_books has changed unexpectedly
+    if user.borrowed_books.len() != initial_borrowed_books_length - 1 {
+        info!("Unexpected change detected in borrowed_books, rolling back");
+        return Err(BibErrorResponse::ConcurrencyError(
+            "Unexpected change in borrowed_books".to_string(),
+        ));
+    }
 
     Transaction::unborrow(db, transaction_id, user, &book, borrowed_date, time_zone)
         .await
