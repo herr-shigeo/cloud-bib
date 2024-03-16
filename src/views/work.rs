@@ -12,6 +12,7 @@ use crate::views::transaction::*;
 use crate::views::utils::get_nowtime;
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
+use lazy_static::lazy_static;
 use log::{debug, error, info};
 use mongodb::Database;
 use serde::Deserialize;
@@ -19,6 +20,7 @@ use shared_mongodb::database::{abort_transaction, commit_transaction, start_tran
 use shared_mongodb::{database, ClientHolder};
 use std::collections::HashMap;
 use std::sync::Mutex;
+use tokio::sync::Mutex as AsyncMutex;
 
 const BOOK_BARCODE_KETA: usize = 7;
 
@@ -27,6 +29,10 @@ pub struct FormData {
     pub user_id: String,
     pub borrowed_book_id: String,
     pub returned_book_id: String,
+}
+
+lazy_static! {
+    static ref GIANT_LOCK: AsyncMutex<()> = AsyncMutex::new(());
 }
 
 pub async fn process(
@@ -49,6 +55,20 @@ pub async fn process(
     }
     let system_setting = system_setting.unwrap();
 
+    let mut setting = RentalSetting::default();
+    setting.id = 1;
+    let mut setting = match search_items(&db, &setting).await {
+        Ok(setting) => setting,
+        Err(e) => {
+            database::disconnect(&data);
+            return Err(BibErrorResponse::DataNotFound(e.to_string()));
+        }
+    };
+    if setting.len() != 1 {
+        return Err(BibErrorResponse::DataDuplicated(0));
+    }
+    let setting = setting.pop().unwrap();
+
     let cache = cache_map.get(&dbname);
     if cache.is_none() {
         return Err(BibErrorResponse::NotAuthorized);
@@ -60,6 +80,9 @@ pub async fn process(
         return Err(BibErrorResponse::NotAuthorized);
     }
     let transaction = transaction.unwrap();
+
+    // Lock the whole process
+    let _lock = GIANT_LOCK.lock().await;
 
     let mut user = User::default();
     if form.user_id == "" && form.borrowed_book_id == "" && form.returned_book_id != "" {
@@ -87,21 +110,6 @@ pub async fn process(
             return Err(BibErrorResponse::UserNotFound(user.id));
         }
     };
-
-    let mut setting = RentalSetting::default();
-    setting.id = 1;
-    let mut setting = match search_items(&db, &setting).await {
-        Ok(setting) => setting,
-        Err(e) => {
-            database::disconnect(&data);
-            return Err(BibErrorResponse::DataNotFound(e.to_string()));
-        }
-    };
-
-    if setting.len() != 1 {
-        return Err(BibErrorResponse::DataDuplicated(0));
-    }
-    let setting = setting.pop().unwrap();
 
     if form.borrowed_book_id != "" {
         // Create a DB session
